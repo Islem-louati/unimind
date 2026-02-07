@@ -27,8 +27,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 180, unique: true)]
     private string $email;
 
-    #[ORM\Column(type: 'json')]
-    private array $roles = [];
+    #[ORM\Column(type: 'string', enumType: RoleType::class)]
+    private RoleType $role;
 
     #[ORM\Column(type: 'string')]
     private string $password;
@@ -129,7 +129,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->is_active = true;
         $this->is_verified = false;
         $this->statut = 'actif';
-        $this->roles = [RoleType::ETUDIANT->value];
+        $this->role = RoleType::ETUDIANT;
         $this->disponibilites = new ArrayCollection();
         $this->rendezVousEtudiant = new ArrayCollection();
         $this->rendezVousPsy = new ArrayCollection();
@@ -471,34 +471,41 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRoles(): array
     {
-        $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
-        $roles[] = 'ROLE_USER';
+        $roles = [$this->role->value];
 
-        return array_unique($roles);
-    }
-
-    public function setRoles(array $roles): self
-    {
-        // Filtrer pour ne garder que les rôles valides
-        $validRoles = array_intersect($roles, RoleType::getValues());
-        $this->roles = array_values($validRoles);
-        return $this;
-    }
-
-    public function addRole(string $role): self
-    {
-        if (!in_array($role, $this->roles, true) && in_array($role, RoleType::getValues(), true)) {
-            $this->roles[] = $role;
+        // Ajouter ROLE_ préfix pour Symfony Security
+        $symfonyRoles = [];
+        foreach ($roles as $role) {
+            $symfonyRoles[] = 'ROLE_' . strtoupper(str_replace(' ', '_', $role));
         }
+
+        // Ajouter ROLE_USER par défaut
+        $symfonyRoles[] = 'ROLE_USER';
+
+        return array_unique($symfonyRoles);
+    }
+
+    public function getRole(): RoleType
+    {
+        return $this->role;
+    }
+
+    public function setRole(RoleType $role): self
+    {
+        $this->role = $role;
         return $this;
     }
 
-    public function removeRole(string $role): self
+    public function addRole(RoleType $role): self
     {
-        if (($key = array_search($role, $this->roles, true)) !== false) {
-            unset($this->roles[$key]);
-            $this->roles = array_values($this->roles);
+        $this->role = $role;
+        return $this;
+    }
+
+    public function removeRole(RoleType $role): self
+    {
+        if ($this->role === $role) {
+            $this->role = RoleType::ETUDIANT;
         }
         return $this;
     }
