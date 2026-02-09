@@ -2,10 +2,13 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route; // tu peux garder Attribute ou Annotation
-use Symfony\Component\Security\Http\Authentication\AuthenticationUtils; // <-- ajouté
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 final class AuthController extends AbstractController
 {
@@ -16,5 +19,34 @@ final class AuthController extends AbstractController
             'last_username' => $authenticationUtils->getLastUsername(),
             'error' => $authenticationUtils->getLastAuthenticationError(),
         ]);
+    }
+
+    #[Route('/dashboard-redirect', name: 'app_dashboard_redirect')]
+    #[IsGranted('ROLE_USER')]
+    public function dashboardRedirect(): RedirectResponse
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if (!$user) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        $userRole = $user->getRole();
+
+        // Redirection basée sur le rôle
+        return match ($userRole) {
+            'Psychologue' => $this->redirectToRoute('app_dashboard_psy'),
+            'Responsable Etudiant' => $this->redirectToRoute('app_dashboard_responsable'),
+            'Admin' => $this->redirectToRoute('app_dashboard_admin'),
+            default => $this->redirectToRoute('app_dashboard_etudiant'),
+        };
+    }
+
+    #[Route('/logout', name: 'app_logout')]
+    public function logout(): void
+    {
+        // This method can be empty - it will be intercepted by the logout key on your firewall
+        throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall');
     }
 }

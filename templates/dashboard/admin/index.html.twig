@@ -1,0 +1,11 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Dashboard Admin{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Dashboard Admin</h1>
+    <p>Bienvenue {{ user.prenom }} {{ user.nom }}!</p>
+    <p>Vous êtes connecté en tant qu'Administrateur.</p>
+</div>
+{% endblock %}

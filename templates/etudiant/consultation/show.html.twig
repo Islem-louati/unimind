@@ -1,0 +1,272 @@
+{# templates/dashboard/etudiant/consultations/show.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails Consultation | UniMind{% endblock %}
+
+{% block body_class %}g-sidenav-show bg-gray-100{% endblock %}
+
+{% block body %}
+  <div class="min-height-300 bg-dark position-absolute w-100"></div>
+  
+  {# Sidebar pour Étudiant #}
+  <aside class="sidenav bg-white navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-4" id="sidenav-main">
+    <div class="sidenav-header">
+      <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
+      <a class="navbar-brand m-0" href="{{ path('app_dashboard_etudiant') }}">
+        <img src="{{ asset('assets/img/logo-ct-dark.png') }}" width="26px" height="26px" class="navbar-brand-img h-100" alt="main_logo">
+        <span class="ms-1 font-weight-bold">UniMind</span>
+      </a>
+    </div>
+    <hr class="horizontal dark mt-0">
+    <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="{{ path('app_dashboard_etudiant') }}">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-tv-2 text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ path('app_etudiant_rdv') }}">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-calendar-grid-58 text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Mes Rendez-vous</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="{{ path('app_etudiant_consultations') }}">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-folder-17 text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Consultations</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ path('app_etudiant_traitements') }}">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-bag-17 text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Traitements</span>
+          </a>
+        </li>
+        <li class="nav-item mt-3">
+          <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Mon Compte</h6>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ path('app_etudiant_profil') }}">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-single-02 text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Mon Profil</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ path('app_logout') }}">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-button-power text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Déconnexion</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </aside>
+  
+  <main class="main-content position-relative border-radius-lg">
+    {# Navbar #}
+    <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur" data-scroll="false">
+      <div class="container-fluid py-1 px-3">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
+            <li class="breadcrumb-item text-sm"><a class="opacity-5 text-white" href="{{ path('app_dashboard_etudiant') }}">Étudiant</a></li>
+            <li class="breadcrumb-item text-sm"><a class="opacity-5 text-white" href="{{ path('app_etudiant_consultations') }}">Consultations</a></li>
+            <li class="breadcrumb-item text-sm text-white active" aria-current="page">Détails</li>
+          </ol>
+          <h6 class="font-weight-bolder text-white mb-0">Détails de la consultation</h6>
+        </nav>
+        <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
+          <div class="ms-md-auto pe-md-3 d-flex align-items-center">
+            <a href="{{ path('app_etudiant_consultations') }}" class="btn btn-sm btn-white">
+              <i class="fas fa-arrow-left me-2"></i>Retour
+            </a>
+          </div>
+          <ul class="navbar-nav justify-content-end">
+            <li class="nav-item d-flex align-items-center">
+              <a href="#" class="nav-link text-white font-weight-bold px-0">
+                <i class="fa fa-user me-sm-1"></i>
+                <span class="d-sm-inline d-none">{{ user.fullName }}</span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    
+    {# Contenu principal #}
+    <div class="container-fluid py-4">
+      <div class="row">
+        <div class="col-lg-8">
+          <div class="card">
+            <div class="card-header pb-0">
+              <div class="d-flex align-items-center">
+                <div>
+                  <h6 class="mb-0">Consultation du {{ consultation.dateRedaction|date('d/m/Y à H:i') }}</h6>
+                  <p class="text-sm text-secondary mb-0">
+                    Rédigée il y a {{ consultation.age }}
+                    {% if consultation.hasBeenModified %}
+                      <span class="badge badge-sm badge-info ms-2">Modifiée le {{ consultation.dateModification|date('d/m/Y') }}</span>
+                    {% endif %}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div class="card-body">
+              {# Informations du rendez-vous #}
+              <h6 class="text-uppercase text-xs font-weight-bolder mb-3">Informations du rendez-vous</h6>
+              <div class="row mb-4">
+                <div class="col-md-6">
+                  <div class="d-flex align-items-center mb-3">
+                    <i class="ni ni-calendar-grid-58 text-primary me-3" style="font-size: 1.5rem;"></i>
+                    <div>
+                      <p class="text-xs text-secondary mb-0">Date du rendez-vous</p>
+                      <p class="text-sm font-weight-bold mb-0">{{ consultation.dateRendezVous|date('d/m/Y à H:i') }}</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="d-flex align-items-center mb-3">
+                    <i class="ni ni-badge text-info me-3" style="font-size: 1.5rem;"></i>
+                    <div>
+                      <p class="text-xs text-secondary mb-0">Type de consultation</p>
+                      <p class="text-sm font-weight-bold mb-0">{{ consultation.rendezVous.type ?? 'Présentiel' }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {% if consultation.motifRendezVous %}
+                <div class="mb-4">
+                  <h6 class="text-uppercase text-xs font-weight-bolder mb-2">Motif de la consultation</h6>
+                  <p class="text-sm">{{ consultation.motifRendezVous }}</p>
+                </div>
+              {% endif %}
+
+              {# Avis du psychologue #}
+              <hr class="horizontal dark">
+              <h6 class="text-uppercase text-xs font-weight-bolder mb-3">Avis du psychologue</h6>
+              {% if consultation.avisPsy %}
+                <div class="bg-gray-100 border-radius-lg p-3">
+                  <p class="text-sm mb-0" style="white-space: pre-line;">{{ consultation.avisPsy }}</p>
+                </div>
+              {% else %}
+                <div class="alert alert-secondary text-white text-sm" role="alert">
+                  <i class="ni ni-bell-55 me-2"></i>
+                  Le psychologue n'a pas encore rédigé d'avis pour cette consultation.
+                </div>
+              {% endif %}
+
+              {# Note de satisfaction #}
+              <hr class="horizontal dark">
+              <h6 class="text-uppercase text-xs font-weight-bolder mb-3">Évaluation</h6>
+              {% if consultation.noteSatisfaction %}
+                <div class="d-flex align-items-center">
+                  <span class="text-warning me-3" style="font-size: 2rem;">
+                    {% for i in 1..5 %}
+                      {% if i <= consultation.noteSatisfaction %}
+                        ★
+                      {% else %}
+                        ☆
+                      {% endif %}
+                    {% endfor %}
+                  </span>
+                  <div>
+                    <p class="text-sm font-weight-bold mb-0">{{ consultation.noteSatisfaction }}/5</p>
+                    <p class="text-xs text-secondary mb-0">Note de satisfaction</p>
+                  </div>
+                </div>
+              {% else %}
+                <div class="alert alert-secondary text-white text-sm" role="alert">
+                  <i class="ni ni-satisfied me-2"></i>
+                  Vous n'avez pas encore évalué cette consultation.
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        
+        <div class="col-lg-4">
+          {# Carte du psychologue #}
+          <div class="card mb-4">
+            <div class="card-header pb-0">
+              <h6>Votre psychologue</h6>
+            </div>
+            <div class="card-body">
+              <div class="d-flex align-items-center mb-3">
+                <div class="avatar avatar-xl me-3">
+                  <div class="avatar avatar-xl bg-gradient-primary text-white d-flex align-items-center justify-content-center">
+                    <span class="text-lg font-weight-bold">{{ consultation.psy.prenom|slice(0, 1) }}{{ consultation.psy.nom|slice(0, 1) }}</span>
+                  </div>
+                </div>
+                <div>
+                  <h6 class="mb-0">Dr. {{ consultation.psy.nom }} {{ consultation.psy.prenom }}</h6>
+                  <p class="text-xs text-secondary mb-0">{{ consultation.psy.specialite ?? 'Psychologue' }}</p>
+                </div>
+              </div>
+              
+              <hr class="horizontal dark">
+              
+              <ul class="list-group">
+                {% if consultation.psy.email %}
+                  <li class="list-group-item border-0 ps-0 pt-0 text-sm">
+                    <strong class="text-dark">Email:</strong> 
+                    <a href="mailto:{{ consultation.psy.email }}" class="text-primary">{{ consultation.psy.email }}</a>
+                  </li>
+                {% endif %}
+                {% if consultation.psy.telephone %}
+                  <li class="list-group-item border-0 ps-0 text-sm">
+                    <strong class="text-dark">Téléphone:</strong> {{ consultation.psy.telephone }}
+                  </li>
+                {% endif %}
+                {% if consultation.psy.nomEtablissement %}
+                  <li class="list-group-item border-0 ps-0 text-sm">
+                    <strong class="text-dark">Établissement:</strong> {{ consultation.psy.nomEtablissement }}
+                  </li>
+                {% endif %}
+              </ul>
+            </div>
+          </div>
+
+          {# Actions #}
+          <div class="card">
+            <div class="card-header pb-0">
+              <h6>Actions</h6>
+            </div>
+            <div class="card-body">
+              <a href="{{ path('app_etudiant_rdv') }}" class="btn btn-primary btn-sm w-100 mb-2">
+                <i class="ni ni-calendar-grid-58 me-2"></i>Prendre un nouveau RDV
+              </a>
+              <a href="{{ path('app_etudiant_consultations') }}" class="btn btn-outline-secondary btn-sm w-100">
+                <i class="ni ni-folder-17 me-2"></i>Toutes mes consultations
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer class="footer pt-3">
+        <div class="container-fluid">
+          <div class="row align-items-center justify-content-lg-between">
+            <div class="col-lg-6 mb-lg-0 mb-4">
+              <div class="copyright text-center text-sm text-muted text-lg-start">
+                © {{ "now"|date("Y") }} UniMind - Détails Consultation
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </main>
+{% endblock %}

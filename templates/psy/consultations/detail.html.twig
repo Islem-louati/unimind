@@ -1,0 +1,298 @@
+{# templates/psy/consultations/detail.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails Consultation | UniMind{% endblock %}
+
+{% block body_class %}g-sidenav-show bg-gray-100{% endblock %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <style>
+    .detail-card {
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .info-label {
+      font-weight: 600;
+      color: #67748e;
+      font-size: 0.875rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .info-value {
+      font-size: 1.1rem;
+      color: #344767;
+      font-weight: 500;
+    }
+    
+    .stars-display {
+      color: #ffc107;
+      font-size: 1.5rem;
+    }
+  </style>
+{% endblock %}
+
+{% block body %}
+  <div class="min-height-300 bg-dark position-absolute w-100"></div>
+  
+  {# Sidebar #}
+  <aside class="sidenav bg-white navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-4" id="sidenav-main">
+    <div class="sidenav-header">
+      <a class="navbar-brand m-0" href="{{ path('app_dashboard_psy') }}">
+        <img src="{{ asset('assets/img/logo-ct-dark.png') }}" width="26px" height="26px" class="navbar-brand-img h-100" alt="main_logo">
+        <span class="ms-1 font-weight-bold">UniMind</span>
+      </a>
+    </div>
+    <hr class="horizontal dark mt-0">
+    <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="{{ path('app_dashboard_psy') }}">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-tv-2 text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ path('app_psychologue_rdv') }}">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-calendar-grid-58 text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Mes Rendez-vous</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link active" href="{{ path('app_psy_consultations') }}">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-single-copy-04 text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Consultations</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ path('app_psy_patients') }}">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-circle-08 text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Mes Patients</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ path('app_psy_disponibilites') }}">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-time-alarm text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Disponibilités</span>
+          </a>
+        </li>
+        <li class="nav-item mt-3">
+          <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Mon Compte</h6>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ path('app_psy_profil') }}">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-single-02 text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Mon Profil</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ path('app_logout') }}">
+            <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+              <i class="ni ni-button-power text-dark text-sm opacity-10"></i>
+            </div>
+            <span class="nav-link-text ms-1">Déconnexion</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </aside>
+  
+  <main class="main-content position-relative border-radius-lg">
+    {# Navbar #}
+    <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl">
+      <div class="container-fluid py-1 px-3">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
+            <li class="breadcrumb-item text-sm"><a class="opacity-5 text-white" href="{{ path('app_dashboard_psy') }}">Psychologue</a></li>
+            <li class="breadcrumb-item text-sm"><a class="text-white" href="{{ path('app_psy_consultations') }}">Consultations</a></li>
+            <li class="breadcrumb-item text-sm text-white active">Détails</li>
+          </ol>
+          <h6 class="font-weight-bolder text-white mb-0">Détails de la Consultation</h6>
+        </nav>
+      </div>
+    </nav>
+    
+    <div class="container-fluid py-4">
+      
+      {# Bouton retour #}
+      <div class="row mb-3">
+        <div class="col-12">
+          <a href="{{ path('app_psy_consultations') }}" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-2"></i>Retour à la liste
+          </a>
+        </div>
+      </div>
+      
+      <div class="row">
+        {# Informations patient #}
+        <div class="col-lg-4 mb-4">
+          <div class="card detail-card">
+            <div class="card-header bg-gradient-primary">
+              <h6 class="text-white mb-0">
+                <i class="fas fa-user me-2"></i>Patient
+              </h6>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <p class="info-label mb-1">Nom complet</p>
+                <p class="info-value">{{ consultation.etudiant.prenom }} {{ consultation.etudiant.nom }}</p>
+              </div>
+              <div class="mb-3">
+                <p class="info-label mb-1">Email</p>
+                <p class="info-value">{{ consultation.etudiant.email }}</p>
+              </div>
+              <div class="mb-3">
+                <p class="info-label mb-1">Téléphone</p>
+                <p class="info-value">{{ consultation.etudiant.telephone ?? 'Non renseigné' }}</p>
+              </div>
+             
+            </div>
+          </div>
+        </div>
+        
+        {# Informations rendez-vous #}
+        <div class="col-lg-4 mb-4">
+          <div class="card detail-card">
+            <div class="card-header bg-gradient-info">
+              <h6 class="text-white mb-0">
+                <i class="fas fa-calendar-alt me-2"></i>Rendez-vous
+              </h6>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <p class="info-label mb-1">Date du RDV</p>
+                <p class="info-value">
+                  {% if consultation.rendezVous.disponibilite %}
+                    {{ consultation.rendezVous.disponibilite.dateDispo|date('d/m/Y') }}
+                  {% else %}
+                    Non spécifiée
+                  {% endif %}
+                </p>
+              </div>
+              <div class="mb-3">
+                <p class="info-label mb-1">Heure</p>
+                <p class="info-value">
+                  {% if consultation.rendezVous.disponibilite %}
+                    {{ consultation.rendezVous.disponibilite.heureDebut|date('H:i') }} - 
+                    {{ consultation.rendezVous.disponibilite.heureFin|date('H:i') }}
+                  {% else %}
+                    -
+                  {% endif %}
+                </p>
+              </div>
+              <div class="mb-3">
+                <p class="info-label mb-1">Type</p>
+                <p class="info-value">
+                  {% if consultation.rendezVous.disponibilite %}
+                    <span class="badge bg-{{ consultation.rendezVous.disponibilite.typeConsult == 'présentiel' ? 'success' : 'info' }}">
+                      {{ consultation.rendezVous.disponibilite.typeConsult|capitalize }}
+                    </span>
+                  {% else %}
+                    -
+                  {% endif %}
+                </p>
+              </div>
+              <div class="mb-3">
+                <p class="info-label mb-1">Motif</p>
+                <p class="info-value">{{ consultation.rendezVous.motif ?? 'Non précisé' }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {# Informations consultation #}
+        <div class="col-lg-4 mb-4">
+          <div class="card detail-card">
+            <div class="card-header bg-gradient-success">
+              <h6 class="text-white mb-0">
+                <i class="fas fa-file-medical me-2"></i>Consultation
+              </h6>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <p class="info-label mb-1">Date de rédaction</p>
+                <p class="info-value">{{ consultation.dateRedaction|date('d/m/Y à H:i') }}</p>
+              </div>
+              <div class="mb-3">
+                <p class="info-label mb-1">Dernière modification</p>
+                <p class="info-value">
+                  {% if consultation.dateModification %}
+                    {{ consultation.dateModification|date('d/m/Y à H:i') }}
+                  {% else %}
+                    Jamais modifiée
+                  {% endif %}
+                </p>
+              </div>
+              <div class="mb-3">
+                <p class="info-label mb-1">Note de satisfaction</p>
+                {% if consultation.noteSatisfaction %}
+                  <div class="stars-display">
+                    {% for i in 1..5 %}
+                      {% if i <= consultation.noteSatisfaction %}
+                        <i class="fas fa-star"></i>
+                      {% else %}
+                        <i class="far fa-star"></i>
+                      {% endif %}
+                    {% endfor %}
+                  </div>
+                  <p class="info-value mt-2">{{ consultation.noteSatisfaction }}/5</p>
+                {% else %}
+                  <span class="badge bg-warning">Non notée</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      {# Avis du psychologue #}
+      <div class="row">
+        <div class="col-12">
+          <div class="card detail-card">
+            <div class="card-header bg-gradient-dark">
+              <h6 class="text-white mb-0">
+                <i class="fas fa-comment-medical me-2"></i>Avis du Psychologue
+              </h6>
+            </div>
+            <div class="card-body">
+              {% if consultation.avisPsy %}
+                <p style="white-space: pre-wrap; line-height: 1.8;">{{ consultation.avisPsy }}</p>
+              {% else %}
+                <div class="text-center py-4">
+                  <i class="fas fa-comment-slash text-secondary" style="font-size: 3rem;"></i>
+                  <p class="text-muted mt-3">Aucun avis rédigé pour cette consultation</p>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer class="footer pt-3 mt-4">
+        <div class="container-fluid">
+          <div class="row align-items-center">
+            <div class="col-lg-12 text-center">
+              <div class="copyright text-sm text-muted">
+                © {{ "now"|date("Y") }} UniMind - Dr. {{ user.nom }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </main>
+{% endblock %}
