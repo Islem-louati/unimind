@@ -1,0 +1,39 @@
+{% extends 'layout_espace_responsable.html.twig' %}
+
+{% block title %}{{ is_edit ? 'Modifier' : 'Nouvelle participation' }} | Back Office | UniMind{% endblock %}
+{% block breadcrumb_page %}{{ is_edit ? 'Modifier la participation' : 'Nouvelle participation' }}{% endblock %}
+{% block breadcrumb_title %}{{ is_edit ? 'Modifier' : 'Créer' }} une participation{% endblock %}
+
+{% block content_back %}
+  <div class="row">
+    <div class="col-12">
+      <div class="card mb-4">
+        <div class="card-header pb-0">
+          <h5>{{ is_edit ? 'Modifier la participation' : 'Nouvelle participation' }}</h5>
+        </div>
+        <div class="card-body">
+          {{ form_start(form) }}
+          <div class="row">
+            <div class="col-md-6">
+              {{ form_row(form.evenement) }}
+            </div>
+            <div class="col-md-6">
+              {{ form_row(form.etudiant) }}
+            </div>
+            <div class="col-md-6">
+              {{ form_row(form.dateInscription) }}
+            </div>
+            <div class="col-md-6">
+              {{ form_row(form.statut) }}
+            </div>
+          </div>
+          <div class="mt-3">
+            <button type="submit" class="btn btn-primary">{{ is_edit ? 'Enregistrer' : 'Créer' }}</button>
+            <a href="{{ path('app_back_participation_index') }}" class="btn btn-outline-secondary">Annuler</a>
+          </div>
+          {{ form_end(form) }}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

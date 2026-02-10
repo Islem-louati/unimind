@@ -1,0 +1,59 @@
+{% extends 'layout_espace_responsable.html.twig' %}
+
+{% block title %}{{ is_edit ? 'Modifier' : 'Nouveau sponsor' }} | Back Office | UniMind{% endblock %}
+{% block breadcrumb_page %}{{ is_edit ? 'Modifier le sponsor' : 'Nouveau sponsor' }}{% endblock %}
+{% block breadcrumb_title %}{{ is_edit ? 'Modifier' : 'Créer' }} un sponsor{% endblock %}
+
+{% block content_back %}
+  <div class="row">
+    <div class="col-12">
+      <div class="card mb-4">
+        <div class="card-header pb-0">
+          <h5>{{ is_edit ? 'Modifier le sponsor' : 'Nouveau sponsor' }}</h5>
+        </div>
+        <div class="card-body">
+          {{ form_start(form) }}
+          <div class="row">
+            <div class="col-md-6">
+              {{ form_row(form.nomSponsor) }}
+            </div>
+            <div class="col-md-6">
+              {{ form_row(form.typeSponsor) }}
+            </div>
+            <div class="col-md-6">
+              {{ form_row(form.emailContact) }}
+            </div>
+            <div class="col-md-6">
+              {{ form_row(form.telephone) }}
+            </div>
+            <div class="col-md-6">
+              {{ form_row(form.siteWeb) }}
+            </div>
+            <div class="col-md-6">
+              {{ form_row(form.domaineActivite) }}
+            </div>
+            <div class="col-md-12">
+              {{ form_row(form.adresse) }}
+            </div>
+            <div class="col-md-6">
+              {{ form_row(form.logoFile) }}
+              {% if sponsor.logo %}
+                <div class="mt-2">
+                  <img src="{{ asset('uploads/sponsors/' ~ sponsor.logo) }}" alt="Logo" class="img-thumbnail" style="max-height: 60px;">
+                </div>
+              {% endif %}
+            </div>
+            <div class="col-md-6">
+              {{ form_row(form.statut) }}
+            </div>
+          </div>
+          <div class="mt-3">
+            <button type="submit" class="btn btn-primary">{{ is_edit ? 'Enregistrer' : 'Créer' }}</button>
+            <a href="{{ path('app_back_sponsor_index') }}" class="btn btn-outline-secondary">Annuler</a>
+          </div>
+          {{ form_end(form) }}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

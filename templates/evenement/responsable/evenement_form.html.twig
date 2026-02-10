@@ -1,0 +1,68 @@
+{% extends 'layout_espace_responsable.html.twig' %}
+
+{% block title %}{{ is_edit ? 'Modifier' : 'Nouvel événement' }} | Back Office | UniMind{% endblock %}
+{% block breadcrumb_page %}{{ is_edit ? 'Modifier l\'événement' : 'Nouvel événement' }}{% endblock %}
+{% block breadcrumb_title %}{{ is_edit ? 'Modifier' : 'Créer' }} un événement{% endblock %}
+
+{% block content_back %}
+  <div class="row">
+    <div class="col-12">
+      <div class="card mb-4">
+        <div class="card-header pb-0">
+          <h5>{{ is_edit ? 'Modifier l\'événement' : 'Nouvel événement' }}</h5>
+        </div>
+        <div class="card-body">
+          {{ form_start(form) }}
+          <div class="row">
+            <div class="col-md-12">
+              {{ form_row(form.titre) }}
+            </div>
+            <div class="col-md-12">
+              {{ form_row(form.description) }}
+            </div>
+            <div class="col-md-6">
+              {{ form_row(form.type) }}
+            </div>
+            <div class="col-md-6">
+              {{ form_row(form.statut) }}
+            </div>
+            <div class="col-md-6">
+              {{ form_row(form.dateDebut) }}
+            </div>
+            <div class="col-md-6">
+              {{ form_row(form.dateFin) }}
+            </div>
+            <div class="col-md-6">
+              {{ form_row(form.lieu) }}
+            </div>
+            <div class="col-md-6">
+              {{ form_row(form.capaciteMax) }}
+            </div>
+            <div class="col-md-6">
+              {{ form_row(form.organisateur) }}
+            </div>
+            <div class="col-md-6">
+              {{ form_row(form.dateLimiteInscription) }}
+            </div>
+            <div class="col-md-12">
+              {{ form_row(form.imageFile) }}
+              {% if evenement.image %}
+                <div class="mt-2">
+                  <label class="form-label">Image actuelle</label>
+                  <div>
+                    <img src="{{ asset('uploads/evenements/' ~ evenement.image) }}" alt="Affiche" class="img-thumbnail" style="max-height: 150px;">
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+          </div>
+          <div class="mt-3">
+            <button type="submit" class="btn btn-primary">{{ is_edit ? 'Enregistrer' : 'Créer' }}</button>
+            <a href="{{ path('app_back_evenement_index') }}" class="btn btn-outline-secondary">Annuler</a>
+          </div>
+          {{ form_end(form) }}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
