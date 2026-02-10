@@ -1,0 +1,120 @@
+
+app_login:
+    path: /connexion
+    controller: App\Controller\SecurityController::login
+
+app_logout:
+    path: /deconnexion
+
+app_register:
+    path: /inscription
+    controller: App\Controller\SecurityController::register
+
+app_verify_email:
+    path: /verification/email
+    controller: App\Controller\SecurityController::verifyUserEmail
+
+app_forgot_password:
+    path: /mot-de-passe-oublie
+    controller: App\Controller\SecurityController::forgotPassword
+
+app_reset_password:
+    path: /reinitialiser-mot-de-passe/{token}
+    controller: App\Controller\SecurityController::resetPassword
+
+app_dashboard:
+    path: /dashboard
+    controller: App\Controller\DashboardController::index
+
+app_profile:
+    path: /profil/mon-profil
+    controller: App\Controller\ProfileController::index
+
+app_profile_edit:
+    path: /profil/modifier
+    controller: App\Controller\ProfileController::edit
+app_change_password:
+    path: /profil/changer-mot-de-passe
+    controller: App\Controller\ProfileController::changePassword
+    methods: [GET, POST]
+app_profile_photo:
+    path: /profil/photo
+    controller: App\Controller\ProfileController::updatePhoto
+
+admin_dashboard:
+    path: /admin/dashboard
+    controller: App\Controller\AdminController::dashboard
+
+admin_users:
+    path: /admin/utilisateurs
+    controller: App\Controller\AdminController::users
+
+admin_pending_users:
+    path: /admin/utilisateurs/demandes
+    controller: App\Controller\AdminController::pendingUsers
+
+admin_validate_user:
+    path: /admin/utilisateurs/{id}/valider
+    controller: App\Controller\AdminController::validateUser
+    methods: POST
+
+admin_reject_user:
+    path: /admin/utilisateurs/{id}/rejeter
+    controller: App\Controller\AdminController::rejectUser
+    methods: POST
+
+admin_activate_user:
+    path: /admin/utilisateurs/{id}/activer
+    controller: App\Controller\AdminController::activateUser
+    methods: POST
+
+admin_deactivate_user:
+    path: /admin/utilisateurs/{id}/desactiver
+    controller: App\Controller\AdminController::deactivateUser
+    methods: POST
+
+admin_edit_user:
+    path: /admin/utilisateurs/{id}/modifier
+    controller: App\Controller\AdminController::editUser
+
+admin_delete_user:
+    path: /admin/utilisateurs/{id}/supprimer
+    controller: App\Controller\AdminController::deleteUser
+    methods: POST
+
+admin_view_profile:
+    path: /admin/utilisateurs/{id}/profil
+    controller: App\Controller\AdminController::viewProfile
+admin_user_new:
+    path: /admin/utilisateurs/nouveau
+    controller: App\Controller\AdminController::newUser
+    methods: [GET, POST]
+admin_statistics:
+    path: /admin/statistiques
+    controller: App\Controller\AdminController::statistics
+
+etudiant_dashboard:
+    path: /dashboard/etudiant
+    controller: App\Controller\DashboardController::etudiantDashboard
+
+psy_dashboard:
+    path: /dashboard/psychologue
+    controller: App\Controller\DashboardController::psychologueDashboard
+
+resp_dashboard:
+    path: /dashboard/responsable
+    controller: App\Controller\DashboardController::responsableDashboard
+admin_users_export_excel:
+    path: /admin/utilisateurs/export/excel
+    controller: App\Controller\AdminController::exportExcel
+    methods: GET
+
+admin_users_export_pdf:
+    path: /admin/utilisateurs/export/pdf
+    controller: App\Controller\AdminController::exportPdf
+    methods: GET
+
+admin_users_export_csv:
+    path: /admin/utilisateurs/export/csv
+    controller: App\Controller\AdminController::exportCsv
+    methods: GET

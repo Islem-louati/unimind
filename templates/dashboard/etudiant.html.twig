@@ -1,0 +1,178 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Tableau de bord - Étudiant{% endblock %}
+
+{% block breadcrumb_title %}Dashboard Étudiant{% endblock %}
+{% block page_title %}Tableau de bord Étudiant{% endblock %}
+
+{% block body %}
+<!-- Page Heading -->
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Tableau de bord - Étudiant</h1>
+    <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+        <i class="fas fa-calendar-plus fa-sm text-white-50"></i> Prendre rendez-vous
+    </a>
+</div>
+
+<!-- Welcome Message -->
+<div class="row mb-4">
+    <div class="col-lg-12">
+        <div class="card border-left-primary shadow">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="h5 font-weight-bold text-primary mb-1">
+                            Bienvenue, {{ app.user.prenom }} {{ app.user.nom }} !
+                        </div>
+                        <div class="text-gray-800">
+                            {% if app.user.profil and app.user.profil.niveau %}
+                                {{ app.user.profil.niveau }} - {{ app.user.profil.filiere }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-user-graduate fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Content Row -->
+<div class="row">
+    <!-- Statistiques fictives -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Rendez-vous passés
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_appointments }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-history fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Messages non lus
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.unread_messages }}</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-envelope fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                            Progression
+                        </div>
+                        <div class="row no-gutters align-items-center">
+                            <div class="col-auto">
+                                <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">{{ stats.progress }}%</div>
+                            </div>
+                            <div class="col">
+                                <div class="progress progress-sm mr-2">
+                                    <div class="progress-bar bg-warning" role="progressbar" 
+                                         style="width: {{ stats.progress }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Statut
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">Actif</div>
+                        <div class="text-xs text-gray-600">Compte vérifié</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-user-check fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Informations -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Fonctionnalités disponibles</h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <h6 class="alert-heading"><i class="fas fa-info-circle"></i> Information</h6>
+                    <p class="mb-0">Cette plateforme est en cours de développement. Actuellement, seules les fonctionnalités suivantes sont actives :</p>
+                    <ul class="mt-2 mb-0">
+                        <li>Profil utilisateur (consultation et modification)</li>
+                        <li>Modification du mot de passe</li>
+                        <li>Déconnexion</li>
+                    </ul>
+                </div>
+                
+                <h6 class="mt-4 mb-3 font-weight-bold text-gray-800">Fonctionnalités à venir :</h6>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="card border-left-primary">
+                            <div class="card-body">
+                                <h6 class="card-title"><i class="fas fa-calendar-alt mr-2"></i>Prise de rendez-vous</h6>
+                                <p class="card-text text-muted small">Prendre rendez-vous avec un psychologue</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card border-left-success">
+                            <div class="card-body">
+                                <h6 class="card-title"><i class="fas fa-comments mr-2"></i>Messagerie</h6>
+                                <p class="card-text text-muted small">Échanger avec votre psychologue</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card border-left-warning">
+                            <div class="card-body">
+                                <h6 class="card-title"><i class="fas fa-file-medical mr-2"></i>Questionnaires</h6>
+                                <p class="card-text text-muted small">Compléter des questionnaires de suivi</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

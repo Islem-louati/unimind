@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="apple-touch-icon" sizes="76x76" href="{{ asset('assets/img/apple-icon.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('assets/img/favicon.png') }}">
+    <title>{% block title %}UniMind - Plateforme de Soutien Psychologique{% endblock %}</title>
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <!-- Fonts and icons -->
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
+    
+    <!-- Nucleo Icons -->
+    <link href="{{ asset('assets/css/nucleo-icons.css') }}" rel="stylesheet" />
+    <link href="{{ asset('assets/css/nucleo-svg.css') }}" rel="stylesheet" />
+    
+    <!-- Font Awesome Icons -->
+    <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+    
+    <!-- CSS Files -->
+    <link id="pagestyle" href="{{ asset('assets/css/argon-dashboard.css?v=2.1.0') }}" rel="stylesheet" />
+    
+    <!-- Custom CSS -->
+    <style>
+        /* Fond violet très clair - comme l'image */
+        body.bg-gray-100 {
+            background: linear-gradient(135deg, #f5f7ff 0%, #f3f0ff 100%) !important;
+        }
+        
+        /* Sidebar style - BLANC comme Creative Tim */
+        .sidenav {
+            background: #ffffff !important;
+            box-shadow: 0 0 2rem 0 rgba(136, 152, 170, 0.15) !important;
+            border-radius: 0.75rem;
+        }
+        
+        .sidenav .navbar-brand .text-white {
+            color: #344767 !important;
+        }
+        
+        .sidenav .navbar-nav .nav-link {
+            color: #344767 !important;
+            margin: 2px 16px;
+            border-radius: 0.375rem;
+            font-weight: 400;
+        }
+        
+        .sidenav .navbar-nav .nav-link:hover {
+            color: #5e72e4 !important;
+            background-color: rgba(94, 114, 228, 0.05);
+        }
+        
+        .sidenav .navbar-nav .nav-link.active {
+            color: #5e72e4 !important;
+            background-color: rgba(94, 114, 228, 0.1);
+            font-weight: 600;
+            box-shadow: none;
+        }
+        
+        .sidenav .nav-link-text {
+            font-weight: 400;
+        }
+        
+        /* User info sidebar - Style comme l'image Creative Tim */
+        .sidebar-user-info {
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 0.5rem;
+            margin: 1rem 16px;
+            border: none;
+        }
+        
+        .sidebar-user-info .text-white {
+            color: #344767 !important;
+            font-weight: 600;
+        }
+        
+        .sidebar-user-info .text-xs {
+            color: #6c757d !important;
+        }
+        
+        .docs-info {
+            color: #6c757d !important;
+        }
+        
+        .docs-info h6 {
+            color: #344767 !important;
+            font-weight: 600;
+        }
+        
+        /* Badges personnalisés */
+        .badge-admin {
+            background: linear-gradient(135deg, #f5365c 0%, #f56036 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        .badge-etudiant {
+            background: linear-gradient(135deg, #11cdef 0%, #1171ef 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        .badge-psychologue {
+            background: linear-gradient(135deg, #fb6340 0%, #fbb140 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        .badge-responsable {
+            background: linear-gradient(135deg, #2dce89 0%, #2dcecc 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        /* Avatar */
+        .avatar-initials {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            background: linear-gradient(135deg, #5e72e4 0%, #825ee4 100%);
+            color: white;
+            border: 2px solid #e9ecef;
+        }
+        
+        /* Notification badge */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            font-size: 0.65rem;
+            padding: 0.25rem 0.5rem;
+            background: #f5365c;
+            color: white;
+            border: 2px solid #ffffff;
+        }
+        
+        /* Navbar principal - Transparent comme l'image */
+        .navbar-main {
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+        
+        .navbar-main .text-white {
+            color: #5e72e4 !important;
+        }
+        
+        .navbar-main .opacity-7 {
+            color: #666666 !important;
+        }
+        
+        /* Cards - sans bordure blanche */
+        .card {
+            border: none;
+            box-shadow: 0 4px 20px -2px rgba(94, 114, 228, 0.15);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+        }
+        
+        .card-header {
+            background: transparent;
+            border-bottom: 1px solid rgba(94, 114, 228, 0.1);
+            border-radius: 16px 16px 0 0 !important;
+            padding: 1.25rem 1.5rem;
+        }
+        
+        /* Boutons */
+        .btn-primary {
+            background: linear-gradient(135deg, #5e72e4 0%, #825ee4 100%);
+            border: none;
+            box-shadow: 0 4px 15px 0 rgba(94, 114, 228, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #4e62d4 0%, #724ed4 100%);
+            box-shadow: 0 6px 20px 0 rgba(94, 114, 228, 0.4);
+            transform: translateY(-1px);
+        }
+        
+        /* Alertes */
+        .alert {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(10px);
+        }
+        
+        /* Table */
+        .table thead th {
+            border-bottom: 2px solid rgba(94, 114, 228, 0.1);
+            background: transparent;
+            font-weight: 700;
+            color: #5e72e4;
+        }
+        
+        /* Icônes sidebar */
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            border-radius: 8px;
+            background: rgba(94, 114, 228, 0.1);
+        }
+        
+        .nav-icon i {
+            color: #5e72e4 !important;
+            font-size: 0.875rem;
+        }
+        
+        .nav-link.active .nav-icon {
+            background: rgba(94, 114, 228, 0.2);
+        }
+        
+        .nav-link.active .nav-icon i {
+            color: #5e72e4 !important;
+        }
+        
+        /* Titres de séparation dans sidebar - Style Creative Tim */
+        .text-uppercase.text-xs.font-weight-bolder.opacity-6 {
+            color: #6c757d !important;
+            padding-left: 1rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.1em;
+        }
+        
+        /* HR dans sidebar */
+        .horizontal.dark {
+            border-color: rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        /* Bordure sur les avatars */
+        .border-white {
+            border-color: #ffffff !important;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            body.bg-gray-100 {
+                background: linear-gradient(135deg, #f5f7ff 0%, #f3f0ff 100%) !important;
+            }
+            
+            .sidenav {
+                background: #ffffff !important;
+            }
+        }
+        
+        /* Animation douce */
+        .nav-link, .btn, .card {
+            transition: all 0.3s ease;
+        }
+        
+        /* Footer sidebar */
+        .sidenav-footer {
+            margin-top: auto;
+            background: transparent;
+        }
+        
+        /* Scrollbar personnalisée */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(94, 114, 228, 0.3);
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(94, 114, 228, 0.5);
+        }
+        
+        /* Icônes dans le dropdown utilisateur */
+        .dropdown-menu .avatar-sm i {
+            color: white !important;
+        }
+        
+        /* Input de recherche dans navbar */
+        .input-group-outline .input-group-text {
+            background: rgba(255, 255, 255, 0.9);
+            color: #5e72e4;
+            border: none;
+            border-radius: 12px 0 0 12px;
+        }
+        
+        .input-group-outline .form-control {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            border: none;
+            border-radius: 0 12px 12px 0;
+        }
+        
+        /* Icône de fermeture sidebar mobile */
+        .fas.fa-times.text-white {
+            color: #344767 !important;
+        }
+        
+        /* Bouton déconnexion */
+        .nav-link.text-danger .nav-icon {
+            background: rgba(245, 54, 92, 0.1);
+        }
+        
+        .nav-link.text-danger .nav-icon i {
+            color: #f5365c !important;
+        }
+        
+        .nav-link.text-danger .nav-link-text {
+            color: #f5365c !important;
+        }
+        
+        .nav-link.text-danger:hover {
+            background-color: rgba(245, 54, 92, 0.05);
+        }
+        
+        /* Breadcrumb */
+        .breadcrumb {
+            background: transparent;
+        }
+        
+        .breadcrumb-item a {
+            color: #5e72e4;
+        }
+        
+        .breadcrumb-item.active {
+            color: #6c757d;
+        }
+        
+        /* Dropdown menu */
+        .dropdown-menu {
+            border: none;
+            box-shadow: 0 10px 40px rgba(94, 114, 228, 0.15);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        
+        /* Toggler pour sidebar mobile */
+        .sidenav-toggler-inner {
+            background: #5e72e4;
+        }
+        
+        .sidenav-toggler-line {
+            background: #5e72e4;
+        }
+        
+        /* Conteneur principal */
+        .container-fluid.py-4 {
+            padding-top: 1.5rem !important;
+            padding-bottom: 1.5rem !important;
+        }
+        
+        /* Stat cards - comme dans l'image */
+        .stat-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(94, 114, 228, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(94, 114, 228, 0.15);
+        }
+        
+        /* Chart containers */
+        .chart-container {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(94, 114, 228, 0.1);
+        }
+    </style>
+    
+    {% block stylesheets %}{% endblock %}
+</head>
+
+<body class="g-sidenav-show bg-gray-100">
+    {% if app.user %}
+        <!-- Sidebar - BLANC comme Creative Tim -->
+        <aside class="sidenav navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-4" id="sidenav-main">
+            <div class="sidenav-header">
+                <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
+                <a class="navbar-brand m-0 d-flex align-items-center" href="{{ path('app_dashboard') }}">
+                    <div class="rounded-circle p-2 me-2" style="background: rgba(94, 114, 228, 0.1);">
+                        <img src="{{ asset('assets/img/unimind.png') }}" width="24px" height="24px" alt="UniMind Logo">
+                    </div>
+                    <span class="ms-1 font-weight-bold" style="color: #344767;">UniMind</span>
+                </a>
+            </div>
+            
+            <hr class="horizontal dark mt-0 mb-2">
+            
+            <!-- User info in sidebar - Style Creative Tim -->
+            <div class="sidebar-user-info">
+                <div class="d-flex align-items-center">
+                    <div class="position-relative">
+                        {% if app.user.profil and app.user.profil.photo %}
+                            <img src="{{ asset('uploads/photos/' ~ app.user.profil.photo) }}" 
+                                 alt="{{ app.user.prenom }} {{ app.user.nom }}" 
+                                 class="rounded-circle border border-3"
+                                 style="width: 48px; height: 48px; object-fit: cover; border-color: #e9ecef !important;">
+                        {% else %}
+                            <div class="avatar-initials rounded-circle text-white d-flex align-items-center justify-content-center border border-3" 
+                                 style="width: 48px; height: 48px; font-size: 1.1rem; border-color: #e9ecef !important;">
+                                {{ app.user.prenom|first|upper }}{{ app.user.nom|first|upper }}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex flex-column ms-3">
+                        <h6 class="mb-0" style="color: #344767;">{{ app.user.prenom }} {{ app.user.nom }}</h6>
+                        <span class="text-xs opacity-8 mt-1">
+                            {% if 'ROLE_ADMIN' in app.user.roles %}
+                                <span class="badge-admin">Administrateur</span>
+                            {% elseif 'ROLE_PSYCHOLOGUE' in app.user.roles %}
+                                <span class="badge-psychologue">Psychologue</span>
+                            {% elseif 'ROLE_RESPONSABLE_ETUDIANT' in app.user.roles %}
+                                <span class="badge-responsable">Responsable</span>
+                            {% else %}
+                                <span class="badge-etudiant">Étudiant</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="collapse navbar-collapse w-auto h-auto mt-3" id="sidenav-collapse-main">
+                <ul class="navbar-nav">
+                    <!-- Dashboard -->
+                    <li class="nav-item">
+                        <a class="nav-link {% if app.request.attributes.get('_route') in ['app_dashboard', 'admin_dashboard', 'etudiant_dashboard', 'psy_dashboard', 'resp_dashboard'] %}active{% endif %}" 
+                           href="{{ path('app_dashboard') }}">
+                            <div class="d-flex align-items-center">
+                                <div class="nav-icon">
+                                    <i class="bi bi-speedometer2"></i>
+                                </div>
+                                <span class="nav-link-text ms-2">Tableau de bord</span>
+                            </div>
+                        </a>
+                    </li>
+                    
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <!-- Admin Menu -->
+                        <li class="nav-item mt-4 mb-2">
+                            <h6 class="ps-3 ms-1 text-uppercase text-xs font-weight-bolder opacity-6">Administration</h6>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link {% if app.request.attributes.get('_route') == 'admin_users' %}active{% endif %}" 
+                               href="{{ path('admin_users') }}">
+                                <div class="d-flex align-items-center">
+                                    <div class="nav-icon">
+                                        <i class="bi bi-people-fill"></i>
+                                    </div>
+                                    <span class="nav-link-text ms-2">Gestion des utilisateurs</span>
+                                </div>
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link {% if app.request.attributes.get('_route') == 'admin_pending_users' %}active{% endif %}" 
+                               href="{{ path('admin_pending_users') }}">
+                                <div class="d-flex align-items-center">
+                                    <div class="nav-icon">
+                                        <i class="bi bi-clock-history"></i>
+                                    </div>
+                                    <span class="nav-link-text ms-2">Inscriptions en attente</span>
+                                    {% if app.session.get('pending_count', 0) > 0 %}
+                                        <span class="badge bg-danger badge-sm rounded-pill ms-auto">{{ app.session.get('pending_count', 0) }}</span>
+                                    {% endif %}
+                                </div>
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link {% if app.request.attributes.get('_route') == 'admin_statistics' %}active{% endif %}" 
+                               href="{{ path('admin_statistics') }}">
+                                <div class="d-flex align-items-center">
+                                    <div class="nav-icon">
+                                        <i class="bi bi-bar-chart-fill"></i>
+                                    </div>
+                                    <span class="nav-link-text ms-2">Statistiques</span>
+                                </div>
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ path('admin_user_new') }}">
+                                <div class="d-flex align-items-center">
+                                    <div class="nav-icon">
+                                        <i class="bi bi-person-plus-fill"></i>
+                                    </div>
+                                    <span class="nav-link-text ms-2">Nouvel utilisateur</span>
+                                </div>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% if is_granted('ROLE_PSYCHOLOGUE') %}
+                        <!-- Psychologue Menu -->
+                        <li class="nav-item mt-4 mb-2">
+                            <h6 class="ps-3 ms-1 text-uppercase text-xs font-weight-bolder opacity-6">Psychologue</h6>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <div class="d-flex align-items-center">
+                                    <div class="nav-icon">
+                                        <i class="bi bi-calendar-check"></i>
+                                    </div>
+                                    <span class="nav-link-text ms-2">Mes rendez-vous</span>
+                                </div>
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <div class="d-flex align-items-center">
+                                    <div class="nav-icon">
+                                        <i class="bi bi-chat-dots"></i>
+                                    </div>
+                                    <span class="nav-link-text ms-2">Messagerie</span>
+                                </div>
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <div class="d-flex align-items-center">
+                                    <div class="nav-icon">
+                                        <i class="bi bi-file-earmark-text"></i>
+                                    </div>
+                                    <span class="nav-link-text ms-2">Mes articles</span>
+                                </div>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% if is_granted('ROLE_ETUDIANT') %}
+                        <!-- Étudiant Menu -->
+                        <li class="nav-item mt-4 mb-2">
+                            <h6 class="ps-3 ms-1 text-uppercase text-xs font-weight-bolder opacity-6">Étudiant</h6>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <div class="d-flex align-items-center">
+                                    <div class="nav-icon">
+                                        <i class="bi bi-calendar-week"></i>
+                                    </div>
+                                    <span class="nav-link-text ms-2">Mes rendez-vous</span>
+                                </div>
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <div class="d-flex align-items-center">
+                                    <div class="nav-icon">
+                                        <i class="bi bi-search"></i>
+                                    </div>
+                                    <span class="nav-link-text ms-2">Trouver un psychologue</span>
+                                </div>
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <div class="d-flex align-items-center">
+                                    <div class="nav-icon">
+                                        <i class="bi bi-book"></i>
+                                    </div>
+                                    <span class="nav-link-text ms-2">Ressources</span>
+                                </div>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% if is_granted('ROLE_RESPONSABLE_ETUDIANT') %}
+                        <!-- Responsable Menu -->
+                        <li class="nav-item mt-4 mb-2">
+                            <h6 class="ps-3 ms-1 text-uppercase text-xs font-weight-bolder opacity-6">Responsable</h6>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <div class="d-flex align-items-center">
+                                    <div class="nav-icon">
+                                        <i class="bi bi-graph-up"></i>
+                                    </div>
+                                    <span class="nav-link-text ms-2">Statistiques</span>
+                                </div>
+                            </a>
+                        </li>
+                        
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <div class="d-flex align-items-center">
+                                    <div class="nav-icon">
+                                        <i class="bi bi-building"></i>
+                                    </div>
+                                    <span class="nav-link-text ms-2">Mon établissement</span>
+                                </div>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    <!-- Common Menu Items -->
+                    <li class="nav-item mt-4 mb-2">
+                        <h6 class="ps-3 ms-1 text-uppercase text-xs font-weight-bolder opacity-6">Compte</h6>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link {% if app.request.attributes.get('_route') == 'app_profile' %}active{% endif %}" 
+                           href="{{ path('app_profile') }}">
+                            <div class="d-flex align-items-center">
+                                <div class="nav-icon">
+                                    <i class="bi bi-person-circle"></i>
+                                </div>
+                                <span class="nav-link-text ms-2">Mon profil</span>
+                            </div>
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link {% if app.request.attributes.get('_route') == 'app_profile_edit' %}active{% endif %}" 
+                           href="{{ path('app_profile_edit') }}">
+                            <div class="d-flex align-items-center">
+                                <div class="nav-icon">
+                                    <i class="bi bi-gear-fill"></i>
+                                </div>
+                                <span class="nav-link-text ms-2">Modifier profil</span>
+                            </div>
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ path('app_change_password') }}">
+                            <div class="d-flex align-items-center">
+                                <div class="nav-icon">
+                                    <i class="bi bi-key-fill"></i>
+                                </div>
+                                <span class="nav-link-text ms-2">Changer mot de passe</span>
+                            </div>
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item mt-4">
+                        <a class="nav-link text-danger" href="{{ path('app_logout') }}">
+                            <div class="d-flex align-items-center">
+                                <div class="nav-icon" style="background: rgba(245, 54, 92, 0.1);">
+                                    <i class="bi bi-box-arrow-right"></i>
+                                </div>
+                                <span class="nav-link-text ms-2">Déconnexion</span>
+                            </div>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="sidenav-footer mx-3 my-4">
+                <div class="card card-plain shadow-none border-0" id="sidenavCard" style="background: transparent;">
+                    <div class="card-body text-center p-3 w-100 pt-0">
+                        <div class="docs-info">
+                            <h6 class="mb-1" style="color: #344767;">UniMind Platform</h6>
+                            <p class="text-xs opacity-8 mb-0">Soutien psychologique universitaire</p>
+                            <p class="text-xs opacity-6 mt-2 mb-0" style="color: #6c757d;">v1.0.0 © 2024</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content position-relative border-radius-lg">
+            <!-- Navbar -->
+            <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur" data-scroll="false">
+                <div class="container-fluid py-1 px-3">
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
+                            <li class="breadcrumb-item text-sm"><a class="opacity-7" href="{{ path('app_dashboard') }}">Pages</a></li>
+                            {% block breadcrumb %}
+                                <li class="breadcrumb-item text-sm active" aria-current="page">
+                                    {% block breadcrumb_title %}Dashboard{% endblock %}
+                                </li>
+                            {% endblock %}
+                        </ol>
+                        <h6 class="font-weight-bolder mb-0">
+                            <i class="bi bi-house-door me-2"></i>{% block page_title %}Tableau de bord{% endblock %}
+                        </h6>
+                    </nav>
+                    
+                    <div class="collapse navbar-collapse mt-sm-0 mt-2 me-md-0 me-sm-4" id="navbar">
+                        <div class="ms-md-auto pe-md-3 d-flex align-items-center">
+                            <div class="input-group input-group-outline">
+                                <span class="input-group-text bg-white border-0"><i class="bi bi-search text-primary"></i></span>
+                                <input type="text" class="form-control border-0 ps-2" placeholder="Rechercher..." style="background: rgba(255, 255, 255, 0.9);">
+                            </div>
+                        </div>
+                        
+                        <ul class="navbar-nav justify-content-end">
+                            <!-- Notifications -->
+                            <li class="nav-item dropdown pe-2 d-flex align-items-center">
+                                <a href="javascript:;" class="nav-link p-0 position-relative" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-bell cursor-pointer fs-5" style="color: #5e72e4;"></i>
+                                    {% if app.session.get('pending_count', 0) > 0 %}
+                                        <span class="notification-badge rounded-pill">{{ app.session.get('pending_count', 0) }}</span>
+                                    {% endif %}
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="dropdownMenuButton">
+                                    <li class="mb-2">
+                                        <a class="dropdown-item border-radius-md" href="{{ path('admin_pending_users') }}">
+                                            <div class="d-flex py-1">
+                                                <div class="avatar avatar-sm bg-gradient-warning me-3 my-auto">
+                                                    <i class="bi bi-clock text-white"></i>
+                                                </div>
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    <h6 class="text-sm font-weight-normal mb-1">
+                                                        Inscriptions en attente
+                                                    </h6>
+                                                    <p class="text-xs text-secondary mb-0">
+                                                        <i class="bi bi-people me-1"></i>
+                                                        {{ app.session.get('pending_count', 0) }} demande(s)
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item border-radius-md" href="#">
+                                            <div class="d-flex py-1">
+                                                <div class="avatar avatar-sm bg-gradient-success me-3 my-auto">
+                                                    <i class="bi bi-check-circle text-white"></i>
+                                                </div>
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    <h6 class="text-sm font-weight-normal mb-1">
+                                                        Système opérationnel
+                                                    </h6>
+                                                    <p class="text-xs text-secondary mb-0">
+                                                        <i class="bi bi-clock me-1"></i>
+                                                        Tous les services sont fonctionnels
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            
+                            <!-- User dropdown -->
+                            <li class="nav-item d-flex align-items-center ms-2">
+                                <a href="javascript:;" class="nav-link font-weight-bold px-0 d-flex align-items-center" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <div class="avatar avatar-sm me-2">
+                                        {% if app.user.profil and app.user.profil.photo %}
+                                            <img src="{{ asset('uploads/photos/' ~ app.user.profil.photo) }}" 
+                                                 alt="{{ app.user.prenom }} {{ app.user.nom }}" 
+                                                 class="rounded-circle border border-2" 
+                                                 style="border-color: #5e72e4 !important;">
+                                        {% else %}
+                                            <div class="avatar-initials rounded-circle text-white d-flex align-items-center justify-content-center" 
+                                                 style="width: 32px; height: 32px; font-size: 0.9rem; background: #5e72e4;">
+                                                {{ app.user.prenom|first|upper }}{{ app.user.nom|first|upper }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <span class="d-sm-inline d-none" style="color: #5e72e4;">{{ app.user.prenom }}</span>
+                                    <i class="bi bi-chevron-down ms-1 fs-6" style="color: #5e72e4;"></i>
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end px-2 py-3 me-sm-n4" aria-labelledby="userDropdown">
+                                    <li>
+                                        <a class="dropdown-item border-radius-md" href="{{ path('app_profile') }}">
+                                            <div class="d-flex py-1">
+                                                <div class="my-auto">
+                                                    <div class="avatar avatar-sm bg-gradient-primary me-3">
+                                                        <i class="bi bi-person text-white"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    <h6 class="text-sm font-weight-normal mb-1">
+                                                        Mon profil
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item border-radius-md" href="{{ path('app_profile_edit') }}">
+                                            <div class="d-flex py-1">
+                                                <div class="my-auto">
+                                                    <div class="avatar avatar-sm bg-gradient-info me-3">
+                                                        <i class="bi bi-gear text-white"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    <h6 class="text-sm font-weight-normal mb-1">
+                                                        Modifier profil
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item border-radius-md" href="{{ path('app_change_password') }}">
+                                            <div class="d-flex py-1">
+                                                <div class="my-auto">
+                                                    <div class="avatar avatar-sm bg-gradient-warning me-3">
+                                                        <i class="bi bi-key text-white"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    <h6 class="text-sm font-weight-normal mb-1">
+                                                        Changer mot de passe
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                    <li><hr class="horizontal dark my-1"></li>
+                                    <li>
+                                        <a class="dropdown-item border-radius-md text-danger" href="{{ path('app_logout') }}">
+                                            <div class="d-flex py-1">
+                                                <div class="my-auto">
+                                                    <div class="avatar avatar-sm bg-gradient-danger me-3">
+                                                        <i class="bi bi-box-arrow-right text-white"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    <h6 class="text-sm font-weight-normal mb-1">
+                                                        Déconnexion
+                                                    </h6>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                            
+                            <!-- Mobile sidenav toggle -->
+                            <li class="nav-item d-xl-none ps-3 d-flex align-items-center">
+                                <a href="javascript:;" class="nav-link p-0" id="iconNavbarSidenav">
+                                    <div class="sidenav-toggler-inner">
+                                        <i class="sidenav-toggler-line"></i>
+                                        <i class="sidenav-toggler-line"></i>
+                                        <i class="sidenav-toggler-line"></i>
+                                    </div>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+            <!-- End Navbar -->
+            
+            <!-- Flash Messages -->
+            {% for message in app.flashes('success') %}
+                <div class="alert alert-success alert-dismissible fade show position-fixed top-1 end-1 z-index-9999" role="alert" style="min-width: 300px;">
+                    <span class="alert-icon"><i class="bi bi-check-circle-fill me-2"></i></span>
+                    <span class="alert-text">{{ message }}</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+            
+            {% for message in app.flashes('error') %}
+                <div class="alert alert-danger alert-dismissible fade show position-fixed top-1 end-1 z-index-9999" role="alert" style="min-width: 300px;">
+                    <span class="alert-icon"><i class="bi bi-exclamation-triangle-fill me-2"></i></span>
+                    <span class="alert-text">{{ message }}</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+            
+            {% for message in app.flashes('warning') %}
+                <div class="alert alert-warning alert-dismissible fade show position-fixed top-1 end-1 z-index-9999" role="alert" style="min-width: 300px;">
+                    <span class="alert-icon"><i class="bi bi-exclamation-octagon-fill me-2"></i></span>
+                    <span class="alert-text">{{ message }}</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+            
+            {% for message in app.flashes('info') %}
+                <div class="alert alert-info alert-dismissible fade show position-fixed top-1 end-1 z-index-9999" role="alert" style="min-width: 300px;">
+                    <span class="alert-icon"><i class="bi bi-info-circle-fill me-2"></i></span>
+                    <span class="alert-text">{{ message }}</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+            
+            <!-- Content -->
+            <div class="container-fluid py-4">
+                {% block body %}{% endblock %}
+            </div>
+        </main>
+        
+    {% else %}
+        <!-- Layout pour utilisateurs non connectés -->
+        <main class="main-content mt-0">
+            {% block unauthenticated_body %}{% endblock %}
+        </main>
+    {% endif %}
+    
+    <!-- Fixed Plugin -->
+    <div class="fixed-plugin">
+        <a class="fixed-plugin-button text-dark position-fixed px-3 py-2">
+            <i class="fa fa-cog py-2"> </i>
+        </a>
+        <div class="card shadow-lg">
+            <div class="card-header pb-0 pt-3">
+                <div class="float-start">
+                    <h5 class="mt-3 mb-0">Configuration</h5>
+                    <p>Options d'affichage</p>
+                </div>
+                <div class="float-end mt-4">
+                    <button class="btn btn-link text-dark p-0 fixed-plugin-close-button">
+                        <i class="fa fa-close"></i>
+                    </button>
+                </div>
+            </div>
+            <hr class="horizontal dark my-1">
+            <div class="card-body pt-sm-3 pt-0">
+                <!-- Sidebar Colors -->
+                <div>
+                    <h6 class="mb-0">Couleurs de la sidebar</h6>
+                </div>
+                <a href="javascript:void(0)" class="switch-trigger background-color">
+                    <div class="badge-colors my-2 text-start">
+                        <span class="badge filter bg-gradient-primary active" data-color="primary"></span>
+                        <span class="badge filter bg-gradient-dark" data-color="dark"></span>
+                        <span class="badge filter bg-gradient-info" data-color="info"></span>
+                        <span class="badge filter bg-gradient-success" data-color="success"></span>
+                        <span class="badge filter bg-gradient-warning" data-color="warning"></span>
+                        <span class="badge filter bg-gradient-danger" data-color="danger"></span>
+                    </div>
+                </a>
+                
+                <!-- Dark/Light Mode -->
+                <div class="mt-2 mb-5 d-flex">
+                    <h6 class="mb-0">Mode clair / sombre</h6>
+                    <div class="form-check form-switch ps-0 ms-auto my-auto">
+                        <input class="form-check-input mt-1 ms-auto" type="checkbox" id="dark-version" onclick="darkMode(this)">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% block javascripts %}
+        <!-- Core JS Files -->
+        <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
+        <script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
+        <script src="{{ asset('assets/js/plugins/perfect-scrollbar.min.js') }}"></script>
+        <script src="{{ asset('assets/js/plugins/smooth-scrollbar.min.js') }}"></script>
+        
+        <!-- Argon Dashboard JS -->
+        <script src="{{ asset('assets/js/argon-dashboard.min.js?v=2.1.0') }}"></script>
+        
+        <!-- Custom JS -->
+        <script>
+            // Initialize sidenav
+            var win = navigator.platform.indexOf('Win') > -1;
+            if (win && document.querySelector('#sidenav-scrollbar')) {
+                var options = {
+                    damping: '0.5'
+                }
+                Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
+            }
+            
+            // Auto-hide alerts after 5 seconds
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(function() {
+                    var alerts = document.querySelectorAll('.alert.position-fixed');
+                    alerts.forEach(function(alert) {
+                        var bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    });
+                }, 5000);
+                
+                // Initialize tooltips
+                var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            });
+            
+            // Dashboard charts initialization
+            document.addEventListener('DOMContentLoaded', function() {
+                const rolePieChart = document.getElementById('rolePieChart');
+                if (rolePieChart) {
+                    const students = parseInt(rolePieChart.dataset.students) || 0;
+                    const psychologues = parseInt(rolePieChart.dataset.psychologues) || 0;
+                    const responsables = parseInt(rolePieChart.dataset.responsables) || 0;
+                    
+                    if (students > 0 || psychologues > 0 || responsables > 0) {
+                        new Chart(rolePieChart, {
+                            type: 'doughnut',
+                            data: {
+                                labels: ["Étudiants", "Psychologues", "Responsables"],
+                                datasets: [{
+                                    data: [students, psychologues, responsables],
+                                    backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc'],
+                                    hoverBackgroundColor: ['#2e59d9', '#17a673', '#2c9faf'],
+                                    hoverBorderColor: "rgba(234, 236, 244, 1)",
+                                }],
+                            },
+                            options: {
+                                maintainAspectRatio: false,
+                                tooltips: {
+                                    backgroundColor: "rgb(255,255,255)",
+                                    bodyFontColor: "#858796",
+                                    borderColor: '#dddfeb',
+                                    borderWidth: 1,
+                                    xPadding: 15,
+                                    yPadding: 15,
+                                    displayColors: false,
+                                    caretPadding: 10,
+                                },
+                                legend: {
+                                    display: false
+                                },
+                                cutoutPercentage: 80,
+                            },
+                        });
+                    }
+                }
+            });
+            
+            // Active menu highlighting
+            document.addEventListener('DOMContentLoaded', function() {
+                const currentPath = window.location.pathname;
+                const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
+                
+                navLinks.forEach(link => {
+                    if (link.getAttribute('href') === currentPath) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        </script>
+    {% endblock %}
+    
+    {% block extra_javascripts %}{% endblock %}
+</body>
+</html>
