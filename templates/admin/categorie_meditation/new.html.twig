@@ -1,0 +1,25 @@
+{% extends 'basedash.html.twig' %}
+
+{% block title %}Nouvelle Catégorie de Méditation{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="fas fa-plus-circle"></i> Nouvelle Catégorie de Méditation</h3>
+                </div>
+                <div class="card-body">
+                    {{ include('admin/categorie_meditation/_form.html.twig') }}
+                </div>
+                <div class="card-footer">
+                    <a href="{{ path('admin_categorie_meditation_index') }}" class="btn btn-link">
+                        <i class="fas fa-arrow-left"></i> Retour à la liste
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

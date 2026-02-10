@@ -1,0 +1,12 @@
+{% set seance = seance_meditation ?? app.request.attributes.get('seance_meditation') %}
+
+{% if seance %}
+<form method="post" action="{{ path('admin_seance_meditation_delete', {'id': seance.seanceId}) }}" 
+      onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette séance ?');" 
+      class="d-inline">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ seance.seanceId) }}">
+    <button class="btn btn-danger w-100">
+        <i class="bi bi-trash"></i> Supprimer
+    </button>
+</form>
+{% endif %}

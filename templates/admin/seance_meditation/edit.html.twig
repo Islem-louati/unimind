@@ -1,0 +1,30 @@
+{% extends 'basedash.html.twig' %}
+
+{% block title %}Modifier la Séance de Méditation{% endblock %}
+
+{% block body %}
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Modifier la séance de méditation</h1>
+            {% if seance_meditation.categorie %}
+                <a href="{{ path('admin_seance_meditation_by_categorie', {'id': seance_meditation.categorie.categorieId}) }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Retour à la liste
+                </a>
+            {% else %}
+                <a href="{{ path('admin_seance_meditation_index') }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Retour à la liste
+                </a>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                {{ include('admin/seance_meditation/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+            </div>
+        </div>
+
+        <div class="mt-3">
+    {{ include('admin/seance_meditation/_delete_form.html.twig', {'seance_meditation': seance_meditation}) }}
+</div>
+    </div>
+{% endblock %}

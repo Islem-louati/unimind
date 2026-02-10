@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Commentaire index{% endblock %}
+
+{% block body %}
+    <h1>Commentaire index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Commentaire_id</th>
+                <th>Contenu</th>
+                <th>Is_anonyme</th>
+                <th>Created_at</th>
+                <th>Updated_at</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for commentaire in commentaires %}
+            <tr>
+                <td>{{ commentaire.commentaireId }}</td>
+                <td>{{ commentaire.contenu }}</td>
+                <td>{{ commentaire.isAnonyme ? 'Yes' : 'No' }}</td>
+                <td>{{ commentaire.createdAt ? commentaire.createdAt|date('Y-m-d H:i:s') : '' }}</td>
+                <td>{{ commentaire.updatedAt ? commentaire.updatedAt|date('Y-m-d H:i:s') : '' }}</td>
+                <td>
+                    <a href="{{ path('app_commentaire_show', {'commentaire_id': commentaire.commentaire_id}) }}">show</a>
+                    <a href="{{ path('app_commentaire_edit', {'commentaire_id': commentaire.commentaire_id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_commentaire_new') }}">Create new</a>
+{% endblock %}

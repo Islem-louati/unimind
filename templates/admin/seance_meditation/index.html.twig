@@ -1,0 +1,446 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}SeanceMeditation index{% endblock %}
+
+{% block body %}
+    <h1>SeanceMeditation index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Titre</th>
+                <th>Description</th>
+                <th>Fichier</th>
+                <th>TypeFichier</th>
+                <th>Durée</th>
+                <th>Actif</th>
+                <th>Niveau</th>
+                <th>Catégorie</th>
+                <th>Créée le</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for seance_meditation in seance_meditations %}
+            <tr>
+                <td>{{ seance_meditation.seanceId }}</td>
+                <td>{{ seance_meditation.titre }}</td>
+                <td>{{ seance_meditation.description|slice(0, 50) }}{% if seance_meditation.description|length > 50 %}...{% endif %}</td>
+                <td>{{ seance_meditation.fichier }}</td>
+                <td>{{ seance_meditation.typeFichier|upper }}</td>
+                <td>{{ seance_meditation.getDureeFormatee() }}</td>
+                <td>
+                    {% if seance_meditation.isActive %}
+                        <span class="badge bg-success">Oui</span>
+                    {% else %}
+                        <span class="badge bg-danger">Non</span>
+                    {% endif %}
+                </td>
+                <td>{{ seance_meditation.niveau|capitalize }}</td>
+                <td>
+                    {% if seance_meditation.categorie %}
+                        {{ seance_meditation.categorie.nom }}
+                    {% else %}
+                        <span class="text-muted">Aucune</span>
+                    {% endif %}
+                </td>
+                <td>{{ seance_meditation.createdAt ? seance_meditation.createdAt|date('d/m/Y') : '' }}</td>
+                <td>
+                    <a href="{{ path('admin_seance_meditation_show', {'id': seance_meditation.seanceId}) }}" class="btn btn-sm btn-info">Voir</a>
+                    <a href="{{ path('admin_seance_meditation_edit', {'id': seance_meditation.seanceId}) }}" class="btn btn-sm btn-warning">Modifier</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="11" class="text-center">Aucune séance trouvée</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('admin_seance_meditation_new') }}" class="btn btn-primary">Créer une nouvelle séance</a>
+{% endblock %}
+{# Modal pour créer une nouvelle séance #}
+<div class="modal fade" id="modalNouvelleSeance" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-plus-circle me-2"></i>Nouvelle Séance de Méditation
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="modalNouvelleSeanceBody">
+        <!-- Le formulaire sera chargé ici via AJAX -->
+        <div class="text-center py-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Chargement...</span>
+          </div>
+          <p class="mt-2">Chargement du formulaire...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Modal pour modifier une séance #}
+<div class="modal fade" id="modalEditSeance" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-edit me-2"></i>Modifier la Séance
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="modalEditSeanceBody">
+        <!-- Le formulaire sera chargé ici via AJAX -->
+        <div class="text-center py-4">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Chargement...</span>
+          </div>
+          <p class="mt-2">Chargement du formulaire...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialiser les tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+      return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // ============ MODAL NOUVELLE SÉANCE ============
+    const modalNew = document.getElementById('modalNouvelleSeance');
+    if (modalNew) {
+        modalNew.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const categorieId = button.getAttribute('data-categorie-id');
+            const url = '{{ path("admin_seance_meditation_new", {"categorieId": "CATEGORIE_ID"}) }}'.replace('CATEGORIE_ID', categorieId) + '?ajax=1';
+            
+            // Charger le formulaire
+            loadFormIntoModal(url, 'modalNouvelleSeanceBody');
+        });
+    }
+    
+    // ============ MODAL ÉDITION SÉANCE ============
+    const modalEdit = document.getElementById('modalEditSeance');
+    if (modalEdit) {
+        modalEdit.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const seanceId = button.getAttribute('data-seance-id');
+            const url = '{{ path("admin_seance_meditation_edit", {"id": "SEANCE_ID"}) }}'.replace('SEANCE_ID', seanceId) + '?ajax=1';
+            
+            // Charger le formulaire
+            loadFormIntoModal(url, 'modalEditSeanceBody');
+        });
+    }
+    
+    // Fonction pour charger un formulaire dans un modal
+    function loadFormIntoModal(url, modalBodyId) {
+        const modalBody = document.getElementById(modalBodyId);
+        
+        // Afficher loader
+        modalBody.innerHTML = `
+            <div class="text-center py-4">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                </div>
+                <p class="mt-2">Chargement du formulaire...</p>
+            </div>
+        `;
+        
+        // Charger via AJAX
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.html) {
+                modalBody.innerHTML = data.html;
+                
+                // Attacher l'événement de soumission
+                const form = modalBody.querySelector('form');
+                if (form) {
+                    form.addEventListener('submit', handleFormSubmit);
+                }
+                
+                // Initialiser les tooltips dans le formulaire
+                const newTooltips = [].slice.call(modalBody.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                newTooltips.forEach(function (tooltipTriggerEl) {
+                    new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            } else {
+                modalBody.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Erreur lors du chargement du formulaire
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            modalBody.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Erreur de connexion
+                </div>
+            `;
+        });
+    }
+    
+    // Fonction pour gérer la soumission des formulaires
+    function handleFormSubmit(e) {
+        e.preventDefault();
+        
+        const form = this;
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        
+        // Désactiver le bouton
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> En cours...';
+        submitBtn.disabled = true;
+        
+        // Récupérer les données du formulaire
+        const formData = new FormData(form);
+        
+        // Envoyer la requête
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Afficher message de succès
+                showToast('success', data.message || 'Opération réussie !');
+                
+                // Fermer le modal
+                const modal = bootstrap.Modal.getInstance(form.closest('.modal'));
+                modal.hide();
+                
+                // Recharger la page après un délai
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            } else {
+                // Afficher les erreurs
+                if (data.errors) {
+                    // Réinitialiser les erreurs précédentes
+                    form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                    form.querySelectorAll('.invalid-feedback').forEach(el => el.innerHTML = '');
+                    
+                    // Afficher les nouvelles erreurs
+                    for (const field in data.errors) {
+                        const input = form.querySelector(`[name*="${field}"]`);
+                        const feedback = form.querySelector(`.invalid-feedback[data-field="${field}"]`) || 
+                                       input?.nextElementSibling;
+                        
+                        if (input && feedback) {
+                            input.classList.add('is-invalid');
+                            feedback.innerHTML = data.errors[field];
+                        }
+                    }
+                } else if (data.message) {
+                    showToast('error', data.message);
+                }
+                
+                // Réactiver le bouton
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            showToast('error', 'Une erreur est survenue');
+            
+            // Réactiver le bouton
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        });
+    }
+    
+    // Fonction pour afficher des notifications
+    function showToast(type, message) {
+        // Créer le toast
+        const toastContainer = document.getElementById('toast-container') || createToastContainer();
+        const toastId = 'toast-' + Date.now();
+        
+        const toastHtml = `
+            <div id="${toastId}" class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" 
+                 role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'} me-2"></i>
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            </div>
+        `;
+        
+        toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+        
+        // Afficher le toast
+        const toastElement = document.getElementById(toastId);
+        const toast = new bootstrap.Toast(toastElement, {
+            autohide: true,
+            delay: 5000
+        });
+        toast.show();
+        
+        // Supprimer le toast après disparition
+        toastElement.addEventListener('hidden.bs.toast', function () {
+            this.remove();
+        });
+    }
+    
+    // Fonction pour créer le conteneur de toasts
+    function createToastContainer() {
+        const container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+        container.style.zIndex = '9999';
+        document.body.appendChild(container);
+        return container;
+    }
+    
+    // ============ GESTION DES MÉDIAS ============
+    // Arrêter les médias quand les modaux se ferment
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('hidden.bs.modal', function () {
+            this.querySelectorAll('audio, video').forEach(media => {
+                media.pause();
+                media.currentTime = 0;
+            });
+        });
+    });
+    
+    // ============ PRÉVISUALISATION DU FICHIER ============
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.matches('input[type="file"][accept*="audio"], input[type="file"][accept*="video"]')) {
+            const input = e.target;
+            const previewContainer = input.parentNode.querySelector('.file-preview') || 
+                                   createPreviewContainer(input);
+            
+            previewContainer.innerHTML = '';
+            
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    if (file.type.startsWith('audio/')) {
+                        previewContainer.innerHTML = `
+                            <div class="mt-2">
+                                <p class="text-sm mb-1"><strong>Fichier audio :</strong> ${file.name}</p>
+                                <audio controls class="w-100">
+                                    <source src="${e.target.result}" type="${file.type}">
+                                </audio>
+                            </div>
+                        `;
+                    } else if (file.type.startsWith('video/')) {
+                        previewContainer.innerHTML = `
+                            <div class="mt-2">
+                                <p class="text-sm mb-1"><strong>Fichier vidéo :</strong> ${file.name}</p>
+                                <video controls class="w-100" style="max-height: 200px;">
+                                    <source src="${e.target.result}" type="${file.type}">
+                                </video>
+                            </div>
+                        `;
+                    } else {
+                        previewContainer.innerHTML = `
+                            <div class="alert alert-warning mt-2">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                Format de fichier non supporté
+                            </div>
+                        `;
+                    }
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        }
+    });
+    
+    function createPreviewContainer(input) {
+        const container = document.createElement('div');
+        container.className = 'file-preview mt-2';
+        input.parentNode.appendChild(container);
+        return container;
+    }
+});
+</script>
+
+<style>
+/* Styles pour les formulaires dans les modaux */
+.modal .form-control:focus {
+    border-color: #5e72e4;
+    box-shadow: 0 0 0 0.2rem rgba(94, 114, 228, 0.25);
+}
+
+.modal .invalid-feedback {
+    display: block;
+}
+
+.modal .is-invalid {
+    border-color: #f5365c;
+}
+
+.modal .form-label {
+    font-weight: 600;
+    color: #525f7f;
+    margin-bottom: 0.5rem;
+}
+
+.modal .form-text {
+    font-size: 0.875rem;
+}
+
+/* Style pour les aperçus de fichiers */
+.file-preview audio,
+.file-preview video {
+    border-radius: 8px;
+    background: #f8f9fe;
+}
+
+/* Toast notifications */
+.toast-container {
+    z-index: 9999;
+}
+
+.toast {
+    min-width: 300px;
+    backdrop-filter: blur(10px);
+}
+
+/* Animation pour les boutons */
+.btn-action-play:active,
+.btn-action-edit:active,
+.btn-action-toggle:active,
+.btn-action-delete:active {
+    animation: buttonClick 0.2s ease;
+}
+
+@keyframes buttonClick {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+</style>
+{% endblock %}

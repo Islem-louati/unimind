@@ -1,0 +1,57 @@
+{% extends 'basedash.html.twig' %}
+
+{% block title %}Détails - {{ categorie_meditation.nom }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h3 class="mb-0"><i class="fas fa-eye"></i> Détails de la Catégorie</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-3 text-center">
+                            {% if categorie_meditation.iconUrl %}
+                                <img src="{{ categorie_meditation.iconUrl }}" alt="{{ categorie_meditation.nom }}" 
+                                     class="img-fluid rounded" style="max-width: 150px;">
+                            {% else %}
+                                <div class="bg-light rounded p-5 text-muted">
+                                    <i class="fas fa-folder fa-4x"></i>
+                                    <p class="mt-2">Pas d'icône</p>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-9">
+                            <h4>{{ categorie_meditation.nom }}</h4>
+                            <p class="lead">{{ categorie_meditation.description }}</p>
+                            
+                            <div class="mt-4">
+                                <h6>Informations :</h6>
+                                <ul class="list-unstyled">
+                                    <li><strong>ID :</strong> {{ categorie_meditation.categorie_id }}</li>
+                                    <li><strong>Créée le :</strong> {{ categorie_meditation.dateCreation|date('d/m/Y à H:i') }}</li>
+                                    {% if categorie_meditation.updatedAt %}
+                                        <li><strong>Modifiée le :</strong> {{ categorie_meditation.updatedAt|date('d/m/Y à H:i') }}</li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <a href="{{ path('admin_categorie_meditation_edit', {'id': categorie_meditation.categorieId}) }}" 
+                           class="btn btn-warning">
+                            <i class="fas fa-edit"></i> Modifier
+                        </a>
+                        <a href="{{ path('admin_categorie_meditation_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour à la liste
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

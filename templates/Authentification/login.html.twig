@@ -1,0 +1,130 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion | UniMind{% endblock %}
+
+{% block body_class %}{% endblock %}
+
+{% block body %}
+<main class="main-content mt-0">
+    <section>
+        <div class="page-header min-vh-100">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-4 col-lg-5 col-md-7 d-flex flex-column mx-lg-0 mx-auto">
+                        <div class="card card-plain">
+                            <div class="card-header pb-0 text-start">
+                                <h4 class="font-weight-bolder">Connexion</h4>
+                                <p class="mb-0">Entrez votre email et mot de passe pour vous connecter</p>
+                            </div>
+                            <div class="card-body">
+                                {# Messages Flash #}
+                                {% for message in app.flashes('error') %}
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <span class="alert-text text-white">{{ message }}</span>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                {% endfor %}
+
+                                {# Erreur d'authentification #}
+                                {% if error %}
+                                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                        <span class="alert-text text-white">
+                                            {% if error.messageKey == 'Invalid credentials.' %}
+                                                Email ou mot de passe incorrect.
+                                            {% else %}
+                                                {{ error.messageKey|trans(error.messageData, 'security') }}
+                                            {% endif %}
+                                        </span>
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                {% endif %}
+
+                                <form method="post" action="{{ path('app_login') }}">
+                                    {# Email #}
+                                    <div class="mb-3">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" 
+                                               class="form-control form-control-lg" 
+                                               id="email"
+                                               name="email" 
+                                               value="{{ last_username }}" 
+                                               placeholder="Email" 
+                                               required 
+                                               autofocus
+                                               autocomplete="email">
+                                    </div>
+
+                                    {# Mot de passe #}
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">Mot de passe</label>
+                                        <input type="password" 
+                                               class="form-control form-control-lg" 
+                                               id="password"
+                                               name="password" 
+                                               placeholder="Mot de passe" 
+                                               required
+                                               autocomplete="current-password">
+                                    </div>
+
+                                    {# CSRF Token - IMPORTANT ! #}
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                                    {# Remember Me #}
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" 
+                                               type="checkbox" 
+                                               id="remember_me" 
+                                               name="_remember_me">
+                                        <label class="form-check-label" for="remember_me">Se souvenir de moi</label>
+                                    </div>
+
+                                    {# Bouton de connexion #}
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-lg btn-primary btn-lg w-100 mt-4 mb-0">
+                                            Se connecter
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                            
+                            <div class="card-footer text-center pt-0 px-lg-2 px-1">
+                                <p class="mb-4 text-sm mx-auto">
+                                    Vous n'avez pas de compte ?
+                                    <a href="#" class="text-primary text-gradient font-weight-bold">S'inscrire</a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {# Image de droite #}
+                    <div class="col-6 d-lg-flex d-none h-100 my-auto pe-0 position-absolute top-0 end-0 text-center justify-content-center flex-column">
+                        <div class="position-relative bg-gradient-primary h-100 m-3 px-7 border-radius-lg d-flex flex-column justify-content-center overflow-hidden"
+                             style="background-image: url('https://images.unsplash.com/photo-1515378960530-7c0da6231fb1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80'); background-size: cover;">
+                            <span class="mask bg-gradient-primary opacity-6"></span>
+                            <h4 class="mt-5 text-white font-weight-bolder position-relative">Bienvenue sur UniMind</h4>
+                            <p class="text-white position-relative">Votre plateforme de soutien psychologique pour étudiants</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Auto-focus sur le champ email
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailInput = document.getElementById('email');
+            if (emailInput && !emailInput.value) {
+                emailInput.focus();
+            }
+        });
+    </script>
+{% endblock %}

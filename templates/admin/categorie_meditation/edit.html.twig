@@ -1,0 +1,25 @@
+{% extends 'basedash.html.twig' %}
+
+{% block title %}Modifier la Catégorie - {{ categorie_meditation.nom }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-warning">
+                    <h3 class="mb-0"><i class="fas fa-edit"></i> Modifier la Catégorie</h3>
+                </div>
+                <div class="card-body">
+                    {{ include('admin/categorie_meditation/_form.html.twig', {'button_label': 'Modifier'}) }}
+                </div>
+                <div class="card-footer">
+                    <a href="{{ path('admin_categorie_meditation_index') }}" class="btn btn-link">
+                        <i class="fas fa-arrow-left"></i> Retour à la liste
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

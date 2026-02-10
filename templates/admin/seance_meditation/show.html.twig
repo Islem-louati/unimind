@@ -1,0 +1,135 @@
+{% extends 'basedash.html.twig' %}
+
+{% block title %}Détails de la Séance de Méditation{% endblock %}
+
+{% block body %}
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Détails de la séance de méditation</h1>
+            <div>
+                <a href="{{ path('app_admin_seance_meditation_index') }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Retour à la liste
+                </a>
+                <a href="{{ path('app_admin_seance_meditation_edit', {'id': seance_meditation.seanceId}) }}" class="btn btn-primary">
+                    <i class="bi bi-pencil"></i> Modifier
+                </a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Informations générales</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table">
+                            <tr>
+                                <th width="30%">ID</th>
+                                <td>{{ seance_meditation.seance_id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Titre</th>
+                                <td>{{ seance_meditation.titre }}</td>
+                            </tr>
+                            <tr>
+                                <th>Description</th>
+                                <td>{{ seance_meditation.description|nl2br }}</td>
+                            </tr>
+                            <tr>
+                                <th>Type de fichier</th>
+                                <td>
+                                    <span class="badge bg-info">
+                                        {{ seance_meditation.typeFichier.value|capitalize }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Durée</th>
+                                <td>
+                                    {% set minutes = (seance_meditation.duree / 60)|round(0, 'floor') %}
+                                    {% set secondes = seance_meditation.duree % 60 %}
+                                    {{ minutes }} min {{ secondes }} sec
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Niveau</th>
+                                <td>
+                                    <span class="badge bg-warning">
+                                        {{ seance_meditation.niveau.value|capitalize }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Catégorie</th>
+                                <td>
+                                    {% if seance_meditation.categorie.iconUrl %}
+                                        <img src="{{ seance_meditation.categorie.iconUrl }}" 
+                                             alt="{{ seance_meditation.categorie.nom }}" 
+                                             style="width: 30px; height: 30px; object-fit: cover; border-radius: 3px; margin-right: 10px;">
+                                    {% endif %}
+                                    {{ seance_meditation.categorie.nom }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Statut</th>
+                                <td>
+                                    {% if seance_meditation.isActif %}
+                                        <span class="badge bg-success">Activée</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Désactivée</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Créée le</th>
+                                <td>{{ seance_meditation.createdAt ? seance_meditation.createdAt|date('d/m/Y H:i') : '' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Modifiée le</th>
+                                <td>{{ seance_meditation.updatedAt ? seance_meditation.updatedAt|date('d/m/Y H:i') : '' }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Fichier média</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        {% if seance_meditation.fichier %}
+                            <p><strong>Fichier :</strong> {{ seance_meditation.fichier }}</p>
+                            
+                            {% if seance_meditation.typeFichier.value == 'audio' %}
+                                <audio controls style="width: 100%;">
+                                    <source src="{{ asset('uploads/seances/' ~ seance_meditation.fichier) }}" type="audio/mpeg">
+                                    Votre navigateur ne supporte pas l'élément audio.
+                                </audio>
+                            {% elseif seance_meditation.typeFichier.value == 'video' %}
+                                <video controls style="width: 100%; max-height: 300px;">
+                                    <source src="{{ asset('uploads/seances/' ~ seance_meditation.fichier) }}" type="video/mp4">
+                                    Votre navigateur ne supporte pas l'élément vidéo.
+                                </video>
+                            {% endif %}
+                        {% else %}
+                            <p class="text-muted">Aucun fichier téléchargé</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <a href="{{ path('app_admin_seance_meditation_edit', {'id': seance_meditation.seanceId}) }}" 
+                           class="btn btn-primary w-100 mb-2">
+                            <i class="bi bi-pencil"></i> Modifier
+                        </a>
+                        {{ include('admin/seance_meditation/_delete_form.html.twig', {'seance_meditation': seance_meditation}) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
