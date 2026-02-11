@@ -1,0 +1,130 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Modifier le questionnaire{% endblock %}
+
+{% block breadcrumb_items %}
+    <li class="breadcrumb-item text-sm">
+        <a class="opacity-5 text-white" href="{{ path('admin_questionnaire_index') }}">Questionnaires</a>
+    </li>
+    <li class="breadcrumb-item text-sm text-white active" aria-current="page">
+        <i class="fas fa-edit me-1"></i>Modifier
+    </li>
+{% endblock %}
+
+{% block page_title %}Modification du questionnaire{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-12">
+        <!-- En-tête -->
+        <div class="card mb-4">
+            <div class="card-body p-3">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h5 class="mb-0">✏️ Modifier le questionnaire</h5>
+                        <p class="text-sm mb-0">{{ questionnaire.nom }} ({{ questionnaire.code }})</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a href="{{ path('admin_questionnaire_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Retour
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Formulaire -->
+        <div class="card">
+            <div class="card-body">
+                {{ form_start(form) }}
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Nom du questionnaire *</label>
+                        {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Code unique *</label>
+                        {{ form_widget(form.code, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Type *</label>
+                        {{ form_widget(form.type, {'attr': {'class': 'form-select'}}) }}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Nombre de questions *</label>
+                        {{ form_widget(form.nbre_questions, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 3}}) }}
+                </div>
+                
+                <hr class="horizontal dark my-4">
+                
+                <h6 class="mb-3">🎯 Seuils d'interprétation</h6>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Seuil léger *</label>
+                        {{ form_widget(form.seuil_leger, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Seuil modéré *</label>
+                        {{ form_widget(form.seuil_modere, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Seuil sévère *</label>
+                        {{ form_widget(form.seuil_severe, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+                </div>
+                
+                <hr class="horizontal dark my-4">
+                
+                <h6 class="mb-3">📝 Messages d'interprétation</h6>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Niveau léger</label>
+                        {{ form_widget(form.interpretat_legere, {'attr': {'class': 'form-control', 'rows': 4}}) }}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Niveau modéré</label>
+                        {{ form_widget(form.interpretat_modere, {'attr': {'class': 'form-control', 'rows': 4}}) }}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Niveau sévère</label>
+                        {{ form_widget(form.interpretat_severe, {'attr': {'class': 'form-control', 'rows': 4}}) }}
+                    </div>
+                </div>
+                
+                <div class="alert alert-warning mt-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Attention :</strong> La modification du nombre de questions affectera le statut du questionnaire.
+                </div>
+                
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ path('admin_questionnaire_show', {'id': questionnaire.questionnaireId}) }}" 
+                       class="btn btn-secondary">
+                        <i class="fas fa-times me-2"></i>Annuler
+                    </a>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save me-2"></i>Enregistrer les modifications
+                    </button>
+                </div>
+                
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,449 @@
+{% extends 'etudiant/base.html.twig' %}
+
+{% block title %}Passer le questionnaire: {{ questionnaire.nom }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <!-- En-tête -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ path('etudiant_dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('etudiant_questionnaire_liste') }}">Questionnaires</a></li>
+                    <li class="breadcrumb-item active">{{ questionnaire.nom }}</li>
+                </ol>
+            </nav>
+            
+            <h1 class="h2 text-dark mb-3">{{ questionnaire.nom }}</h1>
+            <div class="row">
+                <div class="col-md-8">
+                    <p class="lead text-muted mb-3">{{ questionnaire.description }}</p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <span class="badge bg-{{ 
+                        questionnaire.type == 'STRESS' ? 'danger' :
+                        questionnaire.type == 'ANXIETE' ? 'warning' :
+                        questionnaire.type == 'DEPRESSION' ? 'secondary' : 'success'
+                    }} fs-6">
+                        {{ questionnaire.type }}
+                    </span>
+                </div>
+            </div>
+            
+            <div class="alert alert-primary shadow-sm">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-info-circle fa-2x text-primary"></i>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h5 class="alert-heading mb-2">Instructions importantes</h5>
+                        <ul class="mb-0">
+                            <li>Répondez à chaque question avec honnêteté</li>
+                            <li>Chaque question a 5 options de réponse standard</li>
+                            <li>Prenez le temps de bien lire chaque question</li>
+                            <li>Vous ne pouvez pas modifier vos réponses après soumission</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistiques -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-start-primary shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-question-circle fa-2x text-primary"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="text-muted small">Nombre de questions</div>
+                            <div class="fw-bold fs-4">{{ questionnaire.questions|length }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-start-info shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-clock fa-2x text-info"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="text-muted small">Temps estimé</div>
+                            <div class="fw-bold fs-4">{{ (questionnaire.questions|length * 0.5)|round }} min</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-start-success shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-brain fa-2x text-success"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="text-muted small">Type</div>
+                            <div class="fw-bold fs-4">{{ questionnaire.type }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6 mb-3">
+            <div class="card border-start-warning shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-star fa-2x text-warning"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="text-muted small">Score maximum</div>
+                            <div class="fw-bold fs-4">{{ questionnaire.questions|length * 4 }} pts</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Questions -->
+    {% if not questionnaire.questions or questionnaire.questions|length == 0 %}
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-body text-center py-5">
+                        <i class="fas fa-exclamation-triangle fa-4x text-warning mb-4"></i>
+                        <h3 class="text-dark mb-3">Aucune question disponible</h3>
+                        <p class="text-muted mb-4">Ce questionnaire ne contient pas de questions pour le moment.</p>
+                        <a href="{{ path('etudiant_questionnaire_liste') }}" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-2"></i> Retour aux questionnaires
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <!-- Version temporaire sans route de soumission -->
+       <form method="post" action="{{ path('etudiant_questionnaire_soumettre', {'id': questionnaire.id}) }}" id="questionnaireForm">
+            <!-- Barre de progression -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="mb-0">Progression du questionnaire</h6>
+                                <span class="badge bg-primary" id="progressCounter">0/{{ questionnaire.questions|length }}</span>
+                            </div>
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-primary" role="progressbar" id="progressBar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Liste des questions -->
+            {% for question in questionnaire.questions %}
+                {% set questionNumber = loop.index %}
+                {% set options = ["Jamais", "Rarement", "Parfois", "Souvent", "Toujours"] %}
+                {% set scores = [0, 1, 2, 3, 4] %}
+                
+                <div class="row mb-4 question-card" id="question-{{ question.id }}">
+                    <div class="col-12">
+                        <div class="card shadow border-{{ 
+                            questionnaire.type == 'STRESS' ? 'danger' :
+                            questionnaire.type == 'ANXIETE' ? 'warning' :
+                            questionnaire.type == 'DEPRESSION' ? 'secondary' : 'success'
+                        }}">
+                            <div class="card-header bg-{{ 
+                                questionnaire.type == 'STRESS' ? 'danger' :
+                                questionnaire.type == 'ANXIETE' ? 'warning' :
+                                questionnaire.type == 'DEPRESSION' ? 'secondary' : 'success'
+                            }} text-white">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-question-circle me-2"></i>
+                                        Question {{ questionNumber }}
+                                    </h5>
+                                    <span class="badge bg-light text-dark">
+                                        {{ questionNumber }}/{{ questionnaire.questions|length }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="card-body">
+                                <h6 class="card-title mb-4 fs-5 text-dark">{{ question.texte }}</h6>
+                                
+                                <div class="options-container">
+                                    {% for index in 0..4 %}
+                                        <div class="option-item mb-3">
+                                            <input type="radio" 
+                                                   class="btn-check" 
+                                                   name="reponses[{{ question.id }}]" 
+                                                   id="question_{{ question.id }}_option_{{ index }}"
+                                                   value="{{ scores[index] }}"
+                                                   data-question-id="{{ question.id }}">
+                                            <label class="btn btn-outline-secondary w-100 text-start option-label" 
+                                                   for="question_{{ question.id }}_option_{{ index }}">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="option-indicator me-3">
+                                                        <span class="badge bg-secondary option-badge">
+                                                            {{ ['A', 'B', 'C', 'D', 'E'][index] }}
+                                                        </span>
+                                                    </div>
+                                                    <div class="flex-grow-1">
+                                                        <div class="fw-medium">{{ options[index] }}</div>
+                                                        <small class="text-muted">Score: {{ scores[index] }}/4</small>
+                                                    </div>
+                                                    <div class="option-check ms-3">
+                                                        <i class="fas fa-check-circle text-success d-none"></i>
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                
+                                {% if question.description %}
+                                    <div class="mt-3 pt-3 border-top">
+                                        <small class="text-muted">
+                                            <i class="fas fa-info-circle me-1"></i>
+                                            {{ question.description }}
+                                        </small>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            
+            <!-- Actions -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="card shadow border-0">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="text-dark mb-2">Résumé</h5>
+                                    <p class="text-muted mb-0">
+                                        <span id="questionsAnswered">0</span> questions répondus sur {{ questionnaire.questions|length }}
+                                    </p>
+                                </div>
+                                <div>
+                                    <button type="button" class="btn btn-outline-secondary me-2" onclick="window.history.back()">
+                                        <i class="fas fa-times me-2"></i>Annuler
+                                    </button>
+                                    <button type="button" class="btn btn-success btn-lg" id="submitBtn" onclick="soumettreQuestionnaire()">
+                                        <i class="fas fa-paper-plane me-2"></i>
+                                        Soumettre le questionnaire
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+let reponses = {};
+
+document.addEventListener('DOMContentLoaded', function() {
+    const totalQuestions = {{ questionnaire.questions|length }};
+    const submitBtn = document.getElementById('submitBtn');
+    const progressBar = document.getElementById('progressBar');
+    const progressCounter = document.getElementById('progressCounter');
+    const questionsAnswered = document.getElementById('questionsAnswered');
+    
+    // Mettre à jour la progression
+    function updateProgress() {
+        const answeredCount = Object.keys(reponses).length;
+        const percentage = Math.round((answeredCount / totalQuestions) * 100);
+        
+        progressBar.style.width = percentage + '%';
+        progressCounter.textContent = answeredCount + '/' + totalQuestions;
+        questionsAnswered.textContent = answeredCount;
+        
+        // Activer/désactiver le bouton de soumission visuellement
+        if (answeredCount === totalQuestions) {
+            submitBtn.classList.remove('btn-secondary');
+            submitBtn.classList.add('btn-success');
+        } else {
+            submitBtn.classList.remove('btn-success');
+            submitBtn.classList.add('btn-secondary');
+        }
+        
+        // Marquer les questions comme répondues
+        document.querySelectorAll('.question-card').forEach(card => {
+            const questionId = card.id.split('-')[1];
+            if (reponses[questionId] !== undefined) {
+                card.classList.add('border-success');
+            } else {
+                card.classList.remove('border-success');
+            }
+        });
+    }
+    
+    // Gérer les sélections de radio
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const questionId = this.getAttribute('name').match(/\[(\d+)\]/)[1];
+            reponses[questionId] = this.value;
+            
+            // Marquer l'option sélectionnée
+            const parentLabel = this.parentElement;
+            document.querySelectorAll(`[name="${this.name}"]`).forEach(input => {
+                input.parentElement.classList.remove('selected-option');
+            });
+            parentLabel.classList.add('selected-option');
+            
+            updateProgress();
+        });
+    });
+    
+    // Initialiser la progression
+    updateProgress();
+});
+
+// Fonction pour soumettre le questionnaire (version temporaire)
+function soumettreQuestionnaire() {
+    const totalQuestions = {{ questionnaire.questions|length }};
+    const answeredCount = Object.keys(reponses).length;
+    
+    if (answeredCount !== totalQuestions) {
+        alert(`Veuillez répondre à toutes les questions. Il reste ${totalQuestions - answeredCount} question(s) sans réponse.`);
+        for (let i = 0; i < totalQuestions; i++) {
+            const questionId = document.querySelectorAll('.question-card')[i].id.split('-')[1];
+            if (reponses[questionId] === undefined) {
+                document.getElementById(`question-${questionId}`).scrollIntoView({
+                    behavior: 'smooth', block: 'center'
+                });
+                break;
+            }
+        }
+        return;
+    }
+    
+    // ✅ Soumettre le vrai formulaire HTML
+    document.getElementById('questionnaireForm').submit();
+}
+    
+    // Calculer le score
+    let scoreTotal = 0;
+    Object.values(reponses).forEach(score => {
+        scoreTotal += parseInt(score);
+    });
+    
+    const scoreMax = totalQuestions * 4;
+    const pourcentage = Math.round((scoreTotal / scoreMax) * 100);
+    
+    // Afficher le résultat (version temporaire)
+    const resultMessage = `
+        🎉 Questionnaire soumis avec succès !
+        
+        📊 Résultats :
+        - Score total: ${scoreTotal}/${scoreMax}
+        - Pourcentage: ${pourcentage}%
+        - Questionnaire: {{ questionnaire.nom }}
+        - Type: {{ questionnaire.type }}
+        
+        Vos réponses ont été enregistrées.
+    `;
+    
+    if (confirm(resultMessage + '\n\nVoulez-vous retourner à la liste des questionnaires ?')) {
+        window.location.href = '{{ path('etudiant_questionnaire_liste') }}';
+    }
+}
+
+// Sauvegarder les réponses en cas de rafraîchissement de page
+window.addEventListener('beforeunload', function(e) {
+    if (Object.keys(reponses).length > 0) {
+        e.preventDefault();
+        e.returnValue = 'Vous avez des réponses non soumises. Êtes-vous sûr de vouloir quitter ?';
+    }
+});
+</script>
+
+<style>
+.option-item .option-label {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    border: 2px solid #e9ecef;
+}
+
+.option-item .option-label:hover {
+    border-color: #6c757d;
+    background-color: #f8f9fa;
+}
+
+.option-item .btn-check:checked + .option-label {
+    border-color: #0d6efd;
+    background-color: #e7f1ff;
+}
+
+.option-item .btn-check:checked + .option-label .option-badge {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.option-item .btn-check:checked + .option-label .fa-check-circle {
+    display: inline-block !important;
+}
+
+.option-item.selected-option .option-label {
+    border-color: #0d6efd;
+    background-color: #e7f1ff;
+}
+
+.option-badge {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    font-size: 0.9rem;
+}
+
+.question-card {
+    transition: all 0.3s;
+}
+
+.question-card.border-success {
+    box-shadow: 0 0 0 2px rgba(25, 135, 84, 0.2);
+}
+
+.card-header {
+    border-bottom: none;
+}
+
+#submitBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-check:checked + .btn-outline-secondary {
+    background-color: #0d6efd;
+    color: white;
+    border-color: #0d6efd;
+}
+</style>
+{% endblock %}

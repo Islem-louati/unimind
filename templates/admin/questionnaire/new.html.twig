@@ -1,0 +1,133 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Nouveau questionnaire{% endblock %}
+
+{% block breadcrumb_items %}
+    <li class="breadcrumb-item text-sm">
+        <a class="opacity-5 text-white" href="{{ path('admin_questionnaire_index') }}">Questionnaires</a>
+    </li>
+    <li class="breadcrumb-item text-sm text-white active" aria-current="page">
+        <i class="fas fa-plus me-1"></i>Nouveau
+    </li>
+{% endblock %}
+
+{% block page_title %}Création d'un questionnaire{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-12">
+        <!-- En-tête -->
+        <div class="card mb-4">
+            <div class="card-body p-3">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h5 class="mb-0">➕ Créer un nouveau questionnaire</h5>
+                        <p class="text-sm mb-0">Remplissez les informations ci-dessous</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a href="{{ path('admin_questionnaire_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Retour
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Formulaire -->
+        <div class="card">
+            <div class="card-body">
+                {{ form_start(form) }}
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Nom du questionnaire *</label>
+                        {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Ex: Évaluation du stress'}}) }}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Code unique *</label>
+                        {{ form_widget(form.code, {'attr': {'class': 'form-control', 'placeholder': 'Ex: STRESS_2024'}}) }}
+                        <small class="text-muted">Utilisé pour identifier le questionnaire</small>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Type *</label>
+                        {{ form_widget(form.type, {'attr': {'class': 'form-select'}}) }}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Nombre de questions *</label>
+                        {{ form_widget(form.nbre_questions, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+                </div>
+                
+                <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 3, 'placeholder': 'Description détaillée du questionnaire...'}}) }}
+                </div>
+                
+                <hr class="horizontal dark my-4">
+                
+                <h6 class="mb-3">🎯 Seuils d'interprétation</h6>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Seuil léger *</label>
+                        {{ form_widget(form.seuil_leger, {'attr': {'class': 'form-control'}}) }}
+                        <small class="text-muted">Score ≤ ce seuil = niveau léger</small>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Seuil modéré *</label>
+                        {{ form_widget(form.seuil_modere, {'attr': {'class': 'form-control'}}) }}
+                        <small class="text-muted">Seuil léger < Score ≤ ce seuil</small>
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Seuil sévère *</label>
+                        {{ form_widget(form.seuil_severe, {'attr': {'class': 'form-control'}}) }}
+                        <small class="text-muted">Score > ce seuil = niveau sévère</small>
+                    </div>
+                </div>
+                
+                <hr class="horizontal dark my-4">
+                
+                <h6 class="mb-3">📝 Messages d'interprétation</h6>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Niveau léger</label>
+                        {{ form_widget(form.interpretat_legere, {'attr': {'class': 'form-control', 'rows': 4}}) }}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Niveau modéré</label>
+                        {{ form_widget(form.interpretat_modere, {'attr': {'class': 'form-control', 'rows': 4}}) }}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Niveau sévère</label>
+                        {{ form_widget(form.interpretat_severe, {'attr': {'class': 'form-control', 'rows': 4}}) }}
+                    </div>
+                </div>
+                
+                <div class="alert alert-info mt-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Important :</strong> Assurez-vous que : Seuil léger < Seuil modéré < Seuil sévère
+                </div>
+                
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ path('admin_questionnaire_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-times me-2"></i>Annuler
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Créer le questionnaire
+                    </button>
+                </div>
+                
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

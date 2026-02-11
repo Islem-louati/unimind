@@ -1,0 +1,174 @@
+# config/routes.yaml - VERSION COMPLÈTE MANUELLE
+
+# ==================== PAGE D'ACCUEIL ====================
+home:
+    path: /
+    defaults:
+        _controller: Symfony\Bundle\FrameworkBundle\Controller\TemplateController::templateAction
+        template: 'home/index.html.twig'
+
+# ==================== ADMIN ====================
+
+# Dashboard Admin
+admin_dashboard:
+    path: /admin
+    controller: App\Controller\Admin\DashboardController::index
+    methods: GET
+
+admin_stats:
+    path: /admin/stats
+    controller: App\Controller\Admin\DashboardController::stats
+    methods: GET
+
+# Questionnaire Admin CRUD
+admin_questionnaire_index:
+    path: /admin/questionnaire
+    controller: App\Controller\Admin\QuestionnaireController::index
+    methods: GET
+
+admin_questionnaire_new:
+    path: /admin/questionnaire/new
+    controller: App\Controller\Admin\QuestionnaireController::new
+    methods: [GET, POST]
+
+admin_questionnaire_show:
+    path: /admin/questionnaire/{id}
+    controller: App\Controller\Admin\QuestionnaireController::show
+    methods: GET
+    requirements:
+        id: '\d+'
+
+admin_questionnaire_edit:
+    path: /admin/questionnaire/{id}/edit
+    controller: App\Controller\Admin\QuestionnaireController::edit
+    methods: [GET, POST]
+    requirements:
+        id: '\d+'
+
+admin_questionnaire_delete:
+    path: /admin/questionnaire/{id}
+    controller: App\Controller\Admin\QuestionnaireController::delete
+    methods: POST
+    requirements:
+        id: '\d+'
+
+admin_questionnaire_questions:
+    path: /admin/questionnaire/{id}/questions
+    controller: App\Controller\Admin\QuestionnaireController::questions
+    methods: GET
+    requirements:
+        id: '\d+'
+
+# Question Admin CRUD (si vous avez QuestionController.php)
+admin_question_index:
+    path: /admin/question
+    controller: App\Controller\Admin\QuestionController::index
+    methods: GET
+
+admin_question_new:
+    path: /admin/question/new
+    controller: App\Controller\Admin\QuestionController::new
+    methods: [GET, POST]
+
+admin_question_show:
+    path: /admin/question/{id}
+    controller: App\Controller\Admin\QuestionController::show
+    methods: GET
+    requirements:
+        id: '\d+'
+
+admin_question_edit:
+    path: /admin/question/{id}/edit
+    controller: App\Controller\Admin\QuestionController::edit
+    methods: [GET, POST]
+    requirements:
+        id: '\d+'
+
+admin_question_delete:
+    path: /admin/question/{id}
+    controller: App\Controller\Admin\QuestionController::delete
+    methods: POST
+    requirements:
+        id: '\d+'
+
+# ==================== ÉTUDIANT ====================
+
+# Dashboard Étudiant
+etudiant_dashboard:
+    path: /etudiant
+    controller: App\Controller\Etudiant\DashboardController::index
+    methods: GET
+
+etudiant_profil:
+    path: /etudiant/profil
+    controller: App\Controller\Etudiant\DashboardController::profil
+    methods: GET
+
+# Questionnaire Étudiant
+etudiant_questionnaire_liste:
+    path: /etudiant/questionnaire/liste
+    controller: App\Controller\Etudiant\QuestionnaireController::liste
+    methods: GET
+
+etudiant_questionnaire_passer:
+    path: /etudiant/questionnaire/passer/{id}
+    controller: App\Controller\Etudiant\QuestionnaireController::passer
+    methods: GET
+    requirements:
+        id: '\d+'
+
+etudiant_questionnaire_submit:
+    path: /etudiant/questionnaire/submit/{id}
+    controller: App\Controller\Etudiant\QuestionnaireController::submitQuestionnaire
+    methods: POST
+    requirements:
+        id: '\d+'
+
+etudiant_questionnaire_resultat:
+    path: /etudiant/questionnaire/resultat/{id}
+    controller: App\Controller\Etudiant\QuestionnaireController::resultat
+    methods: GET
+    requirements:
+        id: '\d+'
+
+etudiant_questionnaire_ajouter_question:
+    path: /etudiant/questionnaire/{id}/ajouter-question
+    controller: App\Controller\Etudiant\QuestionnaireController::ajouterQuestion
+    methods: [GET, POST]
+    requirements:
+        id: '\d+'
+
+# Mes Réponses
+etudiant_mes_reponses:
+    path: /etudiant/mes-reponses
+    controller: App\Controller\Etudiant\MesReponsesController::index
+    methods: GET
+
+etudiant_mes_reponses_detail:
+    path: /etudiant/mes-reponses/detail/{id}
+    controller: App\Controller\Etudiant\MesReponsesController::detail
+    methods: GET
+    requirements:
+        id: '\d+'
+
+etudiant_mes_reponses_export:
+    path: /etudiant/mes-reponses/export
+    controller: App\Controller\Etudiant\MesReponsesController::export
+    methods: GET
+
+etudiant_mes_reponses_simuler:
+    path: /etudiant/mes-reponses/simuler/{questionnaireId}
+    controller: App\Controller\Etudiant\MesReponsesController::simulerNouvelleReponse
+    methods: GET
+    requirements:
+        questionnaireId: '\d+'
+
+# ==================== API/JSON ====================
+# (Si vous avez des routes API)
+
+etudiant_questionnaire_submit_json:
+    path: /etudiant/questionnaire/submit/{id}/json
+    controller: App\Controller\Etudiant\QuestionnaireController::submitQuestionnaire
+    methods: POST
+    requirements:
+        id: '\d+'

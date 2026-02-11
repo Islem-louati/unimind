@@ -1,0 +1,286 @@
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Détails du questionnaire{% endblock %}
+
+{% block breadcrumb_items %}
+    <li class="breadcrumb-item text-sm">
+        <a class="opacity-5 text-white" href="{{ path('admin_questionnaire_index') }}">Questionnaires</a>
+    </li>
+    <li class="breadcrumb-item text-sm text-white active" aria-current="page">
+        <i class="fas fa-eye me-1"></i>Détails
+    </li>
+{% endblock %}
+
+{% block page_title %}Détails du questionnaire{% endblock %}
+
+{% block body %}
+<div class="row">
+    <div class="col-12">
+        <!-- En-tête avec actions -->
+        <div class="card mb-4">
+            <div class="card-body p-3">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h5 class="mb-0">📄 Détails du questionnaire</h5>
+                        <p class="text-sm mb-0">{{ questionnaire.nom }}</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <div class="btn-group">
+                            <a href="{{ path('admin_questionnaire_index') }}" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-arrow-left me-1"></i>Retour
+                            </a>
+                            <a href="{{ path('admin_questionnaire_edit', {'id': questionnaire.questionnaireId}) }}" 
+                               class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit me-1"></i>Modifier
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Informations générales -->
+        <div class="row">
+            <div class="col-md-8 mb-4">
+                <div class="card h-100">
+                    <div class="card-header pb-0">
+                        <h6>Informations générales</h6>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div class="col-6">
+                                <p class="text-sm mb-1">ID</p>
+                                <h6 class="mb-3">{{ questionnaire.questionnaireId }}</h6>
+                                
+                                <p class="text-sm mb-1">Code</p>
+                                <h6 class="mb-3">
+                                    <span class="badge bg-primary">{{ questionnaire.code }}</span>
+                                </h6>
+                                
+                                <p class="text-sm mb-1">Type</p>
+                                <h6 class="mb-3">
+                                    <span class="badge bg-{{ 
+                                        questionnaire.type == 'stress' ? 'danger' : 
+                                        questionnaire.type == 'anxiete' ? 'warning' : 
+                                        questionnaire.type == 'sommeil' ? 'info' : 'primary' 
+                                    }}">
+                                        {{ questionnaire.type|upper }}
+                                    </span>
+                                </h6>
+                            </div>
+                            <div class="col-6">
+                                <p class="text-sm mb-1">Créé le</p>
+                                <h6 class="mb-3">{{ questionnaire.createdAt|date('d/m/Y H:i') }}</h6>
+                                
+                                <p class="text-sm mb-1">Mis à jour le</p>
+                                <h6 class="mb-3">
+                                    {% if questionnaire.updatedAt %}
+                                        {{ questionnaire.updatedAt|date('d/m/Y H:i') }}
+                                    {% else %}
+                                        Jamais
+                                    {% endif %}
+                                </h6>
+                                
+                                <p class="text-sm mb-1">Statut</p>
+                                <h6 class="mb-0">
+                                    {% if questionnaire.questions|length == questionnaire.nbreQuestions %}
+                                        <span class="badge bg-gradient-success">Complet</span>
+                                    {% else %}
+                                        <span class="badge bg-gradient-warning">
+                                            Incomplet ({{ questionnaire.questions|length }}/{{ questionnaire.nbreQuestions }})
+                                        </span>
+                                    {% endif %}
+                                </h6>
+                            </div>
+                        </div>
+                        
+                        <hr class="horizontal dark my-3">
+                        
+                        <p class="text-sm mb-1">Description</p>
+                        <p class="mb-0">{{ questionnaire.description }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Statistiques -->
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-header pb-0">
+                        <h6>📊 Statistiques</h6>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="row text-center">
+                            <div class="col-6 mb-3">
+                                <h1 class="text-gradient text-primary">{{ questionnaire.questions|length }}</h1>
+                                <p class="text-sm mb-0">Questions</p>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <h1 class="text-gradient text-success">{{ questionnaire.nbreQuestions }}</h1>
+                                <p class="text-sm mb-0">Prévues</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Barre de progression -->
+                        <div class="mt-3">
+                            <div class="d-flex justify-content-between">
+                                <span class="text-sm">Complétion</span>
+                                <span class="text-sm font-weight-bold">
+                                    {% if questionnaire.nbreQuestions > 0 %}
+                                        {{ ((questionnaire.questions|length / questionnaire.nbreQuestions) * 100)|round }}%
+                                    {% else %}
+                                        0%
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar bg-gradient-{{ 
+                                    questionnaire.questions|length == questionnaire.nbreQuestions ? 'success' : 'warning' 
+                                }}" 
+                                     role="progressbar" 
+                                     style="width: {{ 
+                                         questionnaire.nbreQuestions > 0 ? 
+                                         (questionnaire.questions|length / questionnaire.nbreQuestions * 100) : 0 
+                                     }}%">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="mt-4">
+                            <a href="{{ path('admin_question_new', {'questionnaireId': questionnaire.questionnaireId}) }}" 
+                               class="btn btn-primary btn-sm w-100 mb-2">
+                                <i class="fas fa-plus me-2"></i>Ajouter une question
+                            </a>
+                            
+                            <a href="{{ path('admin_question_index', {'questionnaire_id': questionnaire.questionnaireId}) }}" 
+                               class="btn btn-info btn-sm w-100">
+                                <i class="fas fa-list me-2"></i>Voir toutes les questions
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Seuils et Interprétations -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header pb-0">
+                        <h6>🎯 Seuils d'interprétation</h6>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="row">
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="card border-success">
+                                    <div class="card-body p-2">
+                                        <h3 class="text-success mb-0">{{ questionnaire.seuilLeger }}</h3>
+                                        <p class="text-sm mb-0">Seuil léger</p>
+                                        <small class="text-muted">Score ≤ {{ questionnaire.seuilLeger }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="card border-warning">
+                                    <div class="card-body p-2">
+                                        <h3 class="text-warning mb-0">{{ questionnaire.seuilModere }}</h3>
+                                        <p class="text-sm mb-0">Seuil modéré</p>
+                                        <small class="text-muted">{{ questionnaire.seuilLeger }} < Score ≤ {{ questionnaire.seuilModere }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="card border-danger">
+                                    <div class="card-body p-2">
+                                        <h3 class="text-danger mb-0">{{ questionnaire.seuilSevere }}</h3>
+                                        <p class="text-sm mb-0">Seuil sévère</p>
+                                        <small class="text-muted">Score > {{ questionnaire.seuilSevere }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header pb-0">
+                        <h6>📝 Interprétations</h6>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="accordion" id="interpretationsAccordion">
+                            <div class="accordion-item mb-2">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                            data-bs-target="#collapseOne" aria-expanded="false">
+                                        <span class="badge bg-success me-2">Léger</span> Interprétation
+                                    </button>
+                                </h2>
+                                <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#interpretationsAccordion">
+                                    <div class="accordion-body">
+                                        {{ questionnaire.interpretatLegere }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item mb-2">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                            data-bs-target="#collapseTwo" aria-expanded="false">
+                                        <span class="badge bg-warning me-2">Modéré</span> Interprétation
+                                    </button>
+                                </h2>
+                                <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#interpretationsAccordion">
+                                    <div class="accordion-body">
+                                        {{ questionnaire.interpretatModere }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                            data-bs-target="#collapseThree" aria-expanded="false">
+                                        <span class="badge bg-danger me-2">Sévère</span> Interprétation
+                                    </button>
+                                </h2>
+                                <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#interpretationsAccordion">
+                                    <div class="accordion-body">
+                                        {{ questionnaire.interpretatSevere }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Actions de suppression -->
+        <div class="card">
+            <div class="card-body p-3">
+                <div class="alert alert-danger">
+                    <h6 class="alert-heading">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Zone de danger
+                    </h6>
+                    <p class="mb-2">La suppression d'un questionnaire est irréversible.</p>
+                    <form method="post" 
+                          action="{{ path('admin_questionnaire_delete', {'id': questionnaire.questionnaireId}) }}" 
+                          class="d-inline">
+                        <input type="hidden" name="_token" 
+                               value="{{ csrf_token('delete' ~ questionnaire.questionnaireId) }}">
+                        <button class="btn btn-danger" 
+                                onclick="return confirm('⚠️ Êtes-vous sûr de vouloir supprimer ce questionnaire ? Cette action est irréversible.')">
+                            <i class="fas fa-trash me-2"></i>Supprimer définitivement
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
