@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}UniMind{% endblock %}</title>
+
+    {% block stylesheets %}
+        <link href="{{ asset('assets/css/argon-dashboard.css?v=2.1.0') }}" rel="stylesheet">
+<link href="{{ asset('assets/css/nucleo-icons.css') }}" rel="stylesheet">
+<link href="{{ asset('assets/css/nucleo-svg.css') }}" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet">
+<script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+
+    {% endblock %}
+</head>
+
+<body class="{% block body_class %}{% endblock %}">
+
+{% block body %}{% endblock %}
+
+{% block javascripts %}
+    <script src="{{ asset('assets/js/core/popper.min.js') }}"></script>
+<script src="{{ asset('assets/js/core/bootstrap.min.js') }}"></script>
+<script src="{{ asset('assets/js/argon-dashboard.min.js?v=2.1.0') }}"></script>
+
+{% endblock %}
+
+</body>
+</html>
