@@ -3,8 +3,8 @@
 namespace App\Form;
 
 use App\Entity\SuiviTraitement;
-use App\Entity\Enum\Ressenti;
-use App\Entity\Enum\SaisiPar;
+use App\Enum\Ressenti;
+use App\Enum\SaisiPar;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;

@@ -32,13 +32,11 @@
                                             {{ form_label(form.titre, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
                                             {{ form_widget(form.titre, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Titre du traitement...'}}) }}
                                             {{ form_errors(form.titre) }}
-                                            {% if form_errors(form.titre) %}
+                                            {% for error in form_errors(form.titre) %}
                                                 <div class="text-danger small mt-1">
-                                                    {% for error in form_errors(form.titre) %}
-                                                        <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
-                                                    {% endfor %}
+                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
                                                 </div>
-                                            {% endif %}
+                                            {% endfor %}
                                         </div>
                                     </div>
                                     <div class="col-md-3">
@@ -46,13 +44,11 @@
                                             {{ form_label(form.categorie, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
                                             {{ form_widget(form.categorie, {'attr': {'class': 'form-control form-select-lg'}}) }}
                                             {{ form_errors(form.categorie) }}
-                                            {% if form_errors(form.categorie) %}
+                                            {% for error in form_errors(form.categorie) %}
                                                 <div class="text-danger small mt-1">
-                                                    {% for error in form_errors(form.categorie) %}
-                                                        <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
-                                                    {% endfor %}
+                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
                                                 </div>
-                                            {% endif %}
+                                            {% endfor %}
                                         </div>
                                     </div>
                                     <div class="col-md-3">
@@ -60,13 +56,11 @@
                                             {{ form_label(form.type, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
                                             {{ form_widget(form.type, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Type de traitement...'}}) }}
                                             {{ form_errors(form.type) }}
-                                            {% if form_errors(form.type) %}
+                                            {% for error in form_errors(form.type) %}
                                                 <div class="text-danger small mt-1">
-                                                    {% for error in form_errors(form.type) %}
-                                                        <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
-                                                    {% endfor %}
+                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
                                                 </div>
-                                            {% endif %}
+                                            {% endfor %}
                                         </div>
                                     </div>
                                 </div>
@@ -75,13 +69,11 @@
                                     {{ form_label(form.description, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
                                     {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 3, 'placeholder': 'Description détaillée du traitement...'}}) }}
                                     {{ form_errors(form.description) }}
-                                    {% if form_errors(form.description) %}
+                                    {% for error in form_errors(form.description) %}
                                         <div class="text-danger small mt-1">
-                                            {% for error in form_errors(form.description) %}
-                                                <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
-                                            {% endfor %}
+                                            <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
                                         </div>
-                                    {% endif %}
+                                    {% endfor %}
                                 </div>
                             </div>
                         </div>
@@ -100,6 +92,11 @@
                                             {{ form_label(form.priorite, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
                                             {{ form_widget(form.priorite, {'attr': {'class': 'form-control form-select-lg'}}) }}
                                             {{ form_errors(form.priorite) }}
+                                            {% for error in form_errors(form.priorite) %}
+                                                <div class="text-danger small mt-1">
+                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
+                                                </div>
+                                            {% endfor %}
                                         </div>
                                     </div>
                                     <div class="col-md-4">
@@ -107,6 +104,11 @@
                                             {{ form_label(form.statut, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
                                             {{ form_widget(form.statut, {'attr': {'class': 'form-control form-select-lg'}}) }}
                                             {{ form_errors(form.statut) }}
+                                            {% for error in form_errors(form.statut) %}
+                                                <div class="text-danger small mt-1">
+                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
+                                                </div>
+                                            {% endfor %}
                                         </div>
                                     </div>
                                     <div class="col-md-4">
@@ -114,6 +116,11 @@
                                             {{ form_label(form.duree_jours, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
                                             {{ form_widget(form.duree_jours, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Durée en jours'}}) }}
                                             {{ form_errors(form.duree_jours) }}
+                                            {% for error in form_errors(form.duree_jours) %}
+                                                <div class="text-danger small mt-1">
+                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
+                                                </div>
+                                            {% endfor %}
                                         </div>
                                     </div>
                                 </div>
@@ -124,6 +131,11 @@
                                             {{ form_label(form.date_debut, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
                                             {{ form_widget(form.date_debut, {'attr': {'class': 'form-control form-control-lg'}}) }}
                                             {{ form_errors(form.date_debut) }}
+                                            {% for error in form_errors(form.date_debut) %}
+                                                <div class="text-danger small mt-1">
+                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
+                                                </div>
+                                            {% endfor %}
                                         </div>
                                     </div>
                                     <div class="col-md-4">
@@ -131,6 +143,11 @@
                                             {{ form_label(form.date_fin, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
                                             {{ form_widget(form.date_fin, {'attr': {'class': 'form-control form-control-lg'}}) }}
                                             {{ form_errors(form.date_fin) }}
+                                            {% for error in form_errors(form.date_fin) %}
+                                                <div class="text-danger small mt-1">
+                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
+                                                </div>
+                                            {% endfor %}
                                         </div>
                                     </div>
                                     <div class="col-md-4">
@@ -138,6 +155,11 @@
                                             {{ form_label(form.dosage, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
                                             {{ form_widget(form.dosage, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Dosage si applicable'}}) }}
                                             {{ form_errors(form.dosage) }}
+                                            {% for error in form_errors(form.dosage) %}
+                                                <div class="text-danger small mt-1">
+                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
+                                                </div>
+                                            {% endfor %}
                                         </div>
                                     </div>
                                 </div>
@@ -156,6 +178,11 @@
                                     {{ form_label(form.objectif_therapeutique, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
                                     {{ form_widget(form.objectif_therapeutique, {'attr': {'class': 'form-control', 'rows': 3, 'placeholder': 'Objectifs à atteindre avec ce traitement...'}}) }}
                                     {{ form_errors(form.objectif_therapeutique) }}
+                                    {% for error in form_errors(form.objectif_therapeutique) %}
+                                        <div class="text-danger small mt-1">
+                                            <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
+                                        </div>
+                                    {% endfor %}
                                 </div>
 
                                 {% if form.etudiant is defined %}
@@ -163,6 +190,11 @@
                                     {{ form_label(form.etudiant, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
                                     {{ form_widget(form.etudiant, {'attr': {'class': 'form-control form-select-lg'}}) }}
                                     {{ form_errors(form.etudiant) }}
+                                    {% for error in form_errors(form.etudiant) %}
+                                        <div class="text-danger small mt-1">
+                                            <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
+                                        </div>
+                                    {% endfor %}
                                     <div class="form-text">
                                         <i class="fas fa-info-circle me-1"></i>Sélectionnez l'étudiant qui suivra ce traitement
                                     </div>

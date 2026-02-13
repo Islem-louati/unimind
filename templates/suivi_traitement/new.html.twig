@@ -109,14 +109,11 @@
                                             {{ form_label(form.dateSuivi, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
                                             {{ form_widget(form.dateSuivi, {'attr': {'class': 'form-control form-control-lg'}}) }}
                                             {{ form_errors(form.dateSuivi) }}
-                                            {% set errors = form_errors(form.dateSuivi) %}
-                                            {% if errors|length > 0 %}
+                                            {% for error in form_errors(form.dateSuivi) %}
                                                 <div class="text-danger small mt-1">
-                                                    {% for error in errors %}
-                                                        <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
-                                                    {% endfor %}
+                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
                                                 </div>
-                                            {% endif %}
+                                            {% endfor %}
                                         </div>
                                     </div>
                                     {% if form.heureEffective is defined %}
@@ -125,14 +122,11 @@
                                             {{ form_label(form.heureEffective, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
                                             {{ form_widget(form.heureEffective, {'attr': {'class': 'form-control form-control-lg'}}) }}
                                             {{ form_errors(form.heureEffective) }}
-                                            {% set errors = form_errors(form.heureEffective) %}
-                                            {% if errors|length > 0 %}
+                                            {% for error in form_errors(form.heureEffective) %}
                                                 <div class="text-danger small mt-1">
-                                                    {% for error in errors %}
-                                                        <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
-                                                    {% endfor %}
+                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
                                                 </div>
-                                            {% endif %}
+                                            {% endfor %}
                                         </div>
                                     </div>
                                     {% endif %}
@@ -142,14 +136,11 @@
                                             {{ form_label(form.heurePrevue, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
                                             {{ form_widget(form.heurePrevue, {'attr': {'class': 'form-control form-control-lg'}}) }}
                                             {{ form_errors(form.heurePrevue) }}
-                                            {% set errors = form_errors(form.heurePrevue) %}
-                                            {% if errors|length > 0 %}
+                                            {% for error in form_errors(form.heurePrevue) %}
                                                 <div class="text-danger small mt-1">
-                                                    {% for error in errors %}
-                                                        <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
-                                                    {% endfor %}
+                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
                                                 </div>
-                                            {% endif %}
+                                            {% endfor %}
                                         </div>
                                     </div>
                                     {% endif %}
@@ -161,14 +152,11 @@
                                         {{ form_widget(form.effectue, {'attr': {'class': 'form-check-input form-check-input-lg'}}) }}
                                         {{ form_label(form.effectue, null, {'label_attr': {'class': 'form-check-label fw-bold'}}) }}
                                         {{ form_errors(form.effectue) }}
-                                        {% set errors = form_errors(form.effectue) %}
-                                        {% if errors|length > 0 %}
+                                        {% for error in form_errors(form.effectue) %}
                                             <div class="text-danger small mt-1">
-                                                {% for error in errors %}
-                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
-                                                {% endfor %}
+                                                <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
                                             </div>
-                                        {% endif %}
+                                        {% endfor %}
                                     </div>
                                 </div>
                                 {% endif %}
@@ -188,26 +176,20 @@
                                         {{ form_label(form.observations, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
                                         {{ form_widget(form.observations, {'attr': {'class': 'form-control', 'rows': 4, 'placeholder': 'Décrivez comment vous vous sentez, vos observations, les difficultés rencontrées...'}}) }}
                                         {{ form_errors(form.observations) }}
-                                        {% set errors = form_errors(form.observations) %}
-                                        {% if errors|length > 0 %}
+                                        {% for error in form_errors(form.observations) %}
                                             <div class="text-danger small mt-1">
-                                                {% for error in errors %}
-                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
-                                                {% endfor %}
+                                                <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
                                             </div>
-                                        {% endif %}
+                                        {% endfor %}
                                     {% else %}
                                         {{ form_label(form.observationsPsy, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
                                         {{ form_widget(form.observationsPsy, {'attr': {'class': 'form-control', 'rows': 4, 'placeholder': 'Notes du psychologue sur le suivi, observations, recommandations...'}}) }}
                                         {{ form_errors(form.observationsPsy) }}
-                                        {% set errors = form_errors(form.observationsPsy) %}
-                                        {% if errors|length > 0 %}
+                                        {% for error in form_errors(form.observationsPsy) %}
                                             <div class="text-danger small mt-1">
-                                                {% for error in errors %}
-                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
-                                                {% endfor %}
+                                                <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
                                             </div>
-                                        {% endif %}
+                                        {% endfor %}
                                     {% endif %}
                                 </div>
                             </div>
@@ -228,14 +210,11 @@
                                             {{ form_widget(form.valide, {'attr': {'class': 'form-check-input form-check-input-lg'}}) }}
                                             {{ form_label(form.valide, null, {'label_attr': {'class': 'form-check-label fw-bold'}}) }}
                                             {{ form_errors(form.valide) }}
-                                            {% set errors = form_errors(form.valide) %}
-                                            {% if errors|length > 0 %}
+                                            {% for error in form_errors(form.valide) %}
                                                 <div class="text-danger small mt-1">
-                                                    {% for error in errors %}
-                                                        <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
-                                                    {% endfor %}
+                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
                                                 </div>
-                                            {% endif %}
+                                            {% endfor %}
                                         </div>
                                         <div class="form-text">
                                             <i class="fas fa-info-circle me-1"></i>Cochez pour valider le suivi (uniquement si le suivi est effectué)

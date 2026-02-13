@@ -4,9 +4,9 @@ namespace App\Form;
 
 use App\Entity\Traitement;
 use App\Entity\User;
-use App\Entity\Enum\CategorieTraitement;
-use App\Entity\Enum\PrioriteTraitement;
-use App\Entity\Enum\StatutTraitement;
+use App\Enum\CategorieTraitement;
+use App\Enum\PrioriteTraitement;
+use App\Enum\StatutTraitement;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -132,7 +132,7 @@ class TraitementType extends AbstractType
                 'query_builder' => function ($repository) {
                     return $repository->createQueryBuilder('u')
                         ->where('u.role = :role')
-                        ->setParameter('role', \App\Entity\Enum\RoleType::ETUDIANT)
+                        ->setParameter('role', \App\Enum\RoleType::ETUDIANT)
                         ->orderBy('u.nom', 'ASC');
                 },
                 'attr' => [

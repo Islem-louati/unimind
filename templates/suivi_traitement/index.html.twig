@@ -179,26 +179,40 @@
                                     </tr>
                                 </thead>
                                 <tbody id="suivisTableBody">
+                                    {% set current_traitement = null %}
                                     {% for suivi in suivis %}
-                                    <tr class="suivi-row" 
-                                        data-statut="{{ suivi.effectue ? 'effectue' : 'non_effectue' }}"
-                                        data-valide="{{ suivi.valide ? 'valide' : 'non_valide' }}"
-                                        data-ressenti="{{ suivi.ressenti ? suivi.ressenti : '' }}"
-                                        data-date="{{ suivi.dateSuivi|date('Y-m-d') }}"
-                                        data-titre="{{ suivi.traitement.titre|lower }}"
-                                        data-patient="{{ suivi.traitement.etudiant ? (suivi.traitement.etudiant.fullName|default('')) : ''|lower }}">
-                                        <td>
-                                            <div class="d-flex flex-column justify-content-center">
-                                                <h6 class="mb-0 text-sm">{{ suivi.dateSuivi|date('d/m/Y') }}</h6>
-                                                <p class="text-xs text-secondary mb-0">{{ suivi.heureEffective ? suivi.heureEffective|date('H:i') : 'N/A' }}</p>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex flex-column justify-content-center">
-                                                <h6 class="mb-0 text-sm">{{ suivi.traitement.titre }}</h6>
-                                                <p class="text-xs text-secondary mb-0">{{ suivi.traitement.categorieLabel }}</p>
-                                            </div>
-                                        </td>
+                                        {% if current_traitement != suivi.traitement.titre %}
+                                            {% if current_traitement is not null %}
+                                                </tr>
+                                            {% endif %}
+                                            {% set current_traitement = suivi.traitement.titre %}
+                                            <tr class="traitement-header">
+                                                <td colspan="8" class="bg-light text-center fw-bold py-2">
+                                                    <i class="fas fa-stethoscope me-2"></i>
+                                                    {{ suivi.traitement.titre }}
+                                                    <small class="text-muted ms-2">({{ suivi.traitement.etudiant ? suivi.traitement.etudiant.fullName : 'Non assigné' }})</small>
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                        <tr class="suivi-row" 
+                                            data-statut="{{ suivi.effectue ? 'effectue' : 'non_effectue' }}"
+                                            data-valide="{{ suivi.valide ? 'valide' : 'non_valide' }}"
+                                            data-ressenti="{{ suivi.ressenti ? suivi.ressenti : '' }}"
+                                            data-date="{{ suivi.dateSuivi|date('Y-m-d') }}"
+                                            data-titre="{{ suivi.traitement.titre|lower }}"
+                                            data-patient="{{ suivi.traitement.etudiant ? (suivi.traitement.etudiant.fullName|default('')) : ''|lower }}">
+                                            <td>
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    <h6 class="mb-0 text-sm">{{ suivi.dateSuivi|date('d/m/Y') }}</h6>
+                                                    <p class="text-xs text-secondary mb-0">{{ suivi.heureEffective ? suivi.heureEffective|date('H:i') : 'N/A' }}</p>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column justify-content-center">
+                                                    <h6 class="mb-0 text-sm">{{ suivi.traitement.titre }}</h6>
+                                                    <p class="text-xs text-secondary mb-0">{{ suivi.traitement.categorieLabel }}</p>
+                                                </div>
+                                            </td>
                                         <td>
                                             <p class="text-xs font-weight-bold mb-0">{{ suivi.traitement.etudiant ? suivi.traitement.etudiant.fullName : 'Non défini' }}</p>
                                             <p class="text-xs text-secondary mb-0">

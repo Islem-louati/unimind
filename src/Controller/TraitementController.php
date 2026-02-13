@@ -123,16 +123,11 @@ class TraitementController extends AbstractController
                 }
             }
             
-            // Si on a des données, les soumettre manuellement
+            // Si on a des données, les soumettre manuellement SANS forcer les valeurs par défaut
             if (!empty($data)) {
-                // Forcer les valeurs par défaut pour les champs vides
                 if (isset($data['traitement'])) {
                     $formData = $data['traitement'];
-                    $formData['titre'] = $formData['titre'] ?: 'Nouveau traitement';
-                    $formData['type'] = $formData['type'] ?: 'Thérapie';
-                    $formData['description'] = $formData['description'] ?: 'Description du traitement';
-                    $formData['duree_jours'] = $formData['duree_jours'] ?: 30;
-                    $formData['objectif_therapeutique'] = $formData['objectif_therapeutique'] ?: 'Objectif thérapeutique';
+                    // NE PAS forcer les valeurs par défaut pour permettre la validation
                     $form->submit($formData);
                 } else {
                     $form->submit($data);
@@ -159,12 +154,23 @@ class TraitementController extends AbstractController
         // Afficher les erreurs de validation si le formulaire est invalide
         if ($form->isSubmitted() && !$form->isValid()) {
             $errors = $form->getErrors(true);
+            $errorMessages = [];
+            
+            foreach ($errors as $error) {
+                $errorMessages[] = $error->getMessage();
+            }
+            
             $this->addFlash('error', 'Le formulaire contient des erreurs. Veuillez corriger les champs indiqués.');
             
-            // Debug pour voir les erreurs dans la console
-            dump('Erreurs de validation:', $errors);
+            // Debug pour voir les erreurs dans la console (à désactiver en production)
+            if ($this->getParameter('kernel.environment') === 'dev') {
+                dump('Erreurs de validation:', $errorMessages);
+                dump('Form submitted:', $form->isSubmitted());
+                dump('Form valid:', $form->isValid());
+                dump('Form data:', $form->getData());
+            }
             
-            // Rediriger pour éviter le blocage
+            // Rendre le formulaire avec les erreurs
             return $this->render('traitement/new.html.twig', [
                 'traitement' => $traitement,
                 'form' => $form->createView(),

@@ -3,9 +3,9 @@
 namespace App\Entity;
 
 
-use App\Entity\Enum\StatutTraitement;
-use App\Entity\Enum\CategorieTraitement;
-use App\Entity\Enum\PrioriteTraitement;
+use App\Enum\StatutTraitement;
+use App\Enum\CategorieTraitement;
+use App\Enum\PrioriteTraitement;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -32,7 +32,7 @@ class Traitement
         minMessage: 'Le titre doit faire au moins {{ limit }} caractères',
         maxMessage: 'Le titre ne peut pas dépasser {{ limit }} caractères'
     )]
-    private string $titre = '';
+    private ?string $titre = null;
 
     #[ORM\Column(type: 'text')]
     #[Groups(['traitement:read', 'traitement:write'])]
@@ -43,7 +43,7 @@ class Traitement
         minMessage: 'La description doit faire au moins {{ limit }} caractères',
         maxMessage: 'La description ne peut pas dépasser {{ limit }} caractères'
     )]
-    private string $description = '';
+    private ?string $description = null;
 
     #[ORM\Column(type: 'string', length: 255)]
     #[Groups(['traitement:read', 'traitement:write'])]
@@ -54,13 +54,13 @@ class Traitement
         minMessage: 'Le type doit faire au moins {{ limit }} caractères',
         maxMessage: 'Le type ne peut pas dépasser {{ limit }} caractères'
     )]
-    private string $type = '';
+    private ?string $type = null;
 
     #[ORM\Column(type: 'string', length: 255)]
     #[Groups(['traitement:read', 'traitement:write'])]
     #[Assert\NotBlank(message: 'La catégorie est obligatoire')]
     #[Assert\Choice(choices: ['cognitif', 'comportemental', 'humaniste', 'systemique'], message: 'Choisissez une catégorie valide')]
-    private string $categorie = '';
+    private ?string $categorie = null;
 
     #[ORM\Column(type: 'integer')]
     #[Groups(['traitement:read', 'traitement:write'])]
@@ -71,7 +71,7 @@ class Traitement
         max: 365,
         notInRangeMessage: 'La durée doit être comprise entre {{ min }} et {{ max }} jours'
     )]
-    private int $duree_jours = 30;
+    private ?int $duree_jours = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
     #[Groups(['traitement:read', 'traitement:write'])]
@@ -81,7 +81,7 @@ class Traitement
     #[Groups(['traitement:read', 'traitement:write'])]
     #[Assert\NotBlank(message: 'La date de début est obligatoire')]
     #[Assert\Type(\DateTimeInterface::class, message: 'La date de début doit être valide')]
-    private \DateTimeInterface $date_debut;
+    private ?\DateTimeInterface $date_debut = null;
 
     #[ORM\Column(type: 'date', nullable: true)]
     #[Groups(['traitement:read', 'traitement:write'])]
@@ -96,13 +96,13 @@ class Traitement
     #[Groups(['traitement:read', 'traitement:write'])]
     #[Assert\NotBlank(message: 'Le statut est obligatoire')]
     #[Assert\Choice(choices: ['en cours', 'terminé', 'suspendu'], message: 'Choisissez un statut valide')]
-    private string $statut;
+    private ?string $statut = null;
 
     #[ORM\Column(type: 'string', length: 255)]
     #[Groups(['traitement:read', 'traitement:write'])]
     #[Assert\NotBlank(message: 'La priorité est obligatoire')]
     #[Assert\Choice(choices: ['basse', 'moyenne', 'haute'], message: 'Choisissez une priorité valide')]
-    private string $priorite;
+    private ?string $priorite = null;
 
     #[ORM\Column(type: 'text')]
     #[Groups(['traitement:read', 'traitement:write'])]
@@ -113,7 +113,7 @@ class Traitement
         minMessage: 'L\'objectif thérapeutique doit faire au moins {{ limit }} caractères',
         maxMessage: 'L\'objectif thérapeutique ne peut pas dépasser {{ limit }} caractères'
     )]
-    private string $objectif_therapeutique;
+    private ?string $objectif_therapeutique = null;
 
     #[ORM\Column(type: 'datetime')]
     #[Groups(['traitement:read'])]

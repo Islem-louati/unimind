@@ -7,8 +7,8 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Serializer\Annotation\Groups;
-use App\Entity\Enum\Ressenti;
-use App\Entity\Enum\SaisiPar;
+use App\Enum\Ressenti;
+use App\Enum\SaisiPar;
 use DateTime;
 use DateTimeInterface;
 
@@ -38,12 +38,12 @@ class SuiviTraitement
 
     #[ORM\Column(name: 'dateSaisie', type: 'datetime')]
     #[Groups(['suivi:read'])]
-    private \DateTimeInterface $dateSaisie;
+    private ?\DateTimeInterface $dateSaisie = null;
 
     #[ORM\Column(name: 'effectue', type: 'boolean', options: ['default' => false])]
     #[Groups(['suivi:read', 'suivi:write'])]
     #[Assert\NotBlank(message: 'Le statut d\'exécution du suivi est obligatoire')]
-    private bool $effectue = false;
+    private ?bool $effectue = null;
 
     #[ORM\Column(name: 'heurePrevue', type: 'time', nullable: true)]
     #[Groups(['suivi:read', 'suivi:write'])]
@@ -57,7 +57,9 @@ class SuiviTraitement
     #[Groups(['suivi:read', 'suivi:write'])]
     #[Assert\NotBlank(message: 'Les observations sont obligatoires')]
     #[Assert\Length(
+        min: 10,
         max: 1000,
+        minMessage: 'Les observations doivent faire au moins {{ limit }} caractères',
         maxMessage: 'Les observations ne peuvent pas dépasser {{ limit }} caractères'
     )]
     private ?string $observations = null;
@@ -66,7 +68,9 @@ class SuiviTraitement
     #[Groups(['suivi:read', 'suivi:write'])]
     #[Assert\NotBlank(message: 'Les observations du psychologue sont obligatoires')]
     #[Assert\Length(
+        min: 10,
         max: 1000,
+        minMessage: 'Les observations du psychologue doivent faire au moins {{ limit }} caractères',
         maxMessage: 'Les observations du psychologue ne peuvent pas dépasser {{ limit }} caractères'
     )]
     private ?string $observationsPsy = null;
@@ -86,15 +90,15 @@ class SuiviTraitement
 
     #[ORM\Column(name: 'saisiPar', type: 'string', length: 50)]
     #[Groups(['suivi:read', 'suivi:write'])]
-    private string $saisiPar = SaisiPar::ETUDIANT->value;
+    private ?string $saisiPar = null;
 
     #[ORM\Column(name: 'valide', type: 'boolean', options: ['default' => false])]
     #[Groups(['suivi:read', 'suivi:write'])]
-    private bool $valide = false;
+    private ?bool $valide = null;
 
     #[ORM\Column(name: 'createdAt', type: 'datetime')]
     #[Groups(['suivi:read'])]
-    private \DateTimeInterface $createdAt;
+    private ?\DateTimeInterface $createdAt = null;
 
     #[ORM\Column(name: 'updatedAt', type: 'datetime', nullable: true)]
     #[Groups(['suivi:read'])]
@@ -102,12 +106,13 @@ class SuiviTraitement
 
     public function __construct()
     {
-        $this->createdAt = new \DateTime();
-        $this->dateSaisie = new \DateTime();
-        $this->dateSuivi = null;  // ✅ Plus d'initialisation automatique
-        $this->effectue = false;
-        $this->valide = false;
-        $this->saisiPar = SaisiPar::ETUDIANT->value;
+        // ✅ Plus d'initialisation automatique pour permettre la validation
+        $this->createdAt = null;
+        $this->dateSaisie = null;
+        $this->dateSuivi = null;
+        $this->effectue = null;
+        $this->valide = null;
+        $this->saisiPar = null;
     }
 
     // Getters et setters

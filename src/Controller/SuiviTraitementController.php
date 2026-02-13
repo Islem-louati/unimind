@@ -48,24 +48,28 @@ class SuiviTraitementController extends AbstractController
                 ->getQuery()
                 ->getResult();
         } elseif ($this->isGranted('ROLE_PSYCHOLOGUE')) {
-            // Psychologue voit les suivis de ses traitements
+            // Psychologue voit les suivis de ses traitements, classés par traitement
             $suivis = $suiviTraitementRepository->createQueryBuilder('s')
                 ->leftJoin('s.traitement', 't')
                 ->leftJoin('t.etudiant', 'e')
                 ->leftJoin('t.psychologue', 'p')
                 ->addSelect('t', 'e', 'p')
                 ->where('t.psychologue = :user')
+                ->orderBy('t.titre', 'ASC')
+                ->addOrderBy('e.nom', 'ASC')
                 ->setParameter('user', $user)
                 ->getQuery()
                 ->getResult();
         } elseif ($this->isGranted('ROLE_ETUDIANT')) {
-            // Étudiant voit seulement ses suivis
+            // Étudiant voit seulement ses suivis, classés par traitement
             $suivis = $suiviTraitementRepository->createQueryBuilder('s')
                 ->leftJoin('s.traitement', 't')
                 ->leftJoin('t.etudiant', 'e')
                 ->leftJoin('t.psychologue', 'p')
                 ->addSelect('t', 'e', 'p')
                 ->where('t.etudiant = :user')
+                ->orderBy('t.titre', 'ASC')
+                ->addOrderBy('s.dateSuivi', 'DESC')
                 ->setParameter('user', $user)
                 ->getQuery()
                 ->getResult();

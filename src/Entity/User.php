@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Entity\Enum\RoleType;
+use App\Enum\RoleType;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
