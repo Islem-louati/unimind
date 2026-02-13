@@ -106,7 +106,7 @@ class SuiviTraitement
 
     public function __construct()
     {
-        // ✅ Plus d'initialisation automatique pour permettre la validation
+        // Plus d'initialisation automatique pour permettre la validation
         $this->createdAt = null;
         $this->dateSaisie = null;
         $this->dateSuivi = null;
