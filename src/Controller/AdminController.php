@@ -1,4 +1,5 @@
 <?php
+// src/Controller/AdminController.php
 
 namespace App\Controller;
 
@@ -7,6 +8,9 @@ use App\Entity\Profil;
 use App\Enum\RoleType;
 use App\Form\UserType;
 use App\Form\UserFilterType;
+use App\Repository\QuestionnaireRepository;
+use App\Repository\QuestionRepository;
+use App\Repository\ReponseQuestionnaireRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -21,37 +25,112 @@ use App\Service\ExportService;
 class AdminController extends AbstractController
 {
     #[Route('/dashboard', name: 'admin_dashboard')]
-    public function dashboard(EntityManagerInterface $entityManager): Response
-    {
-        // Statistiques
-        $userRepository = $entityManager->getRepository(User::class);
+    public function dashboard(
+        EntityManagerInterface $entityManager,
+        QuestionnaireRepository $questionnaireRepository,
+        QuestionRepository $questionRepository,
+        ReponseQuestionnaireRepository $reponseRepository
+    ): Response {
+        /** @var User $user */
+        $user = $this->getUser();
         
-        $totalUsers = $userRepository->count([]);
-        $pendingUsers = $userRepository->count(['statut' => 'en_attente']);
-        $activeUsers = $userRepository->count(['statut' => 'actif', 'isActive' => true]);
+        $userRepo = $entityManager->getRepository(User::class);
         
-        // Compter par rôle
-        $students = $userRepository->count(['role' => RoleType::ETUDIANT]);
-        $psychologists = $userRepository->count(['role' => RoleType::PSYCHOLOGUE]);
-        $responsables = $userRepository->count(['role' => RoleType::RESPONSABLE_ETUDIANT]);
-        
-        // Derniers utilisateurs (10 derniers)
-        $recentUsers = $userRepository->findBy(
-            [],
-            ['createdAt' => 'DESC'],
-            10
+        // Statistiques utilisateurs
+        $statsUtilisateurs = [
+            'total_utilisateurs' => $userRepo->count([]),
+            'utilisateurs_en_attente' => $userRepo->count(['statut' => 'en_attente']),
+            'utilisateurs_actifs' => $userRepo->count(['isActive' => true]),
+            'etudiants' => $userRepo->count(['role' => RoleType::ETUDIANT]),
+            'psychologues' => $userRepo->count(['role' => RoleType::PSYCHOLOGUE]),
+            'responsables' => $userRepo->count(['role' => RoleType::RESPONSABLE_ETUDIANT]),
+        ];
+
+        // Statistiques questionnaires
+        $tousQuestionnaires = $questionnaireRepository->findAll();
+
+        $questionnairesIncomplets = array_values(array_filter(
+            $tousQuestionnaires,
+            fn($q) => count($q->getQuestions()) < $q->getNbreQuestions()
+        ));
+
+        $derniersQuestionnaires = array_slice(
+            array_reverse($tousQuestionnaires),
+            0,
+            5
         );
 
-        return $this->render('admin/dashboard.html.twig', [
-            'stats' => [
-                'total_users' => $totalUsers,
-                'pending_users' => $pendingUsers,
-                'active_users' => $activeUsers,
-                'students' => $students,
-                'psychologues' => $psychologists,
-                'responsables' => $responsables,
-            ],
-            'recent_users' => $recentUsers,
+        $totalQuestionnaires = count($tousQuestionnaires);
+        $totalQuestions = count($questionRepository->findAll());
+        $totalReponses = count($reponseRepository->findAll());
+
+        // Générer les données pour les graphiques
+        $graphiqueLabels = [];
+        $graphiqueData = [];
+        
+        // Récupérer les données des 30 derniers jours
+        for ($i = 29; $i >= 0; $i--) {
+            $date = new \DateTime("-$i days");
+            $graphiqueLabels[] = $date->format('d/m');
+            
+            // Compter les réponses pour cette date
+            $count = $reponseRepository->createQueryBuilder('r')
+                ->select('COUNT(r)')
+                ->where('r.created_at >= :start')
+                ->andWhere('r.created_at < :end')
+                ->setParameter('start', $date->format('Y-m-d 00:00:00'))
+                ->setParameter('end', $date->format('Y-m-d 23:59:59'))
+                ->getQuery()
+                ->getSingleScalarResult();
+            
+            $graphiqueData[] = $count;
+        }
+
+        // Récupérer la répartition par type de questionnaire
+        // CORRECTION: utiliser questionnaire_id au lieu de id
+        $repartitionTypes = $questionnaireRepository->createQueryBuilder('q')
+            ->select('q.type, COUNT(q.questionnaire_id) as nombre')
+            ->groupBy('q.type')
+            ->getQuery()
+            ->getResult();
+
+        $typesFormatted = [];
+        foreach ($repartitionTypes as $type) {
+            $typesFormatted[] = [
+                'label' => $type['type'] ?? 'Non défini',
+                'nombre_questionnaires' => $type['nombre'],
+                'color' => $this->getColorForType($type['type'])
+            ];
+        }
+
+        // Statistiques globales
+        $statsGlobales = [
+            'total_questionnaires' => $totalQuestionnaires,
+            'total_questions' => $totalQuestions,
+            'total_reponses' => $totalReponses,
+            'total_etudiants' => $statsUtilisateurs['etudiants'],
+            'questionnaires_complets' => $this->countQuestionnairesComplets($tousQuestionnaires),
+            'reponses_ce_mois' => $this->countReponsesThisMonth($reponseRepository),
+            'reponses_severes' => $this->countReponsesSeveres($reponseRepository),
+            'evolution_pourcentage' => $this->calculateEvolutionPercentage($reponseRepository),
+            'repartition_types' => $typesFormatted,
+            'graphique_labels' => $graphiqueLabels,
+            'graphique_data' => $graphiqueData,
+        ];
+
+        // Récupérer les utilisateurs récents
+        $utilisateursRecents = $userRepo->findBy([], ['createdAt' => 'DESC'], 10);
+
+        return $this->render('admin/dashboard/index.html.twig', [
+            'user' => $user,
+            'stats_utilisateurs' => $statsUtilisateurs,
+            'stats_globales' => $statsGlobales,
+            'questionnaires_count' => $totalQuestionnaires,
+            'questions_count' => $totalQuestions,
+            'reponses_count' => $totalReponses,
+            'derniers_questionnaires' => $derniersQuestionnaires,
+            'questionnaires_incomplets' => $questionnairesIncomplets,
+            'utilisateurs_recents' => $utilisateursRecents,
         ]);
     }
 
@@ -94,7 +173,8 @@ class AdminController extends AbstractController
                 ->setParameter('search', '%' . $data['search'] . '%');
             }
         }
-         // Sauvegarder les filtres dans la session pour les exports
+        
+        // Sauvegarder les filtres dans la session pour les exports
         $session = $request->getSession();
         if ($filterForm->isSubmitted() && $filterForm->isValid()) {
             $session->set('user_filters', $filterForm->getData());
@@ -102,6 +182,7 @@ class AdminController extends AbstractController
             // Réinitialiser les filtres si pas de soumission
             $session->remove('user_filters');
         }
+        
         // PAGINATION MANUELLE
         $page = $request->query->getInt('page', 1);
         $limit = 10;
@@ -216,29 +297,29 @@ class AdminController extends AbstractController
     }
 
     #[Route('/utilisateurs/{id}/modifier', name: 'admin_edit_user')]
-public function editUser(int $id, Request $request, EntityManagerInterface $entityManager): Response
-{
-    $user = $entityManager->getRepository(User::class)->find($id);
+    public function editUser(int $id, Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $user = $entityManager->getRepository(User::class)->find($id);
 
-    if (!$user) {
-        throw $this->createNotFoundException('Utilisateur non trouvé');
-    }
+        if (!$user) {
+            throw $this->createNotFoundException('Utilisateur non trouvé');
+        }
 
-    $form = $this->createForm(UserType::class, $user, [
-        'is_creation' => false // Ne pas afficher le champ mot de passe pour l'édition
-    ]);
-    $form->handleRequest($request);
+        $form = $this->createForm(UserType::class, $user, [
+            'is_creation' => false // Ne pas afficher le champ mot de passe pour l'édition
+        ]);
+        $form->handleRequest($request);
 
-    if ($form->isSubmitted() && $form->isValid()) {
-        $entityManager->flush();
-        $this->addFlash('success', 'Utilisateur modifié avec succès !');
-        return $this->redirectToRoute('admin_users');
-    }
+        if ($form->isSubmitted() && $form->isValid()) {
+            $entityManager->flush();
+            $this->addFlash('success', 'Utilisateur modifié avec succès !');
+            return $this->redirectToRoute('admin_users');
+        }
 
-    return $this->render('admin/users/edit_user.html.twig', [
-        'user' => $user,
-        'form' => $form->createView(),
-    ]);
+        return $this->render('admin/users/edit_user.html.twig', [
+            'user' => $user,
+            'form' => $form->createView(),
+        ]);
     }
 
     #[Route('/utilisateurs/{id}/supprimer', name: 'admin_delete_user', methods: ['POST'])]
@@ -302,7 +383,7 @@ public function editUser(int $id, Request $request, EntityManagerInterface $enti
             ->getQuery()
             ->getResult();
 
-        // CORRECTION : Récupérer toutes les dates et traiter côté PHP
+        // Récupérer toutes les dates
         $allUsers = $userRepository->findAll();
         $monthlyStats = [];
         $currentYear = date('Y');
@@ -330,37 +411,36 @@ public function editUser(int $id, Request $request, EntityManagerInterface $enti
     }
 
     #[Route('/utilisateurs/nouveau', name: 'admin_user_new')]
-public function newUser(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
-{
-    $user = new User();
-    $form = $this->createForm(UserType::class, $user, [
-        'is_creation' => true // Passer l'option pour afficher le champ mot de passe
-    ]);
-    $form->handleRequest($request);
+    public function newUser(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher): Response
+    {
+        $user = new User();
+        $form = $this->createForm(UserType::class, $user, [
+            'is_creation' => true // Passer l'option pour afficher le champ mot de passe
+        ]);
+        $form->handleRequest($request);
 
-    if ($form->isSubmitted() && $form->isValid()) {
-        // Hasher le mot de passe
-        $plainPassword = $form->get('plainPassword')->getData();
-        $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
-        $user->setPassword($hashedPassword);
+        if ($form->isSubmitted() && $form->isValid()) {
+            // Hasher le mot de passe
+            $plainPassword = $form->get('plainPassword')->getData();
+            $hashedPassword = $passwordHasher->hashPassword($user, $plainPassword);
+            $user->setPassword($hashedPassword);
 
-        // Configurer les valeurs par défaut
-        $user->setIsVerified(true);
-        $user->setIsActive(true);
-        $user->setCreatedAt(new \DateTime());
-        
-        $entityManager->persist($user);
-        $entityManager->flush();
+            // Configurer les valeurs par défaut
+            $user->setIsVerified(true);
+            $user->setIsActive(true);
+            $user->setCreatedAt(new \DateTime());
+            
+            $entityManager->persist($user);
+            $entityManager->flush();
 
-        $this->addFlash('success', 'Utilisateur créé avec succès !');
-        return $this->redirectToRoute('admin_users');
+            $this->addFlash('success', 'Utilisateur créé avec succès !');
+            return $this->redirectToRoute('admin_users');
+        }
+
+        return $this->render('admin/users/new.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
-
-    return $this->render('admin/users/new.html.twig', [
-        'form' => $form->createView(),
-    ]);
-}
-
 
     #[Route('/utilisateurs/{id}/verifier-email', name: 'admin_user_verify', methods: ['POST'])]
     public function verifyEmail(int $id, EntityManagerInterface $entityManager): Response
@@ -377,7 +457,8 @@ public function newUser(Request $request, EntityManagerInterface $entityManager,
         $this->addFlash('success', 'Email vérifié avec succès !');
         return $this->redirectToRoute('admin_users');
     }
-    #[Route('/admin/utilisateurs/export/excel', name: 'admin_users_export_excel')]
+
+    #[Route('/utilisateurs/export/excel', name: 'admin_users_export_excel')]
     public function exportExcel(
         EntityManagerInterface $entityManager,
         ExportService $exportService,
@@ -389,7 +470,7 @@ public function newUser(Request $request, EntityManagerInterface $entityManager,
         return $exportService->exportToExcel($users);
     }
 
-    #[Route('/admin/utilisateurs/export/pdf', name: 'admin_users_export_pdf')]
+    #[Route('/utilisateurs/export/pdf', name: 'admin_users_export_pdf')]
     public function exportPdf(
         EntityManagerInterface $entityManager,
         ExportService $exportService,
@@ -401,7 +482,7 @@ public function newUser(Request $request, EntityManagerInterface $entityManager,
         return $exportService->exportToPdf($users);
     }
 
-    #[Route('/admin/utilisateurs/export/csv', name: 'admin_users_export_csv')]
+    #[Route('/utilisateurs/export/csv', name: 'admin_users_export_csv')]
     public function exportCsv(
         EntityManagerInterface $entityManager,
         ExportService $exportService,
@@ -413,45 +494,69 @@ public function newUser(Request $request, EntityManagerInterface $entityManager,
         return $exportService->exportToCsv($users);
     }
 
-    /**
-     * Récupère les utilisateurs filtrés (même logique que la méthode users())
-     */
-    private function getFilteredUsers(EntityManagerInterface $entityManager, Request $request): array
+    // Méthodes privées pour les calculs statistiques
+    private function countQuestionnairesComplets(array $questionnaires): int
     {
-        $queryBuilder = $entityManager->getRepository(User::class)
-            ->createQueryBuilder('u')
-            ->orderBy('u.createdAt', 'DESC');
+        return count(array_filter(
+            $questionnaires,
+            fn($q) => count($q->getQuestions()) >= $q->getNbreQuestions()
+        ));
+    }
+
+    private function countReponsesThisMonth(ReponseQuestionnaireRepository $reponseRepository): int
+    {
+        $now = new \DateTime();
+        $start = (new \DateTime())->modify('first day of this month')->setTime(0, 0, 0);
+        $end = (new \DateTime())->modify('last day of this month')->setTime(23, 59, 59);
+
+        return $reponseRepository->createQueryBuilder('r')
+            ->select('COUNT(r)')
+            ->where('r.created_at BETWEEN :start AND :end')
+            ->setParameter('start', $start)
+            ->setParameter('end', $end)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    private function countReponsesSeveres(ReponseQuestionnaireRepository $reponseRepository): int
+    {
+        return $reponseRepository->createQueryBuilder('r')
+            ->select('COUNT(r)')
+            ->where('r.niveau = :niveau')
+            ->setParameter('niveau', 'sévère')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    private function calculateEvolutionPercentage(ReponseQuestionnaireRepository $reponseRepository): float
+    {
+        $moisActuel = $this->countReponsesThisMonth($reponseRepository);
         
-        // Récupérer les paramètres de filtrage de la session ou de la requête
-        $session = $request->getSession();
-        
-        // Si des filtres existent dans la session (depuis la page de liste)
-        $filters = $session->get('user_filters', []);
-        
-        if ($filters) {
-            if (isset($filters['role']) && $filters['role']) {
-                $queryBuilder->andWhere('u.role = :role')
-                    ->setParameter('role', $filters['role']);
-            }
-            
-            if (isset($filters['statut']) && $filters['statut']) {
-                $queryBuilder->andWhere('u.statut = :statut')
-                    ->setParameter('statut', $filters['statut']);
-            }
-            
-            if (isset($filters['search']) && $filters['search']) {
-                $queryBuilder->andWhere(
-                    $queryBuilder->expr()->orX(
-                        $queryBuilder->expr()->like('u.nom', ':search'),
-                        $queryBuilder->expr()->like('u.prenom', ':search'),
-                        $queryBuilder->expr()->like('u.email', ':search'),
-                        $queryBuilder->expr()->like('u.cin', ':search')
-                    )
-                )
-                ->setParameter('search', '%' . $filters['search'] . '%');
-            }
+        $moisDernier = $reponseRepository->createQueryBuilder('r')
+            ->select('COUNT(r)')
+            ->where('r.created_at BETWEEN :start AND :end')
+            ->setParameter('start', (new \DateTime())->modify('first day of last month')->setTime(0, 0, 0))
+            ->setParameter('end', (new \DateTime())->modify('last day of last month')->setTime(23, 59, 59))
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        if ($moisDernier > 0) {
+            return round((($moisActuel - $moisDernier) / $moisDernier) * 100, 1);
         }
         
-        return $queryBuilder->getQuery()->getResult();
+        return 0;
+    }
+
+    private function getColorForType(?string $type): string
+    {
+        $colors = [
+            'ANXETE' => 'danger',
+            'DEPRESSION' => 'warning',
+            'STRESS' => 'info',
+            'BIEN_ETRE' => 'success',
+            'ESTIME_SOI' => 'primary',
+        ];
+
+        return $colors[$type] ?? 'secondary';
     }
 }

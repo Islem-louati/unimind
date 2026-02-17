@@ -49,7 +49,6 @@ class LoginFormType extends AbstractType
         ]);
     }
 
-    // IMPORTANT : Ajoutez cette méthode pour changer le nom du formulaire
     public function getBlockPrefix(): string
     {
         return ''; // Retourne une chaîne vide pour que le formulaire n'ait pas de préfixe

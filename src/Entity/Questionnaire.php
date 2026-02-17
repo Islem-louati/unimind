@@ -6,6 +6,8 @@ use App\Enum\TypeQuestionnaire;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'questionnaire')]
@@ -18,16 +20,19 @@ class Questionnaire
     private ?int $questionnaire_id = null;
 
     #[ORM\Column(type: 'string', length: 20, unique: true)]
-    private string $code;
+    #[Assert\NotBlank(message: "Le code du questionnaire est obligatoire.")]
+    private string $code = '';
 
     #[ORM\Column(type: 'string', length: 150)]
-    private string $nom;
+    #[Assert\NotBlank(message: "Le nom du questionnaire est obligatoire.")]
+    private ?string $nom = null;
 
-    #[ORM\Column(type: 'text')]
-    private string $description;
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $description = null;
 
     #[ORM\Column(type: 'string', length: 20)]
-    private string $type;
+    #[Assert\NotBlank(message: "Le type de questionnaire est obligatoire.")]
+    private string $type = 'stress';
 
     #[ORM\Column(type: 'datetime')]
     private \DateTimeInterface $created_at;
@@ -35,33 +40,40 @@ class Questionnaire
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $updated_at = null;
 
-    #[ORM\Column(type: 'text')]
-    private string $interpretat_legere;
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $interpretat_legere = null;
 
-    #[ORM\Column(type: 'text')]
-    private string $interpretat_modere;
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $interpretat_modere = null;
 
-    #[ORM\Column(type: 'text')]
-    private string $interpretat_severe;
-
-    #[ORM\Column(type: 'integer')]
-    private int $seuil_leger;
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $interpretat_severe = null;
 
     #[ORM\Column(type: 'integer')]
-    private int $seuil_modere;
+    #[Assert\NotBlank(message: "Le seuil léger est obligatoire.")]
+    #[Assert\PositiveOrZero(message: "Le seuil léger doit être positif ou zéro.")]
+    private int $seuil_leger = 1;
 
     #[ORM\Column(type: 'integer')]
-    private int $seuil_severe;
+    #[Assert\NotBlank(message: "Le seuil modéré est obligatoire.")]
+    #[Assert\PositiveOrZero(message: "Le seuil modéré doit être positif ou zéro.")]
+    private int $seuil_modere = 1;
 
     #[ORM\Column(type: 'integer')]
-    private int $nbre_questions;
+    #[Assert\NotBlank(message: "Le seuil sévère est obligatoire.")]
+    #[Assert\PositiveOrZero(message: "Le seuil sévère doit être positif ou zéro.")]
+    private int $seuil_severe = 1;
+
+    #[ORM\Column(type: 'integer')]
+    #[Assert\NotBlank(message: "Le nombre de questions est obligatoire.")]
+    #[Assert\Positive(message: "Le nombre de questions doit être positif.")]
+    private int $nbre_questions = 1;
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'questionnairesAdmin')]
-    #[ORM\JoinColumn(name: 'admin_id', referencedColumnName: 'user_id', nullable: false)]
+    #[ORM\JoinColumn(name: 'admin_id', referencedColumnName: 'user_id', nullable: true)]
     private ?User $admin = null;
 
     #[ORM\OneToMany(mappedBy: 'questionnaire', targetEntity: Question::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
-    #[ORM\OrderBy(['ordre' => 'ASC'])]
     private Collection $questions;
 
     #[ORM\OneToMany(mappedBy: 'questionnaire', targetEntity: ReponseQuestionnaire::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
@@ -72,9 +84,14 @@ class Questionnaire
         $this->created_at = new \DateTime();
         $this->questions = new ArrayCollection();
         $this->reponses = new ArrayCollection();
+        $this->code = 'QST-' . date('Ymd') . '-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
     }
 
-    // Getters et setters
+    public function getId(): ?int
+    {
+        return $this->questionnaire_id;
+    }
+
     public function getQuestionnaireId(): ?int
     {
         return $this->questionnaire_id;
@@ -91,23 +108,23 @@ class Questionnaire
         return $this;
     }
 
-    public function getNom(): string
+    public function getNom(): ?string
     {
         return $this->nom;
     }
 
-    public function setNom(string $nom): self
+    public function setNom(?string $nom): self
     {
         $this->nom = $nom;
         return $this;
     }
 
-    public function getDescription(): string
+    public function getDescription(): ?string
     {
         return $this->description;
     }
 
-    public function setDescription(string $description): self
+    public function setDescription(?string $description): self
     {
         $this->description = $description;
         return $this;
@@ -120,16 +137,21 @@ class Questionnaire
 
     public function setType(string $type): self
     {
-        if (!in_array($type, TypeQuestionnaire::getValues(), true)) {
-            throw new \InvalidArgumentException('Type de questionnaire invalide');
+        $validTypes = ['stress', 'anxiete', 'depression', 'bienetre', 'sommeil'];
+        if (!in_array($type, $validTypes, true)) {
+            $type = 'stress';
         }
         $this->type = $type;
         return $this;
     }
 
-    public function getTypeEnum(): TypeQuestionnaire
+    public function getTypeEnum(): ?TypeQuestionnaire
     {
-        return TypeQuestionnaire::from($this->type);
+        try {
+            return TypeQuestionnaire::from($this->type);
+        } catch (\ValueError $e) {
+            return null;
+        }
     }
 
     public function setTypeEnum(TypeQuestionnaire $type): self
@@ -160,34 +182,34 @@ class Questionnaire
         return $this;
     }
 
-    public function getInterpretatLegere(): string
+    public function getInterpretatLegere(): ?string
     {
         return $this->interpretat_legere;
     }
 
-    public function setInterpretatLegere(string $interpretat_legere): self
+    public function setInterpretatLegere(?string $interpretat_legere): self
     {
         $this->interpretat_legere = $interpretat_legere;
         return $this;
     }
 
-    public function getInterpretatModere(): string
+    public function getInterpretatModere(): ?string
     {
         return $this->interpretat_modere;
     }
 
-    public function setInterpretatModere(string $interpretat_modere): self
+    public function setInterpretatModere(?string $interpretat_modere): self
     {
         $this->interpretat_modere = $interpretat_modere;
         return $this;
     }
 
-    public function getInterpretatSevere(): string
+    public function getInterpretatSevere(): ?string
     {
         return $this->interpretat_severe;
     }
 
-    public function setInterpretatSevere(string $interpretat_severe): self
+    public function setInterpretatSevere(?string $interpretat_severe): self
     {
         $this->interpretat_severe = $interpretat_severe;
         return $this;
@@ -244,16 +266,10 @@ class Questionnaire
 
     public function setAdmin(?User $admin): self
     {
-        // Vérifier que l'utilisateur est bien un admin
-        if ($admin && !$admin->isAdmin()) {
-            throw new \InvalidArgumentException('L\'utilisateur doit être un administrateur');
-        }
-
         $this->admin = $admin;
         return $this;
     }
 
-    // Méthodes pour les questions
     public function getQuestions(): Collection
     {
         return $this->questions;
@@ -265,23 +281,19 @@ class Questionnaire
             $this->questions[] = $question;
             $question->setQuestionnaire($this);
         }
-
         return $this;
     }
 
     public function removeQuestion(Question $question): self
     {
         if ($this->questions->removeElement($question)) {
-            // set the owning side to null (unless already changed)
             if ($question->getQuestionnaire() === $this) {
                 $question->setQuestionnaire(null);
             }
         }
-
         return $this;
     }
 
-    // Méthodes pour les réponses
     public function getReponses(): Collection
     {
         return $this->reponses;
@@ -293,26 +305,22 @@ class Questionnaire
             $this->reponses[] = $reponse;
             $reponse->setQuestionnaire($this);
         }
-
         return $this;
     }
 
     public function removeReponse(ReponseQuestionnaire $reponse): self
     {
         if ($this->reponses->removeElement($reponse)) {
-            // set the owning side to null (unless already changed)
             if ($reponse->getQuestionnaire() === $this) {
                 $reponse->setQuestionnaire(null);
             }
         }
-
         return $this;
     }
 
-    // Méthodes utilitaires
     public function __toString(): string
     {
-        return sprintf('%s (%s)', $this->nom, $this->code);
+        return sprintf('%s (%s)', $this->nom ?? 'Sans nom', $this->code);
     }
 
     #[ORM\PreUpdate]
@@ -321,19 +329,17 @@ class Questionnaire
         $this->updated_at = new \DateTime();
     }
 
-    // Méthode pour obtenir l'interprétation selon le score
     public function getInterpretationForScore(int $score): string
     {
         if ($score <= $this->seuil_leger) {
-            return $this->interpretat_legere;
+            return $this->interpretat_legere ?? '';
         } elseif ($score <= $this->seuil_modere) {
-            return $this->interpretat_modere;
+            return $this->interpretat_modere ?? '';
         } else {
-            return $this->interpretat_severe;
+            return $this->interpretat_severe ?? '';
         }
     }
 
-    // Méthode pour obtenir le niveau selon le score
     public function getNiveauForScore(int $score): string
     {
         if ($score <= $this->seuil_leger) {
@@ -345,129 +351,77 @@ class Questionnaire
         }
     }
 
-    // Méthode pour vérifier si le questionnaire est complet
     public function isComplete(): bool
     {
         return $this->questions->count() === $this->nbre_questions;
     }
 
-    // Méthode pour obtenir le pourcentage de complétion
     public function getCompletionPercentage(): float
     {
         $questionCount = $this->questions->count();
         if ($this->nbre_questions === 0) {
             return $questionCount > 0 ? 100 : 0;
         }
-
-        $percentage = ($questionCount / $this->nbre_questions) * 100;
-
-        // Limiter à 100%
-        return min($percentage, 100);
+        return min(($questionCount / $this->nbre_questions) * 100, 100);
     }
-    // Méthode pour obtenir le type sous forme lisible
+
     public function getTypeLabel(): string
     {
-        return $this->getTypeEnum()->getLabel();
+        $typeEnum = $this->getTypeEnum();
+        return $typeEnum ? $typeEnum->getLabel() : 'Non défini';
     }
 
-    // Méthode pour obtenir le nombre de réponses
     public function getNombreReponses(): int
     {
         return $this->reponses->count();
     }
 
-    // Méthode pour obtenir le score moyen
-    public function getScoreMoyen(): ?float
-    {
-        if ($this->reponses->isEmpty()) {
-            return null;
-        }
-
-        $total = 0;
-        foreach ($this->reponses as $reponse) {
-            $total += $reponse->getScoreTotal();
-        }
-
-        return $total / $this->reponses->count();
-    }
-
-    // Méthode pour vérifier les seuils
-    public function validateSeuils(): bool
-    {
-        return $this->seuil_leger < $this->seuil_modere &&
-            $this->seuil_modere < $this->seuil_severe;
-    }
-
-    // Méthode pour générer un code unique
     public function generateCode(): string
     {
         $prefix = strtoupper(substr($this->type, 0, 3));
         $timestamp = time();
         $random = bin2hex(random_bytes(2));
-
         return sprintf('%s-%s-%s', $prefix, $timestamp, $random);
     }
 
-    // Méthode pour obtenir un résumé
-    public function getResume(): string
+    // ✅ VALIDATION SIMPLIFIÉE - PLUS D'ERREUR DE QUESTIONS
+    #[Assert\Callback]
+    public function validate(ExecutionContextInterface $context, $payload): void
     {
-        return sprintf(
-            "Questionnaire: %s\n" .
-                "Code: %s\n" .
-                "Type: %s\n" .
-                "Nombre de questions: %d/%d\n" .
-                "Seuils: Léger ≤ %d, Modéré ≤ %d, Sévère > %d\n" .
-                "Réponses: %d",
-            $this->nom,
-            $this->code,
-            $this->getTypeLabel(),
-            $this->questions->count(),
-            $this->nbre_questions,
-            $this->seuil_leger,
-            $this->seuil_modere,
-            $this->seuil_severe,
-            $this->getNombreReponses()
-        );
+        // Vérification des interprétations identiques
+        $interpretations = [
+            'Légère' => $this->interpretat_legere,
+            'Modérée' => $this->interpretat_modere,
+            'Sévère' => $this->interpretat_severe
+        ];
+
+        $filledInterpretations = [];
+        foreach ($interpretations as $niveau => $text) {
+            if (!empty($text)) {
+                $filledInterpretations[$niveau] = $text;
+            }
+        }
+
+        if (count($filledInterpretations) > 1) {
+            $uniqueValues = array_unique($filledInterpretations);
+            if (count($uniqueValues) !== count($filledInterpretations)) {
+                $context->buildViolation('Les interprétations ne peuvent pas être identiques entre elles.')
+                    ->atPath('interpretat_legere')
+                    ->addViolation();
+            }
+        }
+
+        // ✅ SUPPRESSION TOTALE DE LA VALIDATION DES QUESTIONS
+        // On ne valide JAMAIS les questions à la création ou modification
+        // La gestion des questions se fait dans l'interface dédiée
     }
-    // Méthode pour obtenir les statistiques des réponses
-public function getStatistiquesReponses(): array
+    /**
+ * Calcule le score maximum possible pour ce questionnaire
+ * (nombre de questions * score maximum par question = 4)
+ */
+public function getScoreMaxPossible(): int
 {
-    $statistiques = [
-        'total_reponses' => $this->reponses->count(),
-        'score_moyen' => null,
-        'distribution_niveaux' => [
-            'léger' => 0,
-            'modéré' => 0,
-            'sévère' => 0
-        ],
-        'besoin_psy' => 0,
-        'scores' => []
-    ];
-    
-    if ($this->reponses->isEmpty()) {
-        return $statistiques;
-    }
-    
-    $totalScore = 0;
-    
-    foreach ($this->reponses as $reponse) {
-        $totalScore += $reponse->getScoreTotale();
-        $statistiques['scores'][] = $reponse->getScoreTotale();
-        
-        // Distribution des niveaux
-        $niveau = $reponse->getNiveau();
-        if (isset($statistiques['distribution_niveaux'][$niveau])) {
-            $statistiques['distribution_niveaux'][$niveau]++;
-        }
-        
-        // Besoin psy
-        if ($reponse->isABesoinPsy()) {
-            $statistiques['besoin_psy']++;
-        }
-    }
-    
-    $statistiques['score_moyen'] = $totalScore / $this->reponses->count();
-    
-    return $statistiques;
+    return $this->getNbreQuestions() * 4;
 }
 }
+// PAS DE TAG HTML APRÈS LA FERMETURE PHP

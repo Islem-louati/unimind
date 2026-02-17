@@ -1,0 +1,211 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Traitements | UniMind{% endblock %}
+
+{% block body_class %}g-sidenav-show bg-gray-100{% endblock %}
+
+{% block body %}
+<div class="min-height-300 bg-primary position-absolute w-100"></div>
+<aside class="sidenav bg-white navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-4" id="sidenav-main">
+    
+    <hr class="horizontal dark mt-0">
+    <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('app_home') }}">
+                    <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="fas fa-home text-primary text-sm opacity-10"></i>
+                    </div>
+                    <span class="nav-link-text ms-1">Accueil</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('app_traitement_index') }}">
+                    <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="fas fa-stethoscope text-primary text-sm opacity-10"></i>
+                    </div>
+                    <span class="nav-link-text ms-1">Traitements</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ path('app_suivi_traitement_index') }}">
+                    <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="fas fa-calendar-check text-primary text-sm opacity-10"></i>
+                    </div>
+                    <span class="nav-link-text ms-1">SuiviTraitements</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('app_test_search') }}">
+                    <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="fas fa-search text-primary text-sm opacity-10"></i>
+                    </div>
+                    <span class="nav-link-text ms-1">Recherche</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</aside>
+
+<main class="main-content position-relative border-radius-lg">
+    <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur">
+        <div class="container-fluid py-1 px-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ path('app_home') }}">Accueil</a></li>
+                    <li class="breadcrumb-item"><a href="{{ path('app_traitement_index') }}">Traitements</a></li>
+                    <li class="breadcrumb-item active">SuiviTraitements</li>
+                </ol>
+            </nav>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Liste des SuiviTraitements</h6>
+                        <div>
+                            {% if is_granted('ROLE_PSYCHOLOGUE') or is_granted('ROLE_ETUDIANT') %}
+                            <a href="{{ path('app_suivi_traitement_new') }}" class="btn btn-primary btn-sm me-2">
+                                <i class="fas fa-plus me-2"></i>Nouveau Suivi
+                            </a>
+                            {% endif %}
+                            <a href="{{ path('app_traitement_index') }}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-stethoscope me-2"></i>Traitements
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body px-0 pt-0 pb-2">
+                        <div class="table-responsive p-0">
+                            <table class="table align-items-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Traitement</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Patient</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Psychologue</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Ressenti</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Évaluation</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Statut</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="suivisTableBody">
+                                    {% for suivi in suivis %}
+                                    <tr class="suivi-row" 
+                                        data-statut="{{ suivi.effectue ? 'effectue' : 'non_effectue' }}"
+                                        data-valide="{{ suivi.valide ? 'valide' : 'non_valide' }}"
+                                        data-ressenti="{{ suivi.ressenti ? suivi.ressenti : '' }}"
+                                        data-date="{{ suivi.dateSuivi|date('Y-m-d') }}"
+                                        data-titre="{{ suivi.traitement.titre|lower }}"
+                                        data-patient="{{ suivi.traitement.etudiant ? (suivi.traitement.etudiant.fullName|default('')) : ''|lower }}">
+                                        <td>
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">{{ suivi.dateSuivi|date('d/m/Y') }}</h6>
+                                                <p class="text-xs text-secondary mb-0">{{ suivi.heureEffective ? suivi.heureEffective|date('H:i') : 'N/A' }}</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column justify-content-center">
+                                                <h6 class="mb-0 text-sm">{{ suivi.traitement.titre }}</h6>
+                                                <p class="text-xs text-secondary mb-0">{{ suivi.traitement.etudiant ? suivi.traitement.etudiant.fullName : 'Non défini' }}</p>
+                                                <p class="text-xs text-secondary mb-0">
+                                                    <i class="fas fa-user-md me-1"></i>
+                                                    {{ suivi.traitement.psychologue ? suivi.traitement.psychologue.fullName : 'Non défini' }}
+                                                </p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {% if suivi.ressenti %}
+                                                <span class="badge {% if suivi.ressenti == 'TRES_BIEN' %}bg-gradient-success{% elseif suivi.ressenti == 'BIEN' %}bg-gradient-info{% elseif suivi.ressenti == 'MOYEN' %}bg-gradient-warning{% else %}bg-gradient-danger{% endif %}">
+                                                    {{ suivi.ressentiLabel|default(suivi.ressenti) }}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if suivi.evaluation %}
+                                                <div class="d-flex align-items-center">
+                                                    <span class="me-2">{{ suivi.evaluation }}/5</span>
+                                                    <div class="progress" style="width: 60px; height: 6px;">
+                                                        <div class="progress-bar bg-gradient-info" role="progressbar" style="width: {{ (suivi.evaluation / 5) * 100 }}%;" aria-valuenow="{{ suivi.evaluation }}" aria-valuemin="0" aria-valuemax="5"></div>
+                                                    </div>
+                                                </div>
+                                                <span class="text-xs">{{ suivi.evaluation }}/5</span>
+                                            </div>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column">
+                                                {% if suivi.effectue %}
+                                                    <span class="badge bg-gradient-success">Effectué</span>
+                                                {% else %}
+                                                    <span class="badge bg-gradient-warning">Non effectué</span>
+                                                {% endif %}
+                                                <span class="ms-2">{{ suivi.heureEffective ? suivi.heureEffective|date('H:i') : 'N/A' }}</span>
+                                            </div>
+                                            <div class="d-flex flex-column">
+                                                {% if suivi.valide %}
+                                                    <span class="badge bg-gradient-info">Validé</span>
+                                                {% else %}
+                                                    <span class="badge bg-gradient-secondary">Non validé</span>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td class="align-middle text-center">
+                                            <div class="btn-group" role="group">
+                                                <a href="{{ path('app_suivi_traitement_show', {'id': suivi.id}) }}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye me-1"></i>Voir
+                                                </a>
+                                                {% if is_granted('ROLE_PSYCHOLOGUE') and suivi.traitement.psychologue == app.user %}
+                                                    <a href="{{ path('app_suivi_traitement_new', {'traitement_id': suivi.traitement.id}) }}" class="btn btn-sm btn-success">
+                                                        <i class="fas fa-plus me-1"></i>Ajouter
+                                                    </a>
+                                                {% endif %}
+                                                {% if is_granted('ROLE_ETUDIANT') and suivi.traitement.etudiant == app.user %}
+                                                    <a href="{{ path('app_suivi_traitement_new', {'traitement_id': suivi.traitement.id}) }}" class="btn btn-sm btn-success">
+                                                        <i class="fas fa-plus me-1"></i>Ajouter
+                                                    </a>
+                                                {% endif %}
+                                                {% if can_delete %}
+                                                    <form method="post" action="{{ path('app_suivi_traitement_delete', {'id': suivi.id}) }}" style="display: inline;">
+                                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ suivi.id) }}">
+                                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce suivi ?')">
+                                                            <i class="fas fa-trash me-1"></i>Supprimer
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% if suivis is empty %}
+                            <div class="alert alert-info mx-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                {% if is_granted('ROLE_ETUDIANT') %}
+                                    Vous n'avez pas encore de suivis. 
+                                    <a href="{{ path('app_suivi_traitement_new') }}" class="alert-link">Créez votre premier suivi</a> pour commencer à suivre vos traitements.
+                                    Si vous n'avez pas de traitements assignés, contactez votre psychologue pour qu'il vous crée un traitement.
+                                {% else %}
+                                    Aucun suivi trouvé.
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+{% block javascripts %}
+{{ parent() }}
+{% endblock %}

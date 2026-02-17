@@ -1,0 +1,253 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Suivi #{{ suivi.id }}{% endblock %}
+
+{% block body_class %}g-sidenav-show bg-gray-100{% endblock %}
+
+{% block body %}
+<div class="min-height-300 bg-primary position-absolute w-100"></div>
+
+<aside class="sidenav bg-white navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-4" id="sidenav-main">
+    <div class="sidenav-header">
+        <i class="fas fa-times p-3 cursor-pointer text-secondary opacity-5 position-absolute end-0 top-0 d-none d-xl-none" aria-hidden="true" id="iconSidenav"></i>
+        <a class="navbar-brand m-0" href="{{ path('app_home') }}">
+            <img src="{{ asset('assets/img/unimind-logo.png') }}" width="26px" height="26px" class="navbar-brand-img h-100" alt="UniMind Logo">
+            <span class="ms-1 font-weight-bold">UniMind</span>
+        </a>
+    </div>
+    <hr class="horizontal dark mt-0">
+    <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('app_home') }}">
+                    <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="fas fa-home text-primary text-sm opacity-10"></i>
+                    </div>
+                    <span class="nav-link-text ms-1">Accueil</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('app_traitement_index') }}">
+                    <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="fas fa-stethoscope text-primary text-sm opacity-10"></i>
+                    </div>
+                    <span class="nav-link-text ms-1">Traitements</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</aside>
+
+<main class="main-content position-relative border-radius-lg">
+    <!-- Navbar -->
+    <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur" navbar-scroll="true">
+        <div class="container-fluid py-1 px-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
+                    <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="{{ path('app_home') }}">Accueil</a></li>
+                    <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="{{ path('app_traitement_index') }}">Traitements</a></li>
+                    <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="{{ path('app_traitement_show', {'id': suivi.traitement.id}) }}">{{ suivi.traitement.titre }}</a></li>
+                    <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Suivi #{{ suivi.id }}</li>
+                </ol>
+            </nav>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Détails du suivi -->
+                <div class="card mb-4">
+                    <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Détails du suivi</h6>
+                        <div>
+                            {% if can_edit %}
+                            <a href="{{ path('app_suivi_traitement_edit', {'id': suivi.id}) }}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-edit me-2"></i>Modifier
+                            </a>
+                            {% endif %}
+                            {% if can_validate and suivi.effectue and not suivi.valide %}
+                            <form method="post" action="{{ path('app_suivi_traitement_valider', {'id': suivi.id}) }}" style="display: inline;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('valider' ~ suivi.id) }}">
+                                <button type="submit" class="btn btn-success btn-sm" onclick="return confirm('Valider ce suivi ?')">
+                                    <i class="fas fa-check me-2"></i>Valider
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6 class="text-sm">Informations générales</h6>
+                                <p><strong>Date du suivi:</strong> {{ suivi.dateSuivi|date('d/m/Y') }}</p>
+                                <p><strong>Statut:</strong> 
+                                    <span class="badge badge-sm bg-{{ suivi.couleurStatut }}">
+                                        {{ suivi.statutDetaille }}
+                                    </span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-sm">État d'exécution</h6>
+                                <p><strong>Effectué:</strong> 
+                                    <span class="badge badge-sm {{ suivi.effectue ? 'bg-success' : 'bg-warning' }}">
+                                        {{ suivi.effectue ? 'Oui' : 'Non' }}
+                                    </span>
+                                </p>
+                                {% if suivi.heureEffective %}
+                                <p><strong>Heure effective:</strong> {{ suivi.heureEffective|date('H:i') }}</p>
+                                {% endif %}
+                                <p><strong>Validé:</strong> 
+                                    <span class="badge badge-sm {{ suivi.valide ? 'bg-success' : 'bg-secondary' }}">
+                                        {{ suivi.valide ? 'Oui' : 'Non' }}
+                                    </span>
+                                </p>
+                                {% if suivi.evaluation %}
+                                <p><strong>Évaluation:</strong> {{ suivi.evaluation }}/5</p>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if suivi.observations or suivi.observationsPsy %}
+                        <div class="mt-4">
+                            <h6 class="text-sm">Commentaires et observations</h6>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    {% if is_granted('ROLE_ETUDIANT') %}
+                                        <p class="mb-0">{{ suivi.observations|nl2br }}</p>
+                                    {% elseif is_granted('ROLE_PSYCHOLOGUE') %}
+                                        <p class="mb-0">{{ suivi.observationsPsy|nl2br }}</p>
+                                    {% else %}
+                                        <p class="mb-0">{{ suivi.observations|default(suivi.observationsPsy)|nl2br }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <h6 class="text-sm">Traitement associé</h6>
+                                <p><strong>Titre:</strong> <a href="{{ path('app_traitement_show', {'id': suivi.traitement.id}) }}">{{ suivi.traitement.titre }}</a></p>
+                                <p><strong>Patient:</strong> {{ suivi.traitement.etudiant.fullName }}</p>
+                                <p><strong>Psychologue:</strong> {{ suivi.traitement.psychologue.fullName }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-sm">Informations système</h6>
+                                <p><strong>Créé le:</strong> {{ suivi.createdAt|date('d/m/Y H:i') }}</p>
+                                {% if suivi.updatedAt %}
+                                <p><strong>Modifié le:</strong> {{ suivi.updatedAt|date('d/m/Y H:i') }}</p>
+                                {% endif %}
+                                <p><strong>ID:</strong> #{{ suivi.id }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Actions rapides -->
+                <div class="card mb-4">
+                    <div class="card-header pb-0">
+                        <h6 class="mb-0">Actions rapides</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{{ path('app_traitement_show', {'id': suivi.traitement.id}) }}" class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-stethoscope me-2"></i>Voir le traitement
+                            </a>
+                            
+                            {% if user_role == 'etudiant' and not suivi.effectue %}
+                            <form method="post" action="{{ path('app_suivi_traitement_effectuer', {'id': suivi.id}) }}">
+                                <input type="hidden" name="_token" value="{{ csrf_token('effectuer' ~ suivi.id) }}">
+                                <button type="submit" class="btn btn-outline-success btn-sm w-100" onclick="return confirm('Marquer ce suivi comme effectué ?')">
+                                    <i class="fas fa-check-circle me-2"></i>Marquer comme effectué
+                                </button>
+                            </form>
+                            {% endif %}
+
+                            {% if user_role == 'psychologue' %}
+                            <a href="{{ path('app_suivi_traitement_a_valider') }}" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-list me-2"></i>Suivis à valider
+                            </a>
+                            {% endif %}
+
+                            {% if user_role == 'etudiant' %}
+                            <a href="{{ path('app_suivi_traitement_index') }}" class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-calendar-check me-2"></i>Mes suivis
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statut du suivi -->
+                <div class="card mb-4">
+                    <div class="card-header pb-0">
+                        <h6 class="mb-0">État du suivi</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline timeline-one-side">
+                            <div class="timeline-block mb-3">
+                                <span class="timeline-step">
+                                    <i class="fas fa-calendar text-primary"></i>
+                                </span>
+                                <div class="timeline-content">
+                                    <h6 class="text-dark text-sm font-weight-bold mb-0">Date prévue</h6>
+                                    <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">{{ suivi.dateSuivi|date('d/m/Y') }}</p>
+                                </div>
+                            </div>
+
+                            {% if suivi.effectue %}
+                            <div class="timeline-block mb-3">
+                                <span class="timeline-step">
+                                    <i class="fas fa-check text-success"></i>
+                                </span>
+                                <div class="timeline-content">
+                                    <h6 class="text-dark text-sm font-weight-bold mb-0">Effectué</h6>
+                                    <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">
+                                        {{ suivi.heureEffective ? suivi.heureEffective|date('H:i') : 'Heure non précisée' }}
+                                    </p>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if suivi.valide %}
+                            <div class="timeline-block mb-3">
+                                <span class="timeline-step">
+                                    <i class="fas fa-check-double text-info"></i>
+                                </span>
+                                <div class="timeline-content">
+                                    <h6 class="text-dark text-sm font-weight-bold mb-0">Validé</h6>
+                                    <p class="text-secondary font-weight-bold text-xs mt-1 mb-0">Par le psychologue</p>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Flash messages -->
+{% for type, messages in app.session.flashbag.all() %}
+    {% for message in messages %}
+        <div class="alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999;" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endfor %}
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    // Auto-hide flash messages
+    setTimeout(function() {
+        $('.alert').fadeOut();
+    }, 5000);
+</script>
+{% endblock %}

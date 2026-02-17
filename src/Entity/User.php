@@ -842,17 +842,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     // Méthodes pour les rôles spécifiques
     public function isEtudiant(): bool
     {
-        return $this->hasRole(RoleType::ETUDIANT->value);
+        return $this->hasRole('ROLE_ETUDIANT');
     }
 
     public function isPsychologue(): bool
     {
-        return $this->hasRole(RoleType::PSYCHOLOGUE->value);
+        return $this->hasRole('ROLE_PSYCHOLOGUE');
     }
 
     public function isResponsableEtudiant(): bool
     {
-        return $this->hasRole(RoleType::RESPONSABLE_ETUDIANT->value);
+        return $this->hasRole('ROLE_RESPONSABLE_ETUDIANT');
     }
 
     public function isAdmin(): bool

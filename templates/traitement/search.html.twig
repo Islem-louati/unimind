@@ -1,0 +1,315 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Recherche de Traitements{% endblock %}
+
+{% block body_class %}g-sidenav-show bg-gray-100{% endblock %}
+
+{% block body %}
+<div class="min-height-300 bg-primary position-absolute w-100"></div>
+
+<aside class="sidenav bg-white navbar navbar-vertical navbar-expand-xs border-0 border-radius-xl my-3 fixed-start ms-4" id="sidenav-main">
+    
+    <hr class="horizontal dark mt-0">
+    <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('app_home') }}">
+                    <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="fas fa-home text-primary text-sm opacity-10"></i>
+                    </div>
+                    <span class="nav-link-text ms-1">Accueil</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ path('app_traitement_index') }}">
+                    <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="fas fa-stethoscope text-primary text-sm opacity-10"></i>
+                    </div>
+                    <span class="nav-link-text ms-1">Traitements</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ path('app_traitement_search') }}">
+                    <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="fas fa-search text-primary text-sm opacity-10"></i>
+                    </div>
+                    <span class="nav-link-text ms-1">Recherche</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</aside>
+
+<main class="main-content position-relative border-radius-lg">
+    <!-- Navbar -->
+    <nav class="navbar navbar-main navbar-expand-lg px-0 mx-4 shadow-none border-radius-xl" id="navbarBlur" navbar-scroll="true">
+        <div class="container-fluid py-1 px-3">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
+                    <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="{{ path('app_home') }}">Accueil</a></li>
+                    <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="{{ path('app_traitement_index') }}">Traitements</a></li>
+                    <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Recherche</li>
+                </ol>
+            </nav>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-header pb-0">
+                        <h6 class="mb-0">Recherche avancée de traitements</h6>
+                    </div>
+                    <div class="card-body">
+                        <form id="searchForm" class="row g-3">
+                            <div class="col-md-4">
+                                <label for="searchTerm" class="form-label">Recherche</label>
+                                <input type="text" class="form-control" id="searchTerm" placeholder="Titre, description, patient...">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="statut" class="form-label">Statut</label>
+                                <select class="form-select" id="statut">
+                                    <option value="">Tous</option>
+                                    <option value="EN_COURS">En cours</option>
+                                    <option value="TERMINE">Terminé</option>
+                                    <option value="SUSPENDU">Suspendu</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="priorite" class="form-label">Priorité</label>
+                                <select class="form-select" id="priorite">
+                                    <option value="">Toutes</option>
+                                    <option value="HAUTE">Haute</option>
+                                    <option value="MOYENNE">Moyenne</option>
+                                    <option value="BASSE">Basse</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="sortBy" class="form-label">Trier par</label>
+                                <select class="form-select" id="sortBy">
+                                    <option value="createdAt">Date de création</option>
+                                    <option value="titre">Titre</option>
+                                    <option value="dateDebut">Date de début</option>
+                                    <option value="priorite">Priorité</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="sortOrder" class="form-label">Ordre</label>
+                                <select class="form-select" id="sortOrder">
+                                    <option value="desc">Décroissant</option>
+                                    <option value="asc">Croissant</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search me-2"></i>Rechercher
+                                </button>
+                                <button type="button" class="btn btn-secondary" id="resetBtn">
+                                    <i class="fas fa-redo me-2"></i>Réinitialiser
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Résultats de recherche</h6>
+                        <span id="resultCount" class="badge bg-primary">0 résultats</span>
+                    </div>
+                    <div class="card-body px-0 pt-0 pb-2">
+                        <div class="table-responsive p-0">
+                            <table class="table align-items-center mb-0" id="resultsTable">
+                                <thead>
+                                    <tr>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Titre</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Patient</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Psychologue</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Statut</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Priorité</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Progression</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="resultsBody">
+                                    <tr>
+                                        <td colspan="7" class="text-center">Lancez une recherche pour voir les résultats</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+let currentPage = 1;
+let isLoading = false;
+
+document.addEventListener('DOMContentLoaded', function() {
+    const searchForm = document.getElementById('searchForm');
+    const resetBtn = document.getElementById('resetBtn');
+    
+    searchForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        currentPage = 1;
+        performSearch();
+    });
+    
+    resetBtn.addEventListener('click', function() {
+        searchForm.reset();
+        currentPage = 1;
+        performSearch();
+    });
+    
+    // Recherche automatique lors du changement de filtres
+    ['searchTerm', 'statut', 'priorite', 'sortBy', 'sortOrder'].forEach(id => {
+        document.getElementById(id).addEventListener('change', function() {
+            currentPage = 1;
+            performSearch();
+        });
+    });
+});
+
+function performSearch() {
+    if (isLoading) return;
+    
+    isLoading = true;
+    
+    const formData = new FormData(document.getElementById('searchForm'));
+    const params = new URLSearchParams();
+    
+    for (let [key, value] of formData.entries()) {
+        if (value) params.append(key, value);
+    }
+    params.append('page', currentPage);
+    
+    // Afficher le loader
+    document.getElementById('resultsBody').innerHTML = `
+        <tr>
+            <td colspan="7" class="text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                </div>
+            </td>
+        </tr>
+    `;
+    
+    fetch(`/api/traitements?${params.toString()}`, {
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        displayResults(data);
+        isLoading = false;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('resultsBody').innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center text-danger">
+                    Erreur lors de la recherche
+                </td>
+            </tr>
+        `;
+        isLoading = false;
+    });
+}
+
+function displayResults(data) {
+    const tbody = document.getElementById('resultsBody');
+    const resultCount = document.getElementById('resultCount');
+    
+    resultCount.textContent = `${data.length} résultat${data.length > 1 ? 's' : ''}`;
+    
+    if (data.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center">
+                    <i class="fas fa-search fa-3x text-secondary mb-3"></i>
+                    <h6 class="text-secondary">Aucun résultat trouvé</h6>
+                    <p class="text-sm text-secondary">Essayez de modifier vos critères de recherche</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    tbody.innerHTML = data.map(traitement => `
+        <tr>
+            <td>
+                <div class="d-flex px-2 py-1">
+                    <div class="d-flex flex-column justify-content-center">
+                        <h6 class="mb-0 text-sm">${traitement.titre}</h6>
+                        <p class="text-xs text-secondary mb-0">${traitement.categorieLabel}</p>
+                    </div>
+                </div>
+            </td>
+            <td>
+                <p class="text-xs font-weight-bold mb-0">${traitement.etudiant.fullName}</p>
+            </td>
+            <td>
+                <p class="text-xs font-weight-bold mb-0">${traitement.psychologue.fullName}</p>
+            </td>
+            <td>
+                <span class="badge badge-sm ${getStatutClass(traitement.statut)}">
+                    ${traitement.statutLabel}
+                </span>
+            </td>
+            <td>
+                <span class="badge badge-sm ${getPrioriteClass(traitement.priorite)}">
+                    ${traitement.prioriteLabel}
+                </span>
+            </td>
+            <td>
+                <div class="progress">
+                    <div class="progress-bar bg-gradient-info" role="progressbar" style="width: ${traitement.pourcentageCompletion}%;" aria-valuenow="${traitement.pourcentageCompletion}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <span class="text-xs">${traitement.pourcentageCompletion.toFixed(1)}%</span>
+            </td>
+            <td class="align-middle">
+                <a href="/traitement/${traitement.traitement_id}" class="text-secondary font-weight-bold text-xs" data-toggle="tooltip" data-original-title="Voir">
+                    <i class="fas fa-eye"></i>
+                </a>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function getStatutClass(statut) {
+    const classes = {
+        'EN_COURS': 'bg-gradient-info',
+        'TERMINE': 'bg-gradient-success',
+        'SUSPENDU': 'bg-gradient-warning'
+    };
+    return classes[statut] || 'bg-gradient-secondary';
+}
+
+function getPrioriteClass(priorite) {
+    const classes = {
+        'HAUTE': 'bg-gradient-danger',
+        'MOYENNE': 'bg-gradient-warning',
+        'BASSE': 'bg-gradient-secondary'
+    };
+    return classes[priorite] || 'bg-gradient-secondary';
+}
+
+// Auto-hide flash messages
+setTimeout(function() {
+    $('.alert').fadeOut();
+}, 5000);
+</script>
+{% endblock %}
+{% endblock %}

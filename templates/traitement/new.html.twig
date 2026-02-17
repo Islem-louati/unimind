@@ -1,0 +1,239 @@
+{% extends 'layout/dashboard.html.twig' %}
+
+{% block page_title %}Nouveau Traitement{% endblock %}
+
+{% block breadcrumb %}
+    <li class="breadcrumb-item text-sm"><a class="opacity-5 text-dark" href="{{ path('app_traitement_index') }}">Traitements</a></li>
+    <li class="breadcrumb-item text-sm text-dark active" aria-current="page">Nouveau</li>
+{% endblock %}
+
+{% block dashboard_content %}
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card mb-4">
+                    <div class="card-header pb-0">
+                        <h6 class="mb-0">Créer un nouveau traitement</h6>
+                    </div>
+                    <div class="card-body">
+                        {{ form_start(form) }}
+                        
+                        <!-- Informations générales -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0 text-primary">
+                                    <i class="fas fa-info-circle me-2"></i>Informations générales
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            {{ form_label(form.titre, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
+                                            {{ form_widget(form.titre, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Titre du traitement...'}}) }}
+                                            {{ form_errors(form.titre) }}
+                                            {% for error in form_errors(form.titre) %}
+                                                <div class="text-danger small mt-1">
+                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            {{ form_label(form.categorie, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
+                                            {{ form_widget(form.categorie, {'attr': {'class': 'form-control form-select-lg'}}) }}
+                                            {{ form_errors(form.categorie) }}
+                                            {% for error in form_errors(form.categorie) %}
+                                                <div class="text-danger small mt-1">
+                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="mb-3">
+                                            {{ form_label(form.type, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
+                                            {{ form_widget(form.type, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Type de traitement...'}}) }}
+                                            {{ form_errors(form.type) }}
+                                            {% for error in form_errors(form.type) %}
+                                                <div class="text-danger small mt-1">
+                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    {{ form_label(form.description, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
+                                    {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 3, 'placeholder': 'Description détaillée du traitement...'}}) }}
+                                    {{ form_errors(form.description) }}
+                                    {% for error in form_errors(form.description) %}
+                                        <div class="text-danger small mt-1">
+                                            <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Planification -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0 text-warning">
+                                    <i class="fas fa-calendar-alt me-2"></i>Planification
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            {{ form_label(form.priorite, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
+                                            {{ form_widget(form.priorite, {'attr': {'class': 'form-control form-select-lg'}}) }}
+                                            {{ form_errors(form.priorite) }}
+                                            {% for error in form_errors(form.priorite) %}
+                                                <div class="text-danger small mt-1">
+                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            {{ form_label(form.statut, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
+                                            {{ form_widget(form.statut, {'attr': {'class': 'form-control form-select-lg'}}) }}
+                                            {{ form_errors(form.statut) }}
+                                            {% for error in form_errors(form.statut) %}
+                                                <div class="text-danger small mt-1">
+                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            {{ form_label(form.duree_jours, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
+                                            {{ form_widget(form.duree_jours, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Durée en jours'}}) }}
+                                            {{ form_errors(form.duree_jours) }}
+                                            {% for error in form_errors(form.duree_jours) %}
+                                                <div class="text-danger small mt-1">
+                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            {{ form_label(form.date_debut, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
+                                            {{ form_widget(form.date_debut, {'attr': {'class': 'form-control form-control-lg'}}) }}
+                                            {{ form_errors(form.date_debut) }}
+                                            {% for error in form_errors(form.date_debut) %}
+                                                <div class="text-danger small mt-1">
+                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            {{ form_label(form.date_fin, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
+                                            {{ form_widget(form.date_fin, {'attr': {'class': 'form-control form-control-lg'}}) }}
+                                            {{ form_errors(form.date_fin) }}
+                                            {% for error in form_errors(form.date_fin) %}
+                                                <div class="text-danger small mt-1">
+                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            {{ form_label(form.dosage, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
+                                            {{ form_widget(form.dosage, {'attr': {'class': 'form-control form-control-lg', 'placeholder': 'Dosage si applicable'}}) }}
+                                            {{ form_errors(form.dosage) }}
+                                            {% for error in form_errors(form.dosage) %}
+                                                <div class="text-danger small mt-1">
+                                                    <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Objectifs -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0 text-success">
+                                    <i class="fas fa-bullseye me-2"></i>Objectifs thérapeutiques
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    {{ form_label(form.objectif_therapeutique, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
+                                    {{ form_widget(form.objectif_therapeutique, {'attr': {'class': 'form-control', 'rows': 3, 'placeholder': 'Objectifs à atteindre avec ce traitement...'}}) }}
+                                    {{ form_errors(form.objectif_therapeutique) }}
+                                    {% for error in form_errors(form.objectif_therapeutique) %}
+                                        <div class="text-danger small mt-1">
+                                            <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                {% if form.etudiant is defined %}
+                                <div class="mb-3">
+                                    {{ form_label(form.etudiant, null, {'label_attr': {'class': 'form-control-label fw-bold'}}) }}
+                                    {{ form_widget(form.etudiant, {'attr': {'class': 'form-control form-select-lg'}}) }}
+                                    {{ form_errors(form.etudiant) }}
+                                    {% for error in form_errors(form.etudiant) %}
+                                        <div class="text-danger small mt-1">
+                                            <span>{{ error.message }}</span>{% if not loop.last %}<br>{% endif %}
+                                        </div>
+                                    {% endfor %}
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle me-1"></i>Sélectionnez l'étudiant qui suivra ce traitement
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <a href="{{ path('app_traitement_index') }}" class="btn btn-outline-secondary btn-lg me-3">
+                                <i class="fas fa-arrow-left me-2"></i>Retour
+                            </a>
+                            {{ form_widget(form.submit) }}
+                        </div>
+
+                        {{ form_end(form) }}
+                        {{ form_rest(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+</main>
+
+<!-- Flash messages -->
+{% for type, messages in app.session.flashbag.all() %}
+    {% for message in messages %}
+        <div class="alert alert-{{ type == 'error' ? 'danger' : type }} alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999;" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+{% endfor %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    // Auto-hide flash messages
+    setTimeout(function() {
+        $('.alert').fadeOut();
+    }, 5000);
+</script>
+{% endblock %}
+{% endblock %}
