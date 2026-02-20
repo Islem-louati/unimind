@@ -431,6 +431,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->user_id;
     }
 
+    public function getId(): ?int
+    {
+        return $this->user_id;
+    }
+
     public function getNom(): string
     {
         return $this->nom;
@@ -843,22 +848,22 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     // Méthodes pour les rôles spécifiques
     public function isEtudiant(): bool
     {
-        return $this->hasRole(RoleType::ETUDIANT->value);
+        return $this->role === RoleType::ETUDIANT;
     }
 
     public function isPsychologue(): bool
     {
-        return $this->hasRole(RoleType::PSYCHOLOGUE->value);
+        return $this->role === RoleType::PSYCHOLOGUE;
     }
 
     public function isResponsableEtudiant(): bool
     {
-        return $this->hasRole(RoleType::RESPONSABLE_ETUDIANT->value);
+        return $this->role === RoleType::RESPONSABLE_ETUDIANT;
     }
 
     public function isAdmin(): bool
     {
-        return $this->hasRole(RoleType::ADMIN->value);
+        return $this->role === RoleType::ADMIN;
     }
 
     /**

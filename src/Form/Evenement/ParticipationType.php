@@ -22,11 +22,25 @@ class ParticipationType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        /** @var User|null $organisateur */
+        $organisateur = $options['organisateur_evenements'] ?? null;
+
         $builder
             ->add('evenement', EntityType::class, [
                 'label' => 'Événement',
                 'class' => Evenement::class,
                 'choice_label' => 'titre',
+                'query_builder' => function (EntityRepository $er) use ($organisateur) {
+                    $qb = $er->createQueryBuilder('e')
+                        ->orderBy('e.dateDebut', 'DESC');
+
+                    if ($organisateur !== null) {
+                        $qb->andWhere('e.organisateur = :organisateur')
+                            ->setParameter('organisateur', $organisateur);
+                    }
+
+                    return $qb;
+                },
                 'placeholder' => 'Choisir un événement',
             ])
             ->add('etudiant', EntityType::class, [
@@ -57,6 +71,7 @@ class ParticipationType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Participation::class,
+            'organisateur_evenements' => null,
         ]);
     }
 }

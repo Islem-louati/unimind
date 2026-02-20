@@ -64,6 +64,78 @@ class ParticipationRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    /**
+     * @return Participation[]
+     */
+    public function searchAndSortForOrganisateur(User $organisateur, string $q = '', string $sort = 'date_inscription', string $order = 'DESC'): array
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->leftJoin('p.evenement', 'e')
+            ->leftJoin('p.etudiant', 'u')
+            ->addSelect('e', 'u')
+            ->andWhere('e.organisateur = :organisateur')
+            ->setParameter('organisateur', $organisateur);
+
+        if ($q !== '') {
+            $qb->andWhere('e.titre LIKE :q OR u.nom LIKE :q OR u.prenom LIKE :q OR u.email LIKE :q')
+                ->setParameter('q', '%' . $q . '%');
+        }
+
+        $allowedSort = ['date_inscription', 'statut', 'evenement_titre'];
+        if (!\in_array($sort, $allowedSort, true)) {
+            $sort = 'date_inscription';
+        }
+        $order = strtoupper($order) === 'DESC' ? 'DESC' : 'ASC';
+
+        if ($sort === 'evenement_titre') {
+            $qb->orderBy('e.titre', $order);
+        } else {
+            $qb->orderBy('p.' . $sort, $order);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * @return Participation[]
+     */
+    public function searchFeedbacks(string $q = '', string $sort = 'feedback_at', string $order = 'DESC', ?User $organisateur = null): array
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->leftJoin('p.evenement', 'e')
+            ->leftJoin('p.etudiant', 'u')
+            ->leftJoin('e.organisateur', 'o')
+            ->addSelect('e', 'u', 'o')
+            ->andWhere("(p.note_satisfaction IS NOT NULL OR (p.feedback_commentaire IS NOT NULL AND p.feedback_commentaire <> ''))");
+
+        if ($organisateur !== null) {
+            $qb->andWhere('e.organisateur = :organisateur')
+                ->setParameter('organisateur', $organisateur);
+        }
+
+        if ($q !== '') {
+            $qb->andWhere("e.titre LIKE :q OR u.nom LIKE :q OR u.prenom LIKE :q OR u.email LIKE :q OR p.feedback_commentaire LIKE :q")
+                ->setParameter('q', '%' . $q . '%');
+        }
+
+        $allowedSort = ['feedback_at', 'note_satisfaction', 'evenement_titre', 'etudiant_nom'];
+        if (!\in_array($sort, $allowedSort, true)) {
+            $sort = 'feedback_at';
+        }
+
+        $order = strtoupper($order) === 'ASC' ? 'ASC' : 'DESC';
+
+        if ($sort === 'evenement_titre') {
+            $qb->orderBy('e.titre', $order);
+        } elseif ($sort === 'etudiant_nom') {
+            $qb->orderBy('u.nom', $order);
+        } else {
+            $qb->orderBy('p.' . $sort, $order);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
+
 //    /**
 //     * @return Participation[] Returns an array of Participation objects
 //     */

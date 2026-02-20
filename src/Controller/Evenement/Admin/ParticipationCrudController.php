@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\Evenement\Responsable;
+namespace App\Controller\Evenement\Admin;
 
 use App\Entity\Participation;
 use App\Form\Evenement\ParticipationType;
@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 /**
  * CRUD des participations.
  */
-#[Route('/responsable-etudiant/evenements/participations', name: 'app_back_participation_')]
+#[Route('/admin/evenements/participations', name: 'app_admin_participation_')]
 final class ParticipationCrudController extends AbstractController
 {
     #[Route('', name: 'index', methods: ['GET'])]
@@ -25,7 +25,10 @@ final class ParticipationCrudController extends AbstractController
         $order = (string) $request->query->get('order', 'DESC');
         $participations = $repository->searchAndSort($q, $sort, $order);
 
-        return $this->render('evenement/responsable/participation_index.html.twig', [
+        return $this->render('evenement/admin/participation_index.html.twig', [
+            'route_prefix' => 'app_admin_',
+            'space_label' => 'Admin',
+            'show_sponsors' => true,
             'participations' => $participations,
             'q' => $q,
             'sort' => $sort,
@@ -48,10 +51,13 @@ final class ParticipationCrudController extends AbstractController
             $em->persist($participation);
             $em->flush();
             $this->addFlash('success', 'La participation a été créée.');
-            return $this->redirectToRoute('app_back_participation_index');
+            return $this->redirectToRoute('app_admin_participation_index');
         }
 
-        return $this->render('evenement/responsable/participation_form.html.twig', [
+        return $this->render('evenement/admin/participation_form.html.twig', [
+            'route_prefix' => 'app_admin_',
+            'space_label' => 'Admin',
+            'show_sponsors' => true,
             'participation' => $participation,
             'form' => $form,
             'is_edit' => false,
@@ -77,10 +83,13 @@ final class ParticipationCrudController extends AbstractController
             }
             $em->flush();
             $this->addFlash('success', 'La participation a été modifiée.');
-            return $this->redirectToRoute('app_back_participation_index');
+            return $this->redirectToRoute('app_admin_participation_index');
         }
 
-        return $this->render('evenement/responsable/participation_form.html.twig', [
+        return $this->render('evenement/admin/participation_form.html.twig', [
+            'route_prefix' => 'app_admin_',
+            'space_label' => 'Admin',
+            'show_sponsors' => true,
             'participation' => $participation,
             'form' => $form,
             'is_edit' => true,
@@ -93,7 +102,7 @@ final class ParticipationCrudController extends AbstractController
         $token = $request->request->get('_token');
         if (!$this->isCsrfTokenValid('delete_participation_' . $participation->getId(), $token)) {
             $this->addFlash('error', 'Jeton de sécurité invalide.');
-            return $this->redirectToRoute('app_back_participation_index');
+            return $this->redirectToRoute('app_admin_participation_index');
         }
         if ($participation->isConfirme() && $participation->getEvenement()) {
             $participation->getEvenement()->decrementNombreInscrits();
@@ -101,6 +110,6 @@ final class ParticipationCrudController extends AbstractController
         $em->remove($participation);
         $em->flush();
         $this->addFlash('success', 'La participation a été supprimée.');
-        return $this->redirectToRoute('app_back_participation_index');
+        return $this->redirectToRoute('app_admin_participation_index');
     }
 }

@@ -71,7 +71,21 @@
                         {% if p.canGiveFeedback() %}
                           <a class="btn btn-sm btn-primary" href="{{ path('app_etudiant_participation_feedback', { id: p.id }) }}">Donner un feedback</a>
                         {% elseif p.hasFeedback() %}
-                          <span class="badge bg-success">Donné</span>
+                          <div class="d-flex flex-column gap-1">
+                            <span class="badge bg-success align-self-start">Feedback donné</span>
+                            <small class="text-xs mb-0">
+                              <strong>Votre note :</strong>
+                              {{ p.noteSatisfaction is not null ? p.noteSatisfaction ~ '/5' : '—' }}
+                            </small>
+                            {% if p.feedbackCommentaire %}
+                              <small class="text-xs mb-0">
+                                <strong>Votre commentaire :</strong>
+                                <span style="display:inline-block; max-width: 360px; white-space: normal; word-break: break-word;">
+                                  {{ p.feedbackCommentaire }}
+                                </span>
+                              </small>
+                            {% endif %}
+                          </div>
                         {% else %}
                           <span class="badge bg-secondary">Non disponible</span>
                         {% endif %}

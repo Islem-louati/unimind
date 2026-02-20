@@ -17,20 +17,25 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\EnumType;
 
 /**
- * Formulaire de création/édition d'un lien Événement–Sponsor.
- * Validation côté serveur via les contraintes Assert sur l'entité.
+ * Formulaire de création/édition d'un lien Événement–Sponsor
  */
 class EvenementSponsorType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+        $evenementFieldOptions = [
+            'label' => 'Événement',
+            'class' => Evenement::class,
+            'choice_label' => 'titre',
+            'placeholder' => 'Choisir un événement',
+        ];
+
+        if ($options['evenement_choices'] !== null) {
+            $evenementFieldOptions['choices'] = $options['evenement_choices'];
+        }
+
         $builder
-            ->add('evenement', EntityType::class, [
-                'label' => 'Événement',
-                'class' => Evenement::class,
-                'choice_label' => 'titre',
-                'placeholder' => 'Choisir un événement',
-            ])
+            ->add('evenement', EntityType::class, $evenementFieldOptions)
             ->add('sponsor', EntityType::class, [
                 'label' => 'Sponsor',
                 'class' => Sponsor::class,
@@ -66,6 +71,7 @@ class EvenementSponsorType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => EvenementSponsor::class,
+            'evenement_choices' => null,
         ]);
     }
 }

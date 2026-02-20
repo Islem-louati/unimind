@@ -22,6 +22,8 @@
                                     </div>
                                 {% endif %}
 
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
                                 <div class="mb-3">
                                     <input type="email" name="email" value="{{ last_username }}" class="form-control form-control-lg" placeholder="Email" required autofocus>
                                 </div>

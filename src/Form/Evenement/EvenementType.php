@@ -52,11 +52,6 @@ class EvenementType extends AbstractType
             ->add('capaciteMax', IntegerType::class, [
                 'label' => 'Capacité maximale',
             ])
-            ->add('organisateur', EntityType::class, [
-                'label' => 'Organisateur',
-                'class' => User::class,
-                'choice_label' => 'fullName',
-            ])
             ->add('statut', EnumType::class, [
                 'label' => 'Statut',
                 'class' => StatutEvenement::class,
@@ -76,6 +71,14 @@ class EvenementType extends AbstractType
                 ],
             ])
         ;
+
+        if ($options['allow_organisateur']) {
+            $builder->add('organisateur', EntityType::class, [
+                'label' => 'Organisateur',
+                'class' => User::class,
+                'choice_label' => 'fullName',
+            ]);
+        }
     }
 
     public function configureOptions(OptionsResolver $resolver): void
@@ -83,6 +86,7 @@ class EvenementType extends AbstractType
         $resolver->setDefaults([
             'data_class' => Evenement::class,
             'validation_groups' => ['Default', 'creation'],
+            'allow_organisateur' => true,
         ]);
     }
 }

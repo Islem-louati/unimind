@@ -16,7 +16,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
- * Contrôleur Module Événements – Espace étudiant.
  * Pages dédiées aux étudiants, liste et détail des événements
  */
 #[Route('/etudiant/evenements', name: 'app_evenement_etudiant_')]

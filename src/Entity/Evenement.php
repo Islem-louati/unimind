@@ -69,7 +69,7 @@ class Evenement
 
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'evenementsOrganises')]
     #[ORM\JoinColumn(name: 'organisateur_id', referencedColumnName: 'user_id', nullable: false)]
-    #[Assert\NotNull(message: "L'organisateur est obligatoire")]
+    #[Assert\NotNull(message: "L'organisateur est obligatoire", groups: ["creation"])]
     private ?User $organisateur = null;
 
     #[ORM\Column(type: Types::STRING, length: 20)]
@@ -156,7 +156,7 @@ class Evenement
         return $this->dateDebut;
     }
 
-    public function setDateDebut(\DateTimeInterface $dateDebut): self
+    public function setDateDebut(?\DateTimeInterface $dateDebut): self
     {
         $this->dateDebut = $dateDebut;
         return $this;
@@ -167,7 +167,7 @@ class Evenement
         return $this->dateFin;
     }
 
-    public function setDateFin(\DateTimeInterface $dateFin): self
+    public function setDateFin(?\DateTimeInterface $dateFin): self
     {
         $this->dateFin = $dateFin;
         return $this;

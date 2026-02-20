@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\Evenement\Responsable;
+namespace App\Controller\Evenement\Admin;
 
 use App\Enum\StatutEvenement;
 use App\Repository\EvenementRepository;
@@ -14,7 +14,7 @@ use Symfony\Component\Routing\Attribute\Route;
 /**
  * Dashboard responsable– Module Événements.
  */
-#[Route('/responsable-etudiant', name: 'app_back_')]
+#[Route('/admin', name: 'app_admin_')]
 final class BackController extends AbstractController
 {
     /**
@@ -53,7 +53,10 @@ final class BackController extends AbstractController
             ->getQuery()
             ->getResult();
 
-        return $this->render('evenement/responsable/dashboard.html.twig', [
+        return $this->render('evenement/admin/dashboard.html.twig', [
+            'route_prefix' => 'app_admin_',
+            'space_label' => 'Admin',
+            'show_sponsors' => true,
             'kpis' => [
                 'total_evenements' => $totalEvenements,
                 'evenements_a_venir' => $evenementsAVenirCount,

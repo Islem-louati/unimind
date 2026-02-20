@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\EvenementSponsor;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -48,6 +49,22 @@ class EvenementSponsorRepository extends ServiceEntityRepository
             $qb->orderBy('es.' . $sort, $order);
         }
         return $qb->getQuery()->getResult();
+    }
+
+    /**
+     * @return EvenementSponsor[]
+     */
+    public function findForOrganisateur(User $organisateur): array
+    {
+        return $this->createQueryBuilder('es')
+            ->leftJoin('es.evenement', 'e')
+            ->leftJoin('es.sponsor', 's')
+            ->addSelect('e', 's')
+            ->andWhere('e.organisateur = :org')
+            ->setParameter('org', $organisateur)
+            ->orderBy('es.dateContribution', 'DESC')
+            ->getQuery()
+            ->getResult();
     }
 
 //    /**

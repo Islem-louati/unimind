@@ -50,11 +50,21 @@ class SponsorContributionType extends AbstractType
             ->add('nomSponsor', TextType::class, [
                 'label' => 'Nom du sponsor',
                 'attr' => ['placeholder' => 'Nom du sponsor'],
+                'constraints' => [
+                    new Assert\NotBlank([
+                        'message' => 'Le nom du sponsor est obligatoire',
+                    ]),
+                ],
             ])
             ->add('typeSponsor', ChoiceType::class, [
                 'label' => 'Type de sponsor',
                 'choices' => $typeSponsorChoices,
                 'placeholder' => 'Sélectionner un type',
+                'constraints' => [
+                    new Assert\NotBlank([
+                        'message' => 'Le type de sponsor est obligatoire',
+                    ]),
+                ],
             ])
             ->add('siteWeb', UrlType::class, [
                 'label' => 'Site web',
@@ -64,6 +74,14 @@ class SponsorContributionType extends AbstractType
             ->add('emailContact', EmailType::class, [
                 'label' => 'Email de contact',
                 'attr' => ['placeholder' => 'email@example.com'],
+                'constraints' => [
+                    new Assert\NotBlank([
+                        'message' => 'L\'email de contact est obligatoire',
+                    ]),
+                    new Assert\Email([
+                        'message' => 'L\'email n\'est pas valide',
+                    ]),
+                ],
             ])
             ->add('telephone', TelType::class, [
                 'label' => 'Téléphone',

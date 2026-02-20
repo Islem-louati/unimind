@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\Evenement\Responsable;
+namespace App\Controller\Evenement\Admin;
 
 use App\Entity\EvenementSponsor;
 use App\Form\Evenement\EvenementSponsorType;
@@ -14,13 +14,13 @@ use Symfony\Component\Routing\Attribute\Route;
 /**
  * CRUD des liens Événement–Sponsor (Back Office).
  */
-#[Route('/responsable-etudiant/evenement-sponsors', name: 'app_back_evenement_sponsor_')]
+#[Route('/admin/evenement-sponsors', name: 'app_admin_evenement_sponsor_')]
 final class EvenementSponsorCrudController extends AbstractController
 {
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(): Response
     {
-        return $this->redirectToRoute('app_back_sponsor_index');
+        return $this->redirectToRoute('app_admin_sponsor_index');
     }
 
     #[Route('/new', name: 'new', methods: ['GET', 'POST'])]
@@ -34,10 +34,13 @@ final class EvenementSponsorCrudController extends AbstractController
             $em->persist($evenementSponsor);
             $em->flush();
             $this->addFlash('success', 'La contribution a été enregistrée.');
-            return $this->redirectToRoute('app_back_evenement_sponsor_index');
+            return $this->redirectToRoute('app_admin_evenement_sponsor_index');
         }
 
-        return $this->render('evenement/responsable/evenement_sponsor_form.html.twig', [
+        return $this->render('evenement/admin/evenement_sponsor_form.html.twig', [
+            'route_prefix' => 'app_admin_',
+            'space_label' => 'Admin',
+            'show_sponsors' => true,
             'evenement_sponsor' => $evenementSponsor,
             'form' => $form,
             'is_edit' => false,
@@ -52,11 +55,14 @@ final class EvenementSponsorCrudController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em->flush();
-            $this->addFlash('success', 'La contribution a été modifiée.');
-            return $this->redirectToRoute('app_back_evenement_sponsor_index');
+            $this->addFlash('success', 'Le sponsor a été associé à l\'événement.');
+            return $this->redirectToRoute('app_admin_evenement_sponsor_index');
         }
 
-        return $this->render('evenement/responsable/evenement_sponsor_form.html.twig', [
+        return $this->render('evenement/admin/evenement_sponsor_form.html.twig', [
+            'route_prefix' => 'app_admin_',
+            'space_label' => 'Admin',
+            'show_sponsors' => true,
             'evenement_sponsor' => $evenementSponsor,
             'form' => $form,
             'is_edit' => true,
@@ -69,11 +75,11 @@ final class EvenementSponsorCrudController extends AbstractController
         $token = $request->request->get('_token');
         if (!$this->isCsrfTokenValid('delete_evenement_sponsor_' . $evenementSponsor->getId(), $token)) {
             $this->addFlash('error', 'Jeton de sécurité invalide.');
-            return $this->redirectToRoute('app_back_evenement_sponsor_index');
+            return $this->redirectToRoute('app_admin_sponsor_index');
         }
         $em->remove($evenementSponsor);
         $em->flush();
         $this->addFlash('success', 'La contribution a été supprimée.');
-        return $this->redirectToRoute('app_back_evenement_sponsor_index');
+        return $this->redirectToRoute('app_admin_evenement_sponsor_index');
     }
 }

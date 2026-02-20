@@ -90,7 +90,7 @@ class Sponsor
         return $this->nomSponsor;
     }
 
-    public function setNomSponsor(string $nomSponsor): self
+    public function setNomSponsor(?string $nomSponsor): self
     {
         $this->nomSponsor = $nomSponsor;
         return $this;
@@ -123,7 +123,7 @@ class Sponsor
         return $this->emailContact;
     }
 
-    public function setEmailContact(string $emailContact): self
+    public function setEmailContact(?string $emailContact): self
     {
         $this->emailContact = $emailContact;
         return $this;

@@ -1,5 +1,5 @@
 <?php
-namespace App\Entity\Enum;
+namespace App\Enum;
 
 enum TypeFichier: string
 {

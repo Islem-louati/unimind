@@ -8,11 +8,9 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class DashboardEtudiantController extends AbstractController
 {
-    #[Route('/dashboard/etudiant', name: 'app_dashboard_etudiant')]
+    #[Route('/etudiant', name: 'app_etudiant_home')]
     public function index(): Response
     {
-        return $this->render('dashboard/dashboardEtudiant.html.twig', [
-            'controller_name' => 'DashboardEtudiantController',
-        ]);
+        return $this->redirectToRoute('app_evenement_etudiant_index');
     }
 }

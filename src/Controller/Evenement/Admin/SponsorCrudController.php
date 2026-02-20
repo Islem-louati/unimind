@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller\Evenement\Responsable;
+namespace App\Controller\Evenement\Admin;
 
 use App\Entity\Sponsor;
 use App\Entity\EvenementSponsor;
@@ -20,7 +20,7 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 /**
  * CRUD des sponsors
  */
-#[Route('/responsable-etudiant/sponsors', name: 'app_back_sponsor_')]
+#[Route('/admin/sponsors', name: 'app_admin_sponsor_')]
 final class SponsorCrudController extends AbstractController
 {
     private SluggerInterface $slugger;
@@ -42,7 +42,10 @@ final class SponsorCrudController extends AbstractController
 
         $sponsorsSansContribution = $sponsorRepository->findSponsorsWithoutContribution();
 
-        return $this->render('evenement/responsable/sponsor_index.html.twig', [
+        return $this->render('evenement/admin/sponsor_index.html.twig', [
+            'route_prefix' => 'app_admin_',
+            'space_label' => 'Admin',
+            'show_sponsors' => true,
             'evenement_sponsors' => $evenementSponsors,
             'sponsors_sans_contribution' => $sponsorsSansContribution,
             'q' => $q,
@@ -54,7 +57,10 @@ final class SponsorCrudController extends AbstractController
     #[Route('/{id}', name: 'show', requirements: ['id' => '\d+'], methods: ['GET'])]
     public function show(Sponsor $sponsor): Response
     {
-        return $this->render('evenement/responsable/sponsor_show.html.twig', [
+        return $this->render('evenement/admin/sponsor_show.html.twig', [
+            'route_prefix' => 'app_admin_',
+            'space_label' => 'Admin',
+            'show_sponsors' => true,
             'sponsor' => $sponsor,
         ]);
     }
@@ -83,10 +89,13 @@ final class SponsorCrudController extends AbstractController
             $em->persist($sponsor);
             $em->flush();
             $this->addFlash('success', 'Le sponsor a été créé.');
-            return $this->redirectToRoute('app_back_sponsor_index');
+            return $this->redirectToRoute('app_admin_sponsor_index');
         }
 
-        return $this->render('evenement/responsable/sponsor_form.html.twig', [
+        return $this->render('evenement/admin/sponsor_form.html.twig', [
+            'route_prefix' => 'app_admin_',
+            'space_label' => 'Admin',
+            'show_sponsors' => true,
             'sponsor' => $sponsor,
             'form' => $form,
             'is_edit' => false,
@@ -115,10 +124,13 @@ final class SponsorCrudController extends AbstractController
 
             $em->flush();
             $this->addFlash('success', 'Le sponsor a été modifié.');
-            return $this->redirectToRoute('app_back_sponsor_index');
+            return $this->redirectToRoute('app_admin_sponsor_index');
         }
 
-        return $this->render('evenement/responsable/sponsor_form.html.twig', [
+        return $this->render('evenement/admin/sponsor_form.html.twig', [
+            'route_prefix' => 'app_admin_',
+            'space_label' => 'Admin',
+            'show_sponsors' => true,
             'sponsor' => $sponsor,
             'form' => $form,
             'is_edit' => true,
@@ -131,12 +143,12 @@ final class SponsorCrudController extends AbstractController
         $token = $request->request->get('_token');
         if (!$this->isCsrfTokenValid('delete_sponsor_' . $sponsor->getSponsorId(), $token)) {
             $this->addFlash('error', 'Jeton de sécurité invalide.');
-            return $this->redirectToRoute('app_back_sponsor_index');
+            return $this->redirectToRoute('app_admin_sponsor_index');
         }
         $em->remove($sponsor);
         $em->flush();
         $this->addFlash('success', 'Le sponsor a été supprimé.');
-        return $this->redirectToRoute('app_back_sponsor_index');
+        return $this->redirectToRoute('app_admin_sponsor_index');
     }
 
     // --- Gestion des EvenementSponsor (liens événement-sponsor) ---
@@ -144,55 +156,22 @@ final class SponsorCrudController extends AbstractController
     #[Route('/contributions/new', name: 'contribution_new', methods: ['GET', 'POST'])]
     public function contributionNew(Request $request, EntityManagerInterface $em): Response
     {
-        $evenementSponsor = new EvenementSponsor();
-        $form = $this->createForm(EvenementSponsorType::class, $evenementSponsor);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em->persist($evenementSponsor);
-            $em->flush();
-            $this->addFlash('success', 'La contribution a été enregistrée.');
-            return $this->redirectToRoute('app_back_sponsor_index');
-        }
-
-        return $this->render('evenement/responsable/evenement_sponsor_form.html.twig', [
-            'evenement_sponsor' => $evenementSponsor,
-            'form' => $form,
-            'is_edit' => false,
-        ]);
+        $this->addFlash('error', 'L\'admin peut gérer les sponsors uniquement. L\'attribution aux événements se fait par les responsables.');
+        return $this->redirectToRoute('app_admin_sponsor_index');
     }
 
     #[Route('/contributions/{id}/edit', name: 'contribution_edit', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     public function contributionEdit(Request $request, EvenementSponsor $evenementSponsor, EntityManagerInterface $em): Response
     {
-        $form = $this->createForm(EvenementSponsorType::class, $evenementSponsor);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em->flush();
-            $this->addFlash('success', 'La contribution a été modifiée.');
-            return $this->redirectToRoute('app_back_sponsor_index');
-        }
-
-        return $this->render('evenement/responsable/evenement_sponsor_form.html.twig', [
-            'evenement_sponsor' => $evenementSponsor,
-            'form' => $form,
-            'is_edit' => true,
-        ]);
+        $this->addFlash('error', 'L\'admin peut gérer les sponsors uniquement. L\'attribution aux événements se fait par les responsables.');
+        return $this->redirectToRoute('app_admin_sponsor_index');
     }
 
     #[Route('/contributions/{id}/delete', name: 'contribution_delete', requirements: ['id' => '\d+'], methods: ['POST'])]
     public function contributionDelete(Request $request, EvenementSponsor $evenementSponsor, EntityManagerInterface $em): Response
     {
-        $token = $request->request->get('_token');
-        if (!$this->isCsrfTokenValid('delete_evenement_sponsor_' . $evenementSponsor->getId(), $token)) {
-            $this->addFlash('error', 'Jeton de sécurité invalide.');
-            return $this->redirectToRoute('app_back_sponsor_index');
-        }
-        $em->remove($evenementSponsor);
-        $em->flush();
-        $this->addFlash('success', 'La contribution a été supprimée.');
-        return $this->redirectToRoute('app_back_sponsor_index');
+        $this->addFlash('error', 'L\'admin peut gérer les sponsors uniquement. L\'attribution aux événements se fait par les responsables.');
+        return $this->redirectToRoute('app_admin_sponsor_index');
     }
 
     // === Formulaire combiné Sponsor + Contribution ===
@@ -200,58 +179,8 @@ final class SponsorCrudController extends AbstractController
     #[Route('/add-sponsor-contribution', name: 'sponsor_contribution_new', methods: ['GET', 'POST'])]
     public function sponsorContributionNew(Request $request, EntityManagerInterface $em): Response
     {
-        $form = $this->createForm(SponsorContributionType::class);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $data = $form->getData();
-
-            // Créer le sponsor
-            $sponsor = new Sponsor();
-            $sponsor->setNomSponsor($data['nomSponsor']);
-            $sponsor->setTypeSponsor(\App\Enum\TypeSponsor::from($data['typeSponsor']));
-            $sponsor->setSiteWeb($data['siteWeb']);
-            $sponsor->setEmailContact($data['emailContact']);
-            $sponsor->setTelephone($data['telephone']);
-            $sponsor->setAdresse($data['adresse']);
-            $sponsor->setDomaineActivite($data['domaineActivite']);
-
-            /** @var UploadedFile|null $logoFile */
-            $logoFile = $form->get('logoFile')->getData();
-            if ($logoFile) {
-                $originalFilename = pathinfo($logoFile->getClientOriginalName(), PATHINFO_FILENAME);
-                $safeFilename = $this->slugger->slug($originalFilename);
-                $newFilename = $safeFilename . '-' . uniqid() . '.' . $logoFile->guessExtension();
-                $logoFile->move(
-                    $this->getParameter('kernel.project_dir') . '/public/uploads/sponsors',
-                    $newFilename
-                );
-                $sponsor->setLogo($newFilename);
-            }
-            $em->persist($sponsor);
-
-            // Si un événement est sélectionné, créer la contribution
-            if (!empty($data['evenement'])) {
-                $contribution = new EvenementSponsor();
-                $contribution->setEvenement($data['evenement']);
-                $contribution->setSponsor($sponsor);
-                $contribution->setMontantContribution($data['montantContribution'] ?? '0.00');
-                $contribution->setTypeContribution(\App\Enum\TypeContribution::from($data['typeContribution'] ?? \App\Enum\TypeContribution::FINANCIER->value));
-                $contribution->setDescriptionContribution($data['descriptionContribution']);
-                $contribution->setDateContribution($data['dateContribution'] ?? new \DateTime());
-                $contribution->setStatut(\App\Enum\StatutSponsor::from($data['statut'] ?? \App\Enum\StatutSponsor::EN_ATTENTE->value));
-                $em->persist($contribution);
-            }
-
-            $em->flush();
-
-            $this->addFlash('success', 'Le sponsor a été créé' . (!empty($data['evenement']) ? ' et la contribution a été enregistrée.' : '.'));
-            return $this->redirectToRoute('app_back_sponsor_index');
-        }
-
-        return $this->render('evenement/responsable/sponsor_contribution_form.html.twig', [
-            'form' => $form,
-        ]);
+        $this->addFlash('error', 'L\'admin peut gérer les sponsors uniquement. L\'attribution aux événements se fait par les responsables.');
+        return $this->redirectToRoute('app_admin_sponsor_new');
     }
 
     // === Édition unifiée Sponsor + Contribution ===
@@ -259,6 +188,9 @@ final class SponsorCrudController extends AbstractController
     #[Route('/edit-unified/{id}', name: 'edit_unified', requirements: ['id' => '\d+'], methods: ['GET', 'POST'])]
     public function editUnified(Sponsor $sponsor, Request $request, EntityManagerInterface $em): Response
     {
+        $this->addFlash('error', 'L\'admin peut gérer les sponsors uniquement. L\'attribution aux événements se fait par les responsables.');
+        return $this->redirectToRoute('app_admin_sponsor_edit', ['id' => $sponsor->getSponsorId()]);
+
         // Récupérer la première contribution si elle existe
         $contribution = null;
         foreach ($sponsor->getEvenementSponsors() as $es) {
@@ -338,10 +270,13 @@ final class SponsorCrudController extends AbstractController
             $em->flush();
 
             $this->addFlash('success', 'Le sponsor a été modifié' . (!empty($data['evenement']) ? ' et la contribution a été mise à jour.' : '.'));
-            return $this->redirectToRoute('app_back_sponsor_index');
+            return $this->redirectToRoute('app_admin_sponsor_index');
         }
 
-        return $this->render('evenement/responsable/sponsor_contribution_form.html.twig', [
+        return $this->render('evenement/admin/sponsor_contribution_form.html.twig', [
+            'route_prefix' => 'app_admin_',
+            'space_label' => 'Admin',
+            'show_sponsors' => true,
             'form' => $form,
             'sponsor' => $sponsor,
             'contribution' => $contribution,
