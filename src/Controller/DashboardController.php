@@ -147,7 +147,7 @@ class DashboardController extends AbstractController
             $profil->setUser($user);
         }
 
-        return $this->render('dashboard/etudiant/profil.html.twig', [
+        return $this->render('profile/indexP.html.twig', [
             'user' => $user,
             'profil' => $profil,
         ]);
