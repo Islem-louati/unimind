@@ -5,15 +5,21 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Entity\RendezVous;
+use App\Entity\Profil;
 use App\Repository\QuestionnaireRepository;
+use App\Repository\ConsultationRepository;
 use App\Repository\QuestionRepository;
 use App\Repository\ReponseQuestionnaireRepository;
+use App\Repository\TraitementRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Repository\RendezVousRepository;
+use App\Repository\DisponibilitePsyRepository;
+
 
 class DashboardController extends AbstractController
 {
@@ -30,7 +36,7 @@ class DashboardController extends AbstractController
 
         // Vérifier les rôles Symfony
         $roles = $user->getRoles();
-        
+
         // Vérifier chaque rôle possible
         if (in_array('ROLE_ADMIN', $roles)) {
             return $this->redirectToRoute('admin_dashboard');
@@ -46,42 +52,226 @@ class DashboardController extends AbstractController
 
     #[Route('/dashboard/etudiant', name: 'etudiant_dashboard')]
     #[IsGranted('ROLE_ETUDIANT')]
-    public function etudiantDashboard(EntityManagerInterface $em): Response
-    {
+    public function etudiantDashboard(
+        RendezVousRepository $rdvRepository,
+        ConsultationRepository $consultationRepository,
+        TraitementRepository $traitementRepository
+    ): Response {
         /** @var User $user */
         $user = $this->getUser();
 
-        // Récupérer les questionnaires disponibles
-        $totalQuestionnaires = $em->getRepository(\App\Entity\Questionnaire::class)
-            ->createQueryBuilder('q')
-            ->select('COUNT(q)')
-            ->where('q.nbre_questions > 0')
-            ->getQuery()
-            ->getSingleScalarResult();
+        // Récupérer les prochains rendez-vous
+        $prochainsRdv = $rdvRepository->findProchainsRendezVous($user);
 
-        // Récupérer les questionnaires récents - CORRECTION: utiliser created_at au lieu de createdAt
-        $questionnairesRecents = $em->getRepository(\App\Entity\Questionnaire::class)
-            ->findBy([], ['created_at' => 'DESC'], 5);
+        // Récupérer tous les rendez-vous pour les statistiques
+        $tousRdv = $rdvRepository->findBy(['etudiant' => $user]);
 
-        return $this->render('etudiant/dashboard/index.html.twig', [
+        // Calculer les statistiques
+        $stats = [
+            'prochains_rdv' => count($prochainsRdv),
+            'total_consultations' => count(array_filter($tousRdv, fn($rdv) => method_exists($rdv, 'isTermine') ? $rdv->isTermine() : false)),
+            'traitements_actifs' => $traitementRepository ? $traitementRepository->countActifsByEtudiant($user) : 0,
+        ];
+
+        // Rendez-vous passés (terminés)
+        $rdvPasses = array_filter($tousRdv, fn($rdv) => method_exists($rdv, 'isTermine') ? $rdv->isTermine() : false);
+
+        return $this->render('dashboard/etudiant.html.twig', [
             'user' => $user,
-            'total_questionnaires' => $totalQuestionnaires,
-            'questionnaires_recents' => $questionnairesRecents,
+            'prochains_rdv' => $prochainsRdv,
+            'rdv_passés' => $rdvPasses,
+            'stats' => $stats,
         ]);
     }
 
-    #[Route('/dashboard/psychologue', name: 'app_dashboard_psy')]
-    #[IsGranted('ROLE_PSYCHOLOGUE')]
-    public function psychologueDashboard(): Response
+    #[Route('/dashboard/etudiant/rendez-vous', name: 'app_etudiant_rdv')]
+    #[IsGranted('ROLE_ETUDIANT')]
+    public function etudiantRendezVous(RendezVousRepository $rdvRepository): Response
     {
         /** @var User $user */
         $user = $this->getUser();
 
-        
+        $rendezVous = $rdvRepository->findByEtudiantOrderedByDate($user, 'DESC');
 
-        return $this->render('layout/dashboard.html.twig', [
+        return $this->render('dashboard/etudiant/rendez-vous.html.twig', [
             'user' => $user,
-            
+            'rendez_vous' => $rendezVous,
+        ]);
+    }
+
+    #[Route('/dashboard/etudiant/consultations', name: 'app_etudiant_consultations')]
+    #[IsGranted('ROLE_ETUDIANT')]
+    public function etudiantConsultations(ConsultationRepository $consultationRepository): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $consultations = $consultationRepository->findBy(
+            ['etudiant' => $user],
+            ['date_consultation' => 'DESC']
+        );
+
+        return $this->render('dashboard/etudiant/consultations.html.twig', [
+            'user' => $user,
+            'consultations' => $consultations,
+        ]);
+    }
+
+    #[Route('/dashboard/etudiant/traitements', name: 'app_etudiant_traitements')]
+    #[IsGranted('ROLE_ETUDIANT')]
+    public function etudiantTraitements(TraitementRepository $traitementRepository): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $traitementsActifs = $traitementRepository ? $traitementRepository->findActifsByEtudiant($user) : [];
+        $traitementsTermines = $traitementRepository ? $traitementRepository->findTerminesByEtudiant($user) : [];
+
+        return $this->render('dashboard/etudiant/traitements.html.twig', [
+            'user' => $user,
+            'traitements_actifs' => $traitementsActifs,
+            'traitements_termines' => $traitementsTermines,
+        ]);
+    }
+
+    #[Route('/dashboard/etudiant/profil', name: 'app_etudiant_profil')]
+    #[IsGranted('ROLE_ETUDIANT')]
+    public function etudiantProfil(): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $profil = $user->getProfil();
+
+        if (!$profil) {
+            $profil = new Profil();
+            $profil->setUser($user);
+        }
+
+        return $this->render('dashboard/etudiant/profil.html.twig', [
+            'user' => $user,
+            'profil' => $profil,
+        ]);
+    }
+
+    #[Route('/dashboard/psy')]
+    #[IsGranted('ROLE_PSYCHOLOGUE')]
+
+    #[Route('', name: 'app_dashboard_psy')]
+    public function psychologueDashboard(
+        EntityManagerInterface $em,
+        RendezVousRepository $rdvRepository,
+        ConsultationRepository $consultationRepository
+    ): Response {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        // Debug temporaire (removed dumps)
+
+        // Statistiques pour le dashboard
+        $stats = [
+            'rdv_aujourdhui' => $rdvRepository->count([
+                'psy' => $user,
+                // Ajouter un filtre pour aujourd'hui si vous avez la méthode
+            ]),
+            'patients_actifs' => count($user->getConsultationsPsy()),
+            'rdv_en_attente' => $rdvRepository->count([
+                'psy' => $user,
+                // Ajouter statut "en_attente" si vous l'avez
+            ]),
+        ];
+
+        // Prochains rendez-vous
+        $prochainsRdv = $rdvRepository->findByPsyOrderedByDate($user, 'ASC', 5);
+
+        return $this->render('dashboard/psychologue.html.twig', [
+            'user' => $user,
+            'stats' => $stats,
+            'prochains_rdv' => $prochainsRdv,
+        ]);
+    }
+
+    #[Route('/consultations', name: 'app_psy_consultations')]
+    public function consultations(ConsultationRepository $consultationRepository): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        $consultations = $consultationRepository->findBy(
+            ['psy' => $user],
+            ['date_consultation' => 'DESC']
+        );
+
+        return $this->render('dashboard/psychologue/consultations.html.twig', [
+            'user' => $user,
+            'consultations' => $consultations,
+        ]);
+    }
+
+    #[Route('/patients', name: 'app_psy_patients')]
+    public function patients(): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        // Récupérer tous les étudiants uniques qui ont eu des consultations avec ce psy
+        $consultations = $user->getConsultationsPsy();
+        $patients = [];
+
+        foreach ($consultations as $consultation) {
+            $etudiant = $consultation->getEtudiant();
+            if ($etudiant && !isset($patients[$etudiant->getUserId()])) {
+                $patients[$etudiant->getUserId()] = $etudiant;
+            }
+        }
+
+        return $this->render('dashboard/psychologue/patients.html.twig', [
+            'user' => $user,
+            'patients' => $patients,
+        ]);
+    }
+
+    #[Route('/rendez-vous', name: 'app_psy_rendez_vous')]
+    public function rendezVous(RendezVousRepository $rendezVousRepository): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        // Récupérer tous les rendez-vous du psychologue
+        $rendez_vous_list = $rendezVousRepository->findByPsyOrderedByDate($user, 'DESC');
+
+        // Organiser par statut
+        $demandes = array_filter($rendez_vous_list, fn($rdv) => $rdv->getStatut() === 'demande');
+        $confirmes = array_filter($rendez_vous_list, fn($rdv) => $rdv->getStatut() === 'confirme');
+        $en_cours = array_filter($rendez_vous_list, fn($rdv) => $rdv->getStatut() === 'en-cours');
+        $termines = array_filter($rendez_vous_list, fn($rdv) => $rdv->getStatut() === 'terminé');
+        $annules = array_filter($rendez_vous_list, fn($rdv) => $rdv->getStatut() === 'annulé');
+
+        return $this->render('psy/rendezvous/index.html.twig', [
+            'user' => $user,
+            'rendez_vous_list' => $rendez_vous_list,
+            'demandes' => $demandes,
+            'confirmes' => $confirmes,
+            'en_cours' => $en_cours,
+            'termines' => $termines,
+            'annules' => $annules,
+        ]);
+    }
+
+    #[Route('/profil', name: 'app_psy_profil')]
+    public function profil(): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+        $profil = $user->getProfil();
+
+        if (!$profil) {
+            $profil = new Profil();
+            $profil->setUser($user);
+        }
+
+        return $this->render('profile/indexP.html.twig', [
+            'user' => $user,
+            'profil' => $profil,
         ]);
     }
 
@@ -123,9 +313,9 @@ class DashboardController extends AbstractController
     ): Response {
         /** @var User $user */
         $user = $this->getUser();
-        
+
         $userRepo = $entityManager->getRepository(User::class);
-        
+
         // Statistiques utilisateurs
         $statsUtilisateurs = [
             'total_utilisateurs' => $userRepo->count([]),
@@ -158,12 +348,12 @@ class DashboardController extends AbstractController
         // Générer les données pour les graphiques
         $graphiqueLabels = [];
         $graphiqueData = [];
-        
+
         // Récupérer les données des 30 derniers jours
         for ($i = 29; $i >= 0; $i--) {
             $date = new \DateTime("-$i days");
             $graphiqueLabels[] = $date->format('d/m');
-            
+
             // Compter les réponses pour cette date - CORRECTION: utiliser created_at au lieu de dateReponse
             $count = $reponseRepository->createQueryBuilder('r')
                 ->select('COUNT(r)')
@@ -173,7 +363,7 @@ class DashboardController extends AbstractController
                 ->setParameter('end', $date->format('Y-m-d 23:59:59'))
                 ->getQuery()
                 ->getSingleScalarResult();
-            
+
             $graphiqueData[] = $count;
         }
 
@@ -412,7 +602,7 @@ class DashboardController extends AbstractController
     private function calculateEvolutionPercentage(ReponseQuestionnaireRepository $reponseRepository): float
     {
         $moisActuel = $this->countReponsesThisMonth($reponseRepository);
-        
+
         // CORRECTION: utiliser created_at au lieu de dateReponse
         $moisDernier = $reponseRepository->createQueryBuilder('r')
             ->select('COUNT(r)')
@@ -425,7 +615,7 @@ class DashboardController extends AbstractController
         if ($moisDernier > 0) {
             return round((($moisActuel - $moisDernier) / $moisDernier) * 100, 1);
         }
-        
+
         return 0;
     }
 

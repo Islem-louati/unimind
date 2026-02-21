@@ -124,14 +124,7 @@ class TraitementController extends AbstractController
 
         // Afficher les erreurs de validation si le formulaire est invalide
         if ($form->isSubmitted() && !$form->isValid()) {
-            $errors = $form->getErrors(true);
-            $errorMessages = [];
-            
-            foreach ($errors as $error) {
-                $errorMessages[] = $error->getMessage();
-            }
-            
-            $this->addFlash('error', 'Le formulaire contient des erreurs. Veuillez corriger les champs indiqués.');
+            $this->addFlash('error', 'Le formulaire contient des erreurs. Veuillez corriger les champs obligatoires.');
         }
 
         return $this->render('traitement/new.html.twig', [
@@ -193,6 +186,10 @@ class TraitementController extends AbstractController
             $this->addFlash('success', 'Le traitement a été modifié avec succès.');
 
             return $this->redirectToRoute('app_traitement_show', ['id' => $traitement->getId()]);
+        }
+
+        if ($form->isSubmitted() && !$form->isValid()) {
+            $this->addFlash('error', 'Le formulaire contient des erreurs. Veuillez corriger les champs obligatoires.');
         }
 
         return $this->render('traitement/edit.html.twig', [

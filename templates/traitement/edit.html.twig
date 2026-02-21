@@ -1,6 +1,6 @@
-{% extends 'base.html.twig' %}
+{% extends 'layout/dashboard.html.twig' %}
 
-{% block title %}Modifier {{ traitement.titre }}{% endblock %}
+{% block page_title %}Modifier {{ traitement.titre }}{% endblock %}
 
 {% block body_class %}g-sidenav-show bg-gray-100{% endblock %}
 
@@ -129,6 +129,12 @@
                             {{ form_label(form.objectif_therapeutique, null, {'label_attr': {'class': 'form-control-label'}}) }}
                             {{ form_widget(form.objectif_therapeutique, {'attr': {'class': 'form-control'}}) }}
                             {{ form_errors(form.objectif_therapeutique) }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(form.etudiant, null, {'label_attr': {'class': 'form-control-label'}}) }}
+                            {{ form_widget(form.etudiant, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.etudiant) }}
                         </div>
 
                         <div class="text-center mt-4">

@@ -1,6 +1,6 @@
-{% extends 'base.html.twig' %}
+{% extends 'base_etudiant.html.twig' %}
 
-{% block title %}Tableau de bord - Étudiant{% endblock %}
+{% block title %}Dashboard Étudiant | UniMind{% endblock %}
 
 {% block breadcrumb_title %}Dashboard Étudiant{% endblock %}
 {% block page_title %}Tableau de bord Étudiant{% endblock %}
@@ -9,7 +9,7 @@
 <!-- Page Heading -->
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">Tableau de bord - Étudiant</h1>
-    <a href="#" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
+    <a href="{{ path('app_etudiant_rdv') }}" class="d-none d-sm-inline-block btn btn-sm btn-primary shadow-sm">
         <i class="fas fa-calendar-plus fa-sm text-white-50"></i> Prendre rendez-vous
     </a>
 </div>
@@ -22,11 +22,11 @@
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="h5 font-weight-bold text-primary mb-1">
-                            Bienvenue, {{ app.user.prenom }} {{ app.user.nom }} !
+                            Bienvenue, {{ user.prenom }} {{ user.nom }} !
                         </div>
                         <div class="text-gray-800">
-                            {% if app.user.profil and app.user.profil.niveau %}
-                                {{ app.user.profil.niveau }} - {{ app.user.profil.filiere }}
+                            {% if user.etablissement %}
+                                {{ user.etablissement }}
                             {% endif %}
                         </div>
                     </div>
@@ -39,36 +39,79 @@
     </div>
 </div>
 
-<!-- Content Row -->
+<!-- Statistiques Row -->
 <div class="row">
-    <!-- Statistiques fictives -->
+    <!-- Prochains RDV -->
     <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-info shadow h-100 py-2">
+        <div class="card border-left-primary shadow h-100 py-2">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                            Rendez-vous passés
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Prochains RDV
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_appointments }}</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.prochains_rdv ?? 0 }}</div>
+                        <div class="text-xs text-gray-600">Cette semaine</div>
                     </div>
                     <div class="col-auto">
-                        <i class="fas fa-history fa-2x text-gray-300"></i>
+                        <i class="fas fa-calendar-alt fa-2x text-gray-300"></i>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Consultations -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Consultations
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.total_consultations ?? 0 }}</div>
+                        <div class="text-xs text-gray-600">Total</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-file-medical fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Traitements -->
     <div class="col-xl-3 col-md-6 mb-4">
         <div class="card border-left-success shadow h-100 py-2">
             <div class="card-body">
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            Traitements
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.traitements_actifs ?? 0 }}</div>
+                        <div class="text-xs text-gray-600">Actifs</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-pills fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages non lus -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-warning shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
                             Messages non lus
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.unread_messages }}</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ stats.unread_messages ?? 0 }}</div>
+                        <div class="text-xs text-gray-600">Nouveaux</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-envelope fa-2x text-gray-300"></i>
@@ -77,56 +120,136 @@
             </div>
         </div>
     </div>
+</div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-warning shadow h-100 py-2">
+<!-- Contenu principal -->
+<div class="row">
+    <!-- Mes prochains rendez-vous -->
+    <div class="col-lg-8 mb-4">
+        <div class="card shadow">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Mes Prochains Rendez-vous</h6>
+                <a href="{{ path('app_etudiant_rdv') }}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-calendar-plus"></i> Prendre RDV
+                </a>
+            </div>
             <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                            Progression
-                        </div>
-                        <div class="row no-gutters align-items-center">
-                            <div class="col-auto">
-                                <div class="h5 mb-0 mr-3 font-weight-bold text-gray-800">{{ stats.progress }}%</div>
-                            </div>
-                            <div class="col">
-                                <div class="progress progress-sm mr-2">
-                                    <div class="progress-bar bg-warning" role="progressbar" 
-                                         style="width: {{ stats.progress }}%"></div>
+                {% if prochains_rdv is empty %}
+                    <div class="text-center py-4">
+                        <p class="text-muted mb-0">Aucun rendez-vous programmé</p>
+                        <a href="{{ path('app_etudiant_rdv') }}" class="btn btn-outline-primary btn-sm mt-3">
+                            Prendre rendez-vous
+                        </a>
+                    </div>
+                {% else %}
+                    <div class="list-group">
+                        {% for rdv in prochains_rdv|slice(0, 5) %}
+                            <div class="list-group-item list-group-item-action">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <div class="bg-primary text-white rounded-circle p-3">
+                                            <i class="fas fa-calendar-day"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h6 class="mb-1">
+                                                Consultation avec {{ rdv.psy ? 'Dr. ' ~ rdv.psy.nom : 'Psychologue' }}
+                                            </h6>
+                                            <small class="text-muted">{{ rdv.getDateRendezVous()|date('d/m/Y') }}</small>
+                                        </div>
+                                        <p class="mb-1 text-sm">
+                                            <i class="fas fa-clock text-primary mr-1"></i> {{ rdv.getHeureDebut()|date('H:i') }}
+                                            <span class="badge bg-{{ rdv.getTypeConsultation() == 'Présentiel' ? 'success' : 'info' }} ms-2">
+                                                {{ rdv.getTypeConsultation() ?? 'Présentiel' }}
+                                            </span>
+                                        </p>
+                                        {% if rdv.getLieu() %}
+                                            <small class="text-muted">
+                                                <i class="fas fa-map-marker-alt"></i> {{ rdv.getLieu() }}
+                                            </small>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        {% endfor %}
                     </div>
-                    <div class="col-auto">
-                        <i class="fas fa-chart-line fa-2x text-gray-300"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-primary shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            Statut
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">Actif</div>
-                        <div class="text-xs text-gray-600">Compte vérifié</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-user-check fa-2x text-gray-300"></i>
-                    </div>
-                </div>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
 
-<!-- Informations -->
+<!-- Rendez-vous passés -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Rendez-vous passés</h6>
+                <a href="{{ path('app_etudiant_rdv') }}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-history"></i> Voir tout
+                </a>
+            </div>
+            <div class="card-body">
+                {% if rdv_passés is empty %}
+                    <div class="text-center py-4">
+                        <p class="text-muted mb-0">Aucun rendez-vous passé</p>
+                    </div>
+                {% else %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Psychologue</th>
+                                    <th>Date</th>
+                                    <th>Heure</th>
+                                    <th>Type</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for rdv in rdv_passés|slice(0, 5) %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ rdv.psy ? 'Dr. ' ~ rdv.psy.prenom ~ ' ' ~ rdv.psy.nom : 'Psychologue' }}</strong>
+                                        </td>
+                                        <td>{{ rdv.getDateRendezVous()|date('d/m/Y') }}</td>
+                                        <td>{{ rdv.getHeureDebut()|date('H:i') }}</td>
+                                        <td>
+                                            <span class="badge bg-{{ rdv.getTypeConsultation() == 'Présentiel' ? 'success' : 'info' }}">
+                                                {{ rdv.getTypeConsultation() ?? 'Présentiel' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if rdv.isTermine() %}
+                                                <span class="badge bg-secondary">Terminé</span>
+                                            {% elseif rdv.isAnnule() %}
+                                                <span class="badge bg-danger">Annulé</span>
+                                            {% elseif rdv.isAbsent() %}
+                                                <span class="badge bg-dark">Absent</span>
+                                            {% else %}
+                                                <span class="badge bg-info">{{ rdv.statut }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{{ path('app_etudiant_rdv_detail', {'id': rdv.rendezVousId}) }}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i> Détails
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fonctionnalités disponibles -->
 <div class="row">
     <div class="col-lg-12">
         <div class="card shadow mb-4">
@@ -136,9 +259,11 @@
             <div class="card-body">
                 <div class="alert alert-info">
                     <h6 class="alert-heading"><i class="fas fa-info-circle"></i> Information</h6>
-                    <p class="mb-0">Cette plateforme est en cours de développement. Actuellement, seules les fonctionnalités suivantes sont actives :</p>
+                    <p class="mb-0">Cette plateforme est en cours de développement. Actuellement, les fonctionnalités suivantes sont actives :</p>
                     <ul class="mt-2 mb-0">
                         <li>Profil utilisateur (consultation et modification)</li>
+                        <li>Prise de rendez-vous</li>
+                        <li>Consultation des rendez-vous</li>
                         <li>Modification du mot de passe</li>
                         <li>Déconnexion</li>
                     </ul>
@@ -149,8 +274,8 @@
                     <div class="col-md-4 mb-3">
                         <div class="card border-left-primary">
                             <div class="card-body">
-                                <h6 class="card-title"><i class="fas fa-calendar-alt mr-2"></i>Prise de rendez-vous</h6>
-                                <p class="card-text text-muted small">Prendre rendez-vous avec un psychologue</p>
+                                <h6 class="card-title"><i class="fas fa-calendar-alt mr-2"></i>Agenda avancé</h6>
+                                <p class="card-text text-muted small">Vue mensuelle de vos rendez-vous</p>
                             </div>
                         </div>
                     </div>

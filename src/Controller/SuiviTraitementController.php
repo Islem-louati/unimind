@@ -173,39 +173,15 @@ class SuiviTraitementController extends AbstractController
             return $this->redirectToRoute('app_traitement_show', ['id' => $traitement->getId()]);
         }
 
+        if ($form->isSubmitted() && !$form->isValid()) {
+            $this->addFlash('error', 'Le formulaire contient des erreurs. Veuillez corriger les champs obligatoires.');
+        }
+
         return $this->render('suivi_traitement/new.html.twig', [
             'suivi' => $suivi,
             'traitement' => $traitement,
             'form' => $form->createView(),
             'user_role' => $this->getMainRole($user)
-        ]);
-    }
-
-    // Version avec débogage pour voir quel ID est appelé
-    #[Route('/{id}', name: 'app_suivi_traitement_show', methods: ['GET'], requirements: ['id' => '\d+'])]
-    public function show(int $id, SuiviTraitementRepository $suiviTraitementRepository): Response
-    {
-        // Débogage
-        dump('ID reçu: ' . $id);
-        
-        $suivi = $suiviTraitementRepository->find($id);
-        
-        if (!$suivi) {
-            dump('Aucun suivi trouvé pour l\'ID: ' . $id);
-            throw $this->createNotFoundException('Suivi non trouvé pour l\'ID: ' . $id);
-        }
-
-        $user = $this->security->getUser();
-
-        if (!$this->canAccessSuivi($suivi, $user)) {
-            throw $this->createAccessDeniedException();
-        }
-
-        return $this->render('suivi_traitement/show.html.twig', [
-            'suivi' => $suivi,
-            'user_role' => $this->getMainRole($user),
-            'can_edit' => $this->canEditSuivi($suivi, $user),
-            'can_validate' => $this->canValidateSuivi($suivi, $user)
         ]);
     }
 
@@ -237,10 +213,16 @@ class SuiviTraitementController extends AbstractController
             return $this->redirectToRoute('app_suivi_traitement_show', ['id' => $suivi->getId()]);
         }
 
+        if ($form->isSubmitted() && !$form->isValid()) {
+            $this->addFlash('error', 'Le formulaire contient des erreurs. Veuillez corriger les champs obligatoires.');
+        }
+
         return $this->render('suivi_traitement/edit.html.twig', [
             'suivi' => $suivi,
             'form' => $form->createView(),
-            'user_role' => $this->getMainRole($user)
+            'user_role' => $this->getMainRole($user),
+            'can_edit' => $this->canEditSuivi($suivi, $user),
+            'can_validate' => $this->canValidateSuivi($suivi, $user)
         ]);
     }
 
@@ -389,5 +371,33 @@ class SuiviTraitementController extends AbstractController
         }
         
         return 'user';
+    }
+
+    #[Route('/{id}', name: 'app_suivi_traitement_show', methods: ['GET'], requirements: ['id' => '\d+'])]
+    public function show(int $id, SuiviTraitementRepository $suiviTraitementRepository): Response
+    {
+        // Vérification supplémentaire pour s'assurer que l'ID est bien un entier
+        if (!is_numeric($id) || (int)$id != $id) {
+            throw $this->createNotFoundException('ID invalide');
+        }
+        
+        $suivi = $suiviTraitementRepository->find($id);
+        
+        if (!$suivi) {
+            throw $this->createNotFoundException('Suivi non trouvé pour l\'ID: ' . $id);
+        }
+
+        $user = $this->security->getUser();
+
+        if (!$this->canAccessSuivi($suivi, $user)) {
+            throw $this->createAccessDeniedException();
+        }
+
+        return $this->render('suivi_traitement/show.html.twig', [
+            'suivi' => $suivi,
+            'user_role' => $this->getMainRole($user),
+            'can_edit' => $this->canEditSuivi($suivi, $user),
+            'can_validate' => $this->canValidateSuivi($suivi, $user)
+        ]);
     }
 }

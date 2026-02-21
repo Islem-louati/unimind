@@ -1,8 +1,10 @@
 <?php
+// src/Repository/TraitementRepository.php
 
 namespace App\Repository;
 
 use App\Entity\Traitement;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +18,48 @@ class TraitementRepository extends ServiceEntityRepository
         parent::__construct($registry, Traitement::class);
     }
 
-//    /**
-//     * @return Traitement[] Returns an array of Traitement objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('t')
-//            ->andWhere('t.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('t.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
+    /**
+     * Compte les traitements actifs d'un étudiant
+     */
+    public function countActifsByEtudiant(User $etudiant): int
+    {
+        return $this->createQueryBuilder('t')
+            ->select('COUNT(t)')
+            ->where('t.etudiant = :etudiant')
+            ->andWhere('t.statut = :statut')
+            ->setParameter('etudiant', $etudiant)
+            ->setParameter('statut', 'actif')
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 
-//    public function findOneBySomeField($value): ?Traitement
-//    {
-//        return $this->createQueryBuilder('t')
-//            ->andWhere('t.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    /**
+     * Trouve les traitements actifs d'un étudiant
+     */
+    public function findActifsByEtudiant(User $etudiant): array
+    {
+        return $this->createQueryBuilder('t')
+            ->where('t.etudiant = :etudiant')
+            ->andWhere('t.statut = :statut')
+            ->setParameter('etudiant', $etudiant)
+            ->setParameter('statut', 'actif')
+            ->orderBy('t.dateDebut', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Trouve les traitements terminés d'un étudiant
+     */
+    public function findTerminesByEtudiant(User $etudiant): array
+    {
+        return $this->createQueryBuilder('t')
+            ->where('t.etudiant = :etudiant')
+            ->andWhere('t.statut = :statut')
+            ->setParameter('etudiant', $etudiant)
+            ->setParameter('statut', 'termine')
+            ->orderBy('t.dateFin', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }

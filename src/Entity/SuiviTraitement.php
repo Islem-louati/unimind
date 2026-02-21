@@ -55,7 +55,6 @@ class SuiviTraitement
 
     #[ORM\Column(name: 'observations', type: 'text', length: 1000, nullable: true)]
     #[Groups(['suivi:read', 'suivi:write'])]
-    #[Assert\NotBlank(message: 'Les observations sont obligatoires')]
     #[Assert\Length(
         min: 10,
         max: 1000,
@@ -66,7 +65,6 @@ class SuiviTraitement
 
     #[ORM\Column(name: 'observationsPsy', type: 'text', length: 1000, nullable: true)]
     #[Groups(['suivi:read', 'suivi:write'])]
-    #[Assert\NotBlank(message: 'Les observations du psychologue sont obligatoires')]
     #[Assert\Length(
         min: 10,
         max: 1000,
