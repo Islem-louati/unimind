@@ -7,6 +7,7 @@ use App\Form\Evenement\EvenementType;
 use App\Repository\EvenementRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -41,6 +42,47 @@ final class EvenementCrudController extends AbstractController
             'q' => $q,
             'sort' => $sort,
             'order' => $order,
+        ]);
+    }
+
+    #[Route('/search', name: 'search', methods: ['GET'])]
+    public function search(Request $request, EvenementRepository $repository): JsonResponse
+    {
+        $q = trim((string) $request->query->get('q', ''));
+        $type = trim((string) $request->query->get('type', ''));
+        $statut = trim((string) $request->query->get('statut', ''));
+        $sort = (string) $request->query->get('sort', 'dateDebut');
+        $order = (string) $request->query->get('order', 'ASC');
+
+        $dateFromStr = trim((string) $request->query->get('dateFrom', ''));
+        $dateToStr = trim((string) $request->query->get('dateTo', ''));
+        $dateFrom = $dateFromStr !== '' ? new \DateTimeImmutable($dateFromStr) : null;
+        $dateTo = $dateToStr !== '' ? new \DateTimeImmutable($dateToStr) : null;
+
+        $evenements = $repository->searchWithFilters($q, $type, $statut, $dateFrom, $dateTo, $sort, $order);
+
+        $data = array_map(static function (Evenement $e): array {
+            return [
+                'id' => $e->getId(),
+                'titre' => $e->getTitre(),
+                'type_label' => $e->getTypeFormate(),
+                'statut_label' => $e->getStatutFormate(),
+                'date_debut' => $e->getDateDebut()?->format('d/m/Y H:i'),
+                'lieu' => $e->getLieu(),
+                'capacite_max' => $e->getCapaciteMax(),
+                'nombre_inscrits' => $e->getNombreInscrits(),
+                'image' => $e->getImage(),
+                'organisateur' => $e->getOrganisateur() ? [
+                    'id' => $e->getOrganisateur()->getId(),
+                    'prenom' => $e->getOrganisateur()->getPrenom(),
+                    'nom' => $e->getOrganisateur()->getNom(),
+                    'email' => $e->getOrganisateur()->getEmail(),
+                ] : null,
+            ];
+        }, $evenements);
+
+        return $this->json([
+            'evenements' => $data,
         ]);
     }
 

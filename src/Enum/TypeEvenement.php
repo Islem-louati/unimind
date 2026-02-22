@@ -5,7 +5,7 @@ namespace App\Enum;
 enum TypeEvenement: string
 {
     case ATELIER = 'atelier';
-    case WEBINAIRE = 'webinaire';
+    case WEBINAIRE = 'formation';
     case GROUPE_PAROLE = 'groupe_parole';
     case CONFERENCE = 'conference';
     case JOURNEE_THEMATIQUE = 'journee_thematique';
@@ -29,7 +29,7 @@ enum TypeEvenement: string
     {
         return match($this) {
             self::ATELIER => 'Atelier',
-            self::WEBINAIRE => 'Webinaire',
+            self::WEBINAIRE => 'Formation',
             self::GROUPE_PAROLE => 'Groupe de parole',
             self::CONFERENCE => 'Conférence',
             self::JOURNEE_THEMATIQUE => 'Journée thématique',

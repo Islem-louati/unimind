@@ -13,12 +13,42 @@
           <a href="{{ path(route_prefix ~ 'evenement_new') }}" class="btn btn-primary btn-sm">Nouvel événement</a>
         </div>
         <div class="card-body px-0 pt-0 pb-2">
-          <form method="get" action="{{ path(route_prefix ~ 'evenement_index') }}" class="p-4 pb-0 d-flex gap-2 flex-wrap align-items-end">
+          <form method="get" action="{{ path(route_prefix ~ 'evenement_index') }}" class="p-4 pb-0 d-flex gap-2 flex-wrap align-items-end" id="evenement-search-form">
             <input type="hidden" name="sort" value="{{ sort }}">
             <input type="hidden" name="order" value="{{ order }}">
             <div class="flex-grow-1" style="min-width: 200px;">
               <label for="search_q" class="form-label small mb-0">Rechercher (titre, lieu)</label>
               <input type="text" name="q" id="search_q" class="form-control form-control-sm" value="{{ q }}" placeholder="Mot-clé…">
+            </div>
+            <div style="min-width: 180px;">
+              <label for="filter_type" class="form-label small mb-0">Type</label>
+              <select name="type" id="filter_type" class="form-select form-select-sm">
+                <option value="">Tous</option>
+                <option value="atelier">Atelier</option>
+                <option value="formation">Formation</option>
+                <option value="groupe_parole">Groupe de parole</option>
+                <option value="conference">Conférence</option>
+                <option value="journee_thematique">Journée thématique</option>
+                <option value="activite_sportive">Activité sportive</option>
+              </select>
+            </div>
+            <div style="min-width: 180px;">
+              <label for="filter_statut" class="form-label small mb-0">Statut</label>
+              <select name="statut" id="filter_statut" class="form-select form-select-sm">
+                <option value="">Tous</option>
+                <option value="a_venir">À venir</option>
+                <option value="en_cours">En cours</option>
+                <option value="termine">Terminé</option>
+                <option value="annule">Annulé</option>
+              </select>
+            </div>
+            <div style="min-width: 160px;">
+              <label for="filter_date_from" class="form-label small mb-0">Du</label>
+              <input type="date" name="dateFrom" id="filter_date_from" class="form-control form-control-sm">
+            </div>
+            <div style="min-width: 160px;">
+              <label for="filter_date_to" class="form-label small mb-0">Au</label>
+              <input type="date" name="dateTo" id="filter_date_to" class="form-control form-control-sm">
             </div>
             <button type="submit" class="btn btn-outline-primary btn-sm">Rechercher</button>
             {% if q %}
@@ -39,7 +69,7 @@
           {% endfor %}
           {% if evenements|length > 0 %}
             <div class="table-responsive p-4">
-              <table class="table align-items-center mb-0">
+              <table class="table align-items-center mb-0" id="evenement-table">
                 <thead>
                   <tr>
                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Image</th>
@@ -67,7 +97,7 @@
                     <th class="text-secondary opacity-7"></th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody id="evenement-table-body">
                   {% for evenement in evenements %}
                     <tr>
                       <td>
@@ -134,4 +164,80 @@
       </div>
     </div>
   </div>
+
+  <script>
+    (function () {
+      const form = document.getElementById('evenement-search-form');
+      const tbody = document.getElementById('evenement-table-body');
+
+      if (!form || !tbody) return;
+
+      const routePrefix = {{ route_prefix|json_encode|raw }};
+      const searchUrl = routePrefix === 'app_admin_' ? {{ path('app_admin_evenement_search')|json_encode|raw }} : null;
+
+      const debounce = (fn, wait) => {
+        let t;
+        return (...args) => {
+          clearTimeout(t);
+          t = setTimeout(() => fn(...args), wait);
+        };
+      };
+
+      const buildRow = (e) => {
+        const imgCell = e.image
+          ? `<img src="/uploads/evenements/${e.image}" alt="Affiche" class="img-thumbnail" style="max-height: 50px; max-width: 80px;">`
+          : `<span class="text-muted text-xs">Aucune</span>`;
+
+        const organisateurCell = e.organisateur
+          ? `${e.organisateur.prenom} ${e.organisateur.nom} (${e.organisateur.email})`
+          : `<span class="text-muted">—</span>`;
+
+        return `
+          <tr>
+            <td>${imgCell}</td>
+            <td><p class="text-xs font-weight-bold mb-0">${e.titre ?? ''}</p></td>
+            <td><p class="text-xs mb-0">${e.type_label ?? ''}</p></td>
+            <td><p class="text-xs mb-0">${e.date_debut ?? ''}</p></td>
+            <td><p class="text-xs mb-0">${e.lieu ?? ''}</p></td>
+            <td><p class="text-xs mb-0">${e.nombre_inscrits ?? 0} / ${e.capacite_max ?? ''}</p></td>
+            <td><p class="text-xs mb-0">${organisateurCell}</p></td>
+            <td><span class="badge badge-sm bg-gradient-secondary">${e.statut_label ?? ''}</span></td>
+            <td class="align-middle">
+              <a href="/admin/evenements/${e.id}" class="btn btn-link text-info px-2 mb-0">Voir</a>
+              <a href="/admin/evenements/${e.id}/edit" class="btn btn-link text-dark px-2 mb-0">Modifier</a>
+            </td>
+          </tr>
+        `;
+      };
+
+      const doSearch = async () => {
+        if (!searchUrl) return;
+        const params = new URLSearchParams(new FormData(form));
+        const url = `${searchUrl}?${params.toString()}`;
+
+        const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        if (!res.ok) return;
+        const payload = await res.json();
+
+        const rows = (payload.evenements || []).map(buildRow).join('');
+        tbody.innerHTML = rows || `<tr><td colspan="9" class="p-4 text-muted">Aucun résultat.</td></tr>`;
+      };
+
+      const debounced = debounce(doSearch, 300);
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        doSearch();
+      });
+
+      ['input', 'change'].forEach(evt => {
+        form.addEventListener(evt, (e) => {
+          const name = e.target && e.target.name;
+          if (!name) return;
+          if (name === 'q') debounced();
+          else doSearch();
+        });
+      });
+    })();
+  </script>
 {% endblock %}
