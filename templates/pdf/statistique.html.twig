@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Rapport Statistique - {{ period|capitalize }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            margin: 20px;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            color: #007bff;
+            margin: 0;
+            font-size: 24px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .stat-label {
+            font-size: 14px;
+            color: #6c757d;
+            text-transform: uppercase;
+        }
+        .info-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .info-section h3 {
+            color: #007bff;
+            margin-top: 0;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 5px;
+        }
+        .period-info {
+            background-color: #e3f2fd;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 5px 5px 0;
+        }
+        .chart-placeholder {
+            background-color: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            color: #6c757d;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 10px;
+            color: #6c757d;
+            border-top: 1px solid #dee2e6;
+            padding-top: 10px;
+        }
+        .badge {
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            color: white;
+            background-color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Rapport Statistique</h1>
+        <p>Généré le {{ dateGeneration|date('d/m/Y H:i') }}</p>
+    </div>
+
+    <div class="period-info">
+        <h3>📊 Période d'analyse</h3>
+        <div class="info-row">
+            <span class="info-label">Type de rapport :</span>
+            <span class="badge">{{ period|capitalize }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Date de génération :</span>
+            {{ dateGeneration|date('d/m/Y H:i') }}
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.totalTraitements }}</div>
+            <div class="stat-label">Traitements créés</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number">{{ stats.totalSuivis }}</div>
+            <div class="stat-label">Suivis effectués</div>
+        </div>
+    </div>
+
+    <div class="info-section">
+        <h3>📋 Résumé des activités</h3>
+        <div class="info-row">
+            <span class="info-label">Total traitements :</span>
+            {{ stats.totalTraitements }} traitement(s) créé(s) durant cette période
+        </div>
+        <div class="info-row">
+            <span class="info-label">Total suivis :</span>
+            {{ stats.totalSuivis }} suivi(s) enregistré(s) durant cette période
+        </div>
+        <div class="info-row">
+            <span class="info-label">Moyenne suivis/traitement :</span>
+            {% if stats.totalTraitements > 0 %}
+                {{ (stats.totalSuivis / stats.totalTraitements)|number_format(1) }} suivis par traitement
+            {% else %}
+                0.0 suivis par traitement
+            {% endif %}
+        </div>
+        <div class="info-row">
+            <span class="info-label">Total activités :</span>
+            {{ stats.totalTraitements + stats.totalSuivis }} activité(s) totale(s)
+        </div>
+    </div>
+
+    <div class="info-section">
+        <h3>📈 Tendances observées</h3>
+        <div class="info-row">
+            <span class="info-label">Activité thérapeutique :</span>
+            {% if stats.totalSuivis > 0 %}
+                <span class="badge" style="background-color: #28a745;">Active</span>
+                Les suivis sont régulièrement enregistrés
+            {% else %}
+                <span class="badge" style="background-color: #ffc107; color: #000;">Faible</span>
+                Peu d'activité de suivi enregistrée
+            {% endif %}
+        </div>
+        <div class="info-row">
+            <span class="info-label">Engagement patient :</span>
+            {% if stats.totalTraitements > 0 %}
+                <span class="badge" style="background-color: #17a2b8;">Bon</span>
+                Les patients suivent régulièrement leurs traitements
+            {% else %}
+                <span class="badge" style="background-color: #dc3545;">À améliorer</span>
+                Aucun traitement démarré cette période
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="info-section">
+        <h3>📈 Graphiques d'évolution</h3>
+        
+        <!-- Graphique 1: Répartition des activités -->
+        <div style="margin-bottom: 20px;">
+            <h4>📊 Répartition des activités</h4>
+            <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px;">
+                {% set total = stats.totalTraitements + stats.totalSuivis %}
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <div style="width: 150px; font-weight: bold;">Traitements créés:</div>
+                    <div style="flex: 1; background-color: #e9ecef; border-radius: 4px; height: 20px; position: relative;">
+                        {% if stats.totalTraitements > 0 and total > 0 %}
+                            <div style="background-color: #007bff; height: 100%; width: {{ (stats.totalTraitements / total * 100)|number_format(0) }}%; border-radius: 4px;"></div>
+                        {% endif %}
+                    </div>
+                    <div style="width: 60px; text-align: right; font-weight: bold;">{{ stats.totalTraitements }}</div>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <div style="width: 150px; font-weight: bold;">Suivis effectués:</div>
+                    <div style="flex: 1; background-color: #e9ecef; border-radius: 4px; height: 20px; position: relative;">
+                        {% if stats.totalSuivis > 0 and total > 0 %}
+                            <div style="background-color: #28a745; height: 100%; width: {{ (stats.totalSuivis / total * 100)|number_format(0) }}%; border-radius: 4px;"></div>
+                        {% endif %}
+                    </div>
+                    <div style="width: 60px; text-align: right; font-weight: bold;">{{ stats.totalSuivis }}</div>
+                </div>
+                {% if total > 0 %}
+                <div style="margin-top: 10px; font-size: 11px; color: #6c757d;">
+                    Total: {{ total }} activités
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Graphique 2: Indicateurs de performance -->
+        <div style="margin-bottom: 20px;">
+            <h4>📊 Indicateurs de performance</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: bold; color: #007bff; margin-bottom: 5px;">
+                        {% if stats.totalTraitements > 0 %}
+                            {{ (stats.totalSuivis / stats.totalTraitements)|number_format(1) }}
+                        {% else %}
+                            0.0
+                        {% endif %}
+                    </div>
+                    <div style="font-size: 12px; color: #6c757d;">Suivis/Traitement</div>
+                    <div style="margin-top: 10px;">
+                        {% if stats.totalTraitements > 0 %}
+                            {% set ratio = stats.totalSuivis / stats.totalTraitements %}
+                            {% if ratio >= 3 %}
+                                <span class="badge" style="background-color: #28a745;">Excellent</span>
+                            {% elseif ratio >= 1 %}
+                                <span class="badge" style="background-color: #ffc107; color: #000;">Bon</span>
+                            {% else %}
+                                <span class="badge" style="background-color: #dc3545;">À améliorer</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="badge" style="background-color: #6c757d;">Aucune donnée</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; text-align: center;">
+                    <div style="font-size: 24px; font-weight: bold; color: #17a2b8; margin-bottom: 5px;">
+                        {{ period == 'month' ? 'Mensuel' : 'Annuel' }}
+                    </div>
+                    <div style="font-size: 12px; color: #6c757d;">Période analysée</div>
+                    <div style="margin-top: 10px;">
+                        <span class="badge" style="background-color: #17a2b8;">
+                            {{ dateGeneration|date('M Y') }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Graphique 3: Tendance d'activité -->
+        <div>
+            <h4>📊 Tendance d'activité</h4>
+            <div style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px;">
+                <div style="text-align: center; margin-bottom: 15px;">
+                    <div style="font-size: 18px; font-weight: bold; color: #333;">
+                        {% set total = stats.totalTraitements + stats.totalSuivis %}
+                        {% if total > 0 %}
+                            📈 Activité {{ period == 'month' ? 'mensuelle' : 'annuelle' }} détectée
+                        {% else %}
+                            📉 Aucune activité enregistrée
+                        {% endif %}
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-around; text-align: center;">
+                    <div>
+                        <div style="font-size: 20px; font-weight: bold; color: #007bff;">{{ stats.totalTraitements }}</div>
+                        <div style="font-size: 11px; color: #6c757d;">Traitements</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 20px; font-weight: bold; color: #28a745;">{{ stats.totalSuivis }}</div>
+                        <div style="font-size: 11px; color: #6c757d;">Suivis</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 20px; font-weight: bold; color: #17a2b8;">
+                            {{ total }}
+                        </div>
+                        <div style="font-size: 11px; color: #6c757d;">Total activités</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-section">
+        <h3>💡 Recommandations</h3>
+        <div class="info-row">
+            <span class="info-label">Pour les psychologues :</span>
+            <ul style="margin: 5px 0 0 20px;">
+                <li>Continuer le suivi régulier des patients</li>
+                <li>Analyser les tendances des suivis</li>
+                <li>Optimiser les plans de traitement</li>
+            </ul>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Pour l'administration :</span>
+            <ul style="margin: 5px 0 0 20px;">
+                <li>Suivre l'évolution des statistiques</li>
+                <li>Identifier les besoins en ressources</li>
+                <li>Planifier les périodes de forte activité</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Ce rapport a été généré automatiquement par le système de suivi psychologique Unimind</p>
+        <p>Pour plus de détails, consultez le tableau de bord complet</p>
+        <p>Page 1/1</p>
+        <p>© {{ "now"|date("Y") }} Unimind - Tous droits réservés</p>
+    </div>
+</body>
+</html>

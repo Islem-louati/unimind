@@ -1,0 +1,79 @@
+{% extends 'base_psychologue.html.twig' %}
+
+{% block title %}Sélectionner un traitement{% endblock %}
+{% block page_title %}Sélectionner un traitement{% endblock %}
+{% block breadcrumb_title %}Sélectionner un traitement{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list me-2"></i>
+                        {% if patient is defined %}
+                            Sélectionner un traitement pour {{ patient.fullName }}
+                        {% else %}
+                            Sélectionner un traitement pour ajouter un suivi
+                        {% endif %}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if patient is defined %}
+                        <div class="alert alert-info mb-3">
+                            <i class="fas fa-user me-2"></i>
+                            Patient sélectionné : <strong>{{ patient.fullName }}</strong> ({{ patient.email }})
+                        </div>
+                    {% endif %}
+                    
+                    {% if traitements|length > 0 %}
+                        <div class="list-group">
+                            {% for traitement in traitements %}
+                                <a href="{{ path('app_suivi_traitement_new', {'traitement_id': traitement.id}) }}" 
+                                   class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ traitement.titre }}</h6>
+                                        <small class="text-muted">{{ traitement.categorieLabel }}</small>
+                                    </div>
+                                    <p class="mb-1">{{ traitement.description|slice(0, 100) }}...</p>
+                                    <small class="text-muted">
+                                        {% if patient is not defined %}
+                                            Patient: {{ traitement.etudiant ? traitement.etudiant.fullName : 'Non défini' }} | 
+                                        {% endif %}
+                                        Statut: {{ traitement.statutLabel }}
+                                    </small>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            {% if patient is defined %}
+                                Aucun traitement trouvé pour {{ patient.fullName }}.
+                                <a href="{{ path('app_traitement_new') }}" class="alert-link">Créez un traitement pour ce patient</a>.
+                            {% else %}
+                                Vous n'avez aucun traitement. 
+                                <a href="{{ path('app_traitement_new') }}" class="alert-link">Créez un traitement d'abord</a>.
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mt-3">
+                        {% if patient is defined %}
+                            <a href="{{ path('app_suivi_traitement_select_patient') }}" class="btn btn-outline-secondary me-2">
+                                <i class="fas fa-arrow-left me-1"></i>
+                                Changer de patient
+                            </a>
+                        {% endif %}
+                        <a href="{{ path('app_suivi_traitement_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Retour à la liste
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

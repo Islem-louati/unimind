@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Notification Traitement</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .info-box {
+            background-color: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .success-box {
+            background-color: #e8f5e8;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .warning-box {
+            background-color: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .info-row {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+        }
+        .info-label {
+            font-weight: bold;
+            width: 120px;
+            color: #666;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            color: #666;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    {% if type == 'nouveau_traitement' %}
+        <div class="header">
+            <h1>🌟 Nouveau Traitement Démarré</h1>
+            <p>Bonjour {{ etudiant.prenom|default(etudiant.fullName) }},</p>
+        </div>
+        
+        <div class="content">
+            <p>Un nouveau traitement a été démarré pour vous par votre psychologue.</p>
+            
+            <div class="info-box">
+                <h3>📋 Détails du Traitement</h3>
+                <div class="info-row">
+                    <span class="info-label">Titre :</span>
+                    {{ traitement.titre }}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Date début :</span>
+                    {{ traitement.getDateDebut()|date('d/m/Y') }}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Objectif :</span>
+                    {{ traitement.getObjectifTherapeutique()|default('Défini avec votre psychologue') }}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Psychologue :</span>
+                    {{ traitement.getPsychologue() ? traitement.getPsychologue().getFullName() : 'Non assigné' }}
+                </div>
+            </div>
+            
+            <div class="success-box">
+                <h3>💪 Message d'Encouragement</h3>
+                <p>Félicitations pour cette nouvelle étape dans votre parcours ! Chaque traitement est une opportunité de croissance et de bien-être. Nous sommes là pour vous accompagner à chaque étape.</p>
+                <p><strong>Pour accéder à votre traitement, connectez-vous à votre espace personnel sur l'application Unimind.</strong></p>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if type == 'rappel_suivi' %}
+        <div class="header">
+            <h1>📅 Rappel de Suivi</h1>
+            <p>Bonjour {{ etudiant.prenom|default(etudiant.fullName) }},</p>
+        </div>
+        
+        <div class="content">
+            <p>Il est temps de faire un point sur votre traitement.</p>
+            
+            <div class="info-box">
+                <h3>📊 État Actuel</h3>
+                <div class="info-row">
+                    <span class="info-label">Traitement :</span>
+                    {{ traitement.titre }}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Progression :</span>
+                    {{ traitement.pourcentageCompletion|number_format(1) }}%
+                </div>
+                {% if dernierSuivi %}
+                <div class="info-row">
+                    <span class="info-label">Dernier suivi :</span>
+                    {{ dernierSuivi.dateSuivi|date('d/m/Y') }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="success-box">
+                <h3>🎯 Objectif du Suivi</h3>
+                <p>Prenez quelques minutes pour évaluer votre ressenti et votre progression. Votre feedback est précieux pour ajuster le traitement si nécessaire.</p>
+                <p><strong>Connectez-vous à votre espace Unimind pour ajouter votre suivi.</strong></p>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if type == 'fin_traitement' %}
+        <div class="header">
+            <h1>🎉 Traitement Terminé</h1>
+            <p>Félicitations {{ etudiant.prenom|default(etudiant.fullName) }} !</p>
+        </div>
+        
+        <div class="content">
+            <p>Vous avez terminé avec succès votre traitement !</p>
+            
+            <div class="success-box">
+                <h3>🏆 Réalisations</h3>
+                <div class="info-row">
+                    <span class="info-label">Traitement :</span>
+                    {{ traitement.titre }}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Durée :</span>
+                    {{ duree }} jours
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Progression finale :</span>
+                    {{ progression|number_format(1) }}%
+                </div>
+            </div>
+            
+            <div class="info-box">
+                <h3>🌟 Prochaines Étapes</h3>
+                <p>Parlez avec votre psychologue des résultats obtenus et des prochaines étapes de votre parcours. Chaque réussite mérite d'être célébrée !</p>
+                <p><strong>Connectez-vous à votre espace Unimind pour consulter votre bilan.</strong></p>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if type == 'suivi_manquant' %}
+        <div class="header">
+            <h1>⚠️ Suivi Manquant</h1>
+            <p>Bonjour {{ etudiant.prenom|default(etudiant.fullName) }},</p>
+        </div>
+        
+        <div class="content">
+            <p>Nous avons remarqué qu'il n'y a pas eu de suivi récent pour votre traitement.</p>
+            
+            <div class="warning-box">
+                <h3>📅 Dernière Activité</h3>
+                <div class="info-row">
+                    <span class="info-label">Traitement :</span>
+                    {{ traitement.titre }}
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Jours sans suivi :</span>
+                    <strong>{{ joursSansSuivi }}</strong> jours
+                </div>
+                {% if dernierSuivi %}
+                <div class="info-row">
+                    <span class="info-label">Dernier suivi :</span>
+                    {{ dernierSuivi.dateSuivi|date('d/m/Y') }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="info-box">
+                <h3>💡 Importance du Suivi</h3>
+                <p>Les suivis réguliers sont essentiels pour ajuster votre traitement et garantir les meilleurs résultats. Votre psychologue a besoin de votre feedback pour vous accompagner efficacement.</p>
+                <p><strong>Connectez-vous à votre espace Unimind pour faire votre suivi maintenant.</strong></p>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="footer">
+        <p><strong>Cet email est confidentiel et personnel.</strong></p>
+        <p>Généré automatiquement par le système de suivi psychologique Unimind</p>
+        <p>© {{ "now"|date("Y") }} Unimind - Tous droits réservés</p>
+        <p>Si vous avez des questions, contactez votre psychologue : {{ psychologue.email|default('le service') }}</p>
+    </div>
+</body>
+</html>

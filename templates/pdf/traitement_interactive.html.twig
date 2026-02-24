@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Fiche Traitement Interactive - {{ traitement.titre }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            margin: 20px;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        .header {
+            text-align: center;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            color: white;
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .header p {
+            color: rgba(255, 255, 255, 0.8);
+            margin: 5px 0 0 0;
+            font-size: 14px;
+        }
+        .info-section {
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .info-section h3 {
+            color: #007bff;
+            margin-top: 0;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 8px;
+            font-size: 18px;
+        }
+        .info-row {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        .info-label {
+            font-weight: bold;
+            width: 120px;
+            color: #495057;
+        }
+        .suivi-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            background-color: #f8f9fa;
+            border-radius: 0 8px 8px 0;
+        }
+        .suivi-date {
+            font-weight: bold;
+            color: #007bff;
+            font-size: 14px;
+        }
+        .suivi-notes {
+            margin-top: 5px;
+            color: #666;
+            font-style: italic;
+        }
+        .signature-section {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #fff3cd;
+            border: 2px dashed #856404;
+            border-radius: 8px;
+        }
+        .signature-section h3 {
+            color: #856404;
+            margin-top: 0;
+            text-align: center;
+            font-size: 20px;
+        }
+        .signature-field {
+            margin: 15px 0;
+            padding: 10px;
+            border: 2px solid #856404;
+            border-radius: 5px;
+            background-color: white;
+            min-height: 40px;
+        }
+        .signature-label {
+            font-weight: bold;
+            color: #856404;
+            margin-bottom: 5px;
+        }
+        .date-field {
+            display: inline-block;
+            width: 100px;
+            height: 30px;
+            border: 1px solid #ccc;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        .validation-section {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+        }
+        .validation-section h4 {
+            color: #155724;
+            margin-top: 0;
+        }
+        .checkbox-item {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+        }
+        .checkbox {
+            width: 15px;
+            height: 15px;
+            border: 2px solid #155724;
+            margin-right: 10px;
+            display: inline-block;
+        }
+        .observations-field {
+            width: 100%;
+            height: 80px;
+            border: 2px solid #856404;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            background-color: white;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 10px;
+            color: #6c757d;
+            border-top: 1px solid #dee2e6;
+            padding-top: 15px;
+        }
+        .stamp-area {
+            border: 2px dashed #dc3545;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #dc3545;
+            font-weight: bold;
+            text-align: center;
+            font-size: 10px;
+        }
+        @media print {
+            body {
+                background-color: white;
+            }
+            .signature-section {
+                background-color: white;
+                border: 2px solid #856404;
+            }
+            .validation-section {
+                background-color: white;
+                border: 1px solid #155724;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>FICHE TRAITEMENT INTERACTIVE</h1>
+        <p>{{ traitement.titre }}</p>
+    </div>
+
+    <div class="info-section">
+        <h3>📋 Informations du Traitement</h3>
+        <div class="info-row">
+            <span class="info-label">Patient :</span>
+            <span>{{ traitement.etudiant.fullName }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Psychologue :</span>
+            <span>{{ traitement.psychologue.fullName }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Date début :</span>
+            <span>{{ traitement.dateDebut|date('d/m/Y') }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Date fin :</span>
+            <span>{{ traitement.dateFin ? traitement.dateFin|date('d/m/Y') : 'Non définie' }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Statut :</span>
+            <span>{{ traitement.statut }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Type :</span>
+            <span>{{ traitement.type }}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Catégorie :</span>
+            <span>{{ traitement.categorie }}</span>
+        </div>
+        
+        <h4 style="margin-top: 15px; color: #007bff;">Objectif Thérapeutique</h4>
+        <p>{{ traitement.objectifTherapeutique|default('Non défini') }}</p>
+    </div>
+
+    <div class="info-section">
+        <h3>📊 Historique des Suivis</h3>
+        {% if suivis|length > 0 %}
+            {% for suivi in suivis %}
+                <div class="suivi-item">
+                    <div class="suivi-date">{{ suivi.dateSuivi|date('d/m/Y H:i') }}</div>
+                    <div><strong>Type :</strong> 
+                        {% if suivi.valide %}Validé
+                        {% elseif suivi.effectue %}Effectué
+                        {% elseif suivi.isEnRetard() %}En retard
+                        {% elseif suivi.isAujourdhui() %}Aujourd'hui
+                        {% elseif suivi.isAVenir() %}À venir
+                        {% else %}Standard{% endif %}
+                    </div>
+                    <div><strong>Progression :</strong> 
+                        {% if suivi.evaluation %}{{ suivi.evaluation * 10 }}%
+                        {% elseif suivi.valide %}100%
+                        {% elseif suivi.effectue %}80%
+                        {% else %}50%{% endif %}
+                    </div>
+                    {% if suivi.observations or suivi.observationsPsy or suivi.ressenti %}
+                        <div class="suivi-notes">
+                            {% if suivi.observations %}Patient: {{ suivi.observations|slice(0, 60) }}{% endif %}
+                            {% if suivi.observationsPsy %} | Psy: {{ suivi.observationsPsy|slice(0, 60) }}{% endif %}
+                            {% if suivi.ressenti %} | Ressenti: {{ suivi.ressenti }}{% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Aucun suivi enregistré</p>
+        {% endif %}
+    </div>
+
+    <div class="signature-section">
+        <h3>✍️ SIGNATURES ET VALIDATION</h3>
+        
+        <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+            <div style="width: 45%;">
+                <div class="signature-label">Signature du Patient</div>
+                <div class="signature-field"></div>
+                <div style="margin-top: 10px;">
+                    <strong>{{ traitement.etudiant.fullName }}</strong>
+                    <span style="margin-left: 20px;">Date:</span>
+                    <div class="date-field"></div>
+                </div>
+            </div>
+            
+            <div style="width: 45%;">
+                <div class="signature-label">Signature du Psychologue</div>
+                <div class="signature-field"></div>
+                <div style="margin-top: 10px;">
+                    <strong>{{ traitement.psychologue.fullName }}</strong>
+                    <span style="margin-left: 20px;">Date:</span>
+                    <div class="date-field"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stamp-area">
+            TAMPON<br>OFFICIEL
+        </div>
+    </div>
+
+    <div class="validation-section">
+        <h4>✅ VALIDATION DU TRAITEMENT</h4>
+        
+        <div class="checkbox-item">
+            <div class="checkbox"></div>
+            <span>Traitement terminé avec succès</span>
+        </div>
+        <div class="checkbox-item">
+            <div class="checkbox"></div>
+            <span>Traitement en cours</span>
+        </div>
+        <div class="checkbox-item">
+            <div class="checkbox"></div>
+            <span>Objectifs atteints</span>
+        </div>
+        <div class="checkbox-item">
+            <div class="checkbox"></div>
+            <span>Objectifs partiels</span>
+        </div>
+        <div class="checkbox-item">
+            <div class="checkbox"></div>
+            <span>Suivi satisfaisant</span>
+        </div>
+        
+        <div style="margin-top: 15px;">
+            <strong>Observations:</strong>
+            <div class="observations-field"></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p><strong>Document généré le {{ "now"|date('d/m/Y H:i:s') }}</strong></p>
+        <p>Généré par UniMind - Suivi Psychologique</p>
+        <p>Ce document est confidentiel et ne peut être utilisé que par les personnes autorisées</p>
+        <p>Page 1/1</p>
+    </div>
+</body>
+</html>

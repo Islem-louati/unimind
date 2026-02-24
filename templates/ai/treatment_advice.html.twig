@@ -1,0 +1,87 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Conseils IA Traitement{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Conseils IA pour Traitement
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if error %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            {{ error }}
+                        </div>
+                    {% endif %}
+
+                    {% if not advice %}
+                        <form method="POST">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="traitement_type" class="form-label">Type de traitement</label>
+                                        <select name="traitement_type" id="traitement_type" class="form-select" required>
+                                            <option value="">Sélectionner...</option>
+                                            <option value="relaxation">Relaxation</option>
+                                            <option value="cognitif">Thérapie cognitive</option>
+                                            <option value="comportemental">Thérapie comportementale</option>
+                                            <option value="emotionnel">Gestion émotionnelle</option>
+                                            <option value="social">Thérapie sociale</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="patient_profile" class="form-label">Profil du patient</label>
+                                        <textarea name="patient_profile" id="patient_profile" class="form-control" rows="3" required placeholder="Décrire brièvement le profil du patient (âge, symptômes principaux, personnalité...)"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                Générer un conseil
+                            </button>
+                        </form>
+                    {% endif %}
+
+                    {% if advice %}
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">
+                                            <i class="fas fa-robot me-2"></i>
+                                            Conseil personnalisé
+                                        </h6>
+                                        <div class="alert alert-success">
+                                            {{ advice|nl2br }}
+                                        </div>
+                                        
+                                        <div class="mt-3">
+                                            <a href="{{ path('ai_treatment_advice') }}" class="btn btn-outline-success">
+                                                <i class="fas fa-redo me-2"></i>
+                                                Nouveau conseil
+                                            </a>
+                                            <a href="{{ path('app_dashboard') }}" class="btn btn-secondary">
+                                                <i class="fas fa-arrow-left me-2"></i>
+                                                Retour au dashboard
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

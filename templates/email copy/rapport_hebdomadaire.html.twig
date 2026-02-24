@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Rapport Hebdomadaire</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .header {
+            background: linear-gradient(135deg, #2196f3, #1976d2);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 10px 10px 0 0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border-left: 4px solid #2196f3;
+        }
+        .stat-number {
+            font-size: 32px;
+            font-weight: bold;
+            color: #2196f3;
+            margin: 10px 0;
+        }
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+        .list-section {
+            margin: 30px 0;
+        }
+        .list-item {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 3px solid #2196f3;
+        }
+        .list-item h4 {
+            margin: 0 0 10px 0;
+            color: #2196f3;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            color: #666;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Rapport Hebdomadaire Unimind</h1>
+        <p>Bonjour Dr {{ psychologue.getPrenom()|default(psychologue.getNom()) }},</p>
+    </div>
+    
+    <div class="content">
+        <p>Voici le rapport d'activité automatique pour la semaine du {{ debutSemaine|date('d/m/Y') }} au {{ finSemaine|date('d/m/Y') }}.</p>
+        <p><em>Ce rapport est généré automatiquement par le système Unimind pour vous aider à suivre votre activité.</em></p>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Nouveaux Traitements</div>
+                <div class="stat-number">{{ traitements|length }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Suivis Enregistrés</div>
+                <div class="stat-number">{{ suivis|length }}</div>
+            </div>
+        </div>
+        
+        {% if traitements|length > 0 %}
+        <div class="list-section">
+            <h3>🆕 Nouveaux Traitements</h3>
+            {% for traitement in traitements %}
+            <div class="list-item">
+                <h4>{{ traitement.titre }}</h4>
+                <p><strong>Patient :</strong> {{ traitement.etudiant.fullName }}</p>
+                <p><strong>Date début :</strong> {{ traitement.dateDebut|date('d/m/Y') }}</p>
+                <p><strong>Catégorie :</strong> {{ traitement.categorieLabel }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        {% if suivis|length > 0 %}
+        <div class="list-section">
+            <h3>📅 Derniers Suivis</h3>
+            {% for suivi in suivis|slice(0, 5) %}
+            <div class="list-item">
+                <h4>{{ suivi.traitement.titre }}</h4>
+                <p><strong>Patient :</strong> {{ suivi.traitement.etudiant.fullName }}</p>
+                <p><strong>Date :</strong> {{ suivi.dateSuivi|date('d/m/Y H:i') }}</p>
+                <p><strong>Ressenti :</strong> {{ suivi.ressenti|default('Non spécifié') }}</p>
+                <p><strong>Évaluation :</strong> {{ suivi.evaluation }}/5</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        <div style="background: linear-gradient(135deg, #e8f5e8, #c8e6c9); padding: 20px; border-radius: 8px; margin: 20px 0;">
+            <h3>💡 Recommandations</h3>
+            {% if traitements|length > 5 %}
+                <p><strong>📈 Activité élevée :</strong> Vous avez beaucoup d'activité cette semaine. Assurez-vous de bien suivre chaque patient.</p>
+            {% elseif traitements|length > 2 %}
+                <p><strong>📊 Activité normale :</strong> Bon rythme de travail. Continuez à maintenir la qualité des suivis.</p>
+            {% else %}
+                <p><strong>📉 Activité faible :</strong> Pensez à contacter vos patients pour encourager les suivis réguliers.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="footer">
+        <p><strong>Ce rapport est confidentiel et professionnel.</strong></p>
+        <p>Généré automatiquement par le système de suivi psychologique Unimind</p>
+        <p>© {{ "now"|date("Y") }} Unimind - Tous droits réservés</p>
+        <p>Période : {{ debutSemaine|date('d/m/Y') }} - {{ finSemaine|date('d/m/Y') }}</p>
+    </div>
+</body>
+</html>

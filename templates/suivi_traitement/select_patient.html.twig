@@ -1,0 +1,89 @@
+{% extends 'base_psychologue.html.twig' %}
+
+{% block title %}Sélectionner un patient{% endblock %}
+{% block page_title %}Sélectionner un patient{% endblock %}
+{% block breadcrumb_title %}Sélectionner un patient{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>
+                        Sélectionner un patient pour ajouter un suivi
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if patients|length > 0 %}
+                        <div class="row">
+                            {% for patient in patients %}
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <a href="{{ path('app_suivi_traitement_select_traitement_by_patient', {'patient_id': patient.etudiant.id}) }}" 
+                                       class="card text-decoration-none h-100 patient-card">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="avatar-sm bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3">
+                                                    <i class="fas fa-user text-primary"></i>
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 text-dark">{{ patient.etudiant.fullName }}</h6>
+                                                    <small class="text-muted">{{ patient.etudiant.email }}</small>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="badge bg-info bg-opacity-10 text-info">
+                                                    <i class="fas fa-heartbeat me-1"></i>
+                                                    {{ patient.nombreTraitements }} traitement(s)
+                                                </span>
+                                                <i class="fas fa-arrow-right text-muted"></i>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Vous n'avez aucun patient assigné. 
+                            <a href="{{ path('app_traitement_new') }}" class="alert-link">Créez un traitement d'abord</a>.
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mt-3">
+                        <a href="{{ path('app_suivi_traitement_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Retour à la liste
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.patient-card {
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+}
+
+.patient-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: #007bff;
+}
+
+.patient-card .card-body {
+    padding: 1.25rem;
+}
+
+.avatar-sm {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+}
+</style>
+{% endblock %}

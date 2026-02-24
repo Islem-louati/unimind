@@ -1,0 +1,78 @@
+{# Template de pagination personnalisé #}
+{% if pageCount > 1 %}
+    <nav aria-label="Pagination" class="d-flex justify-content-center">
+        <ul class="pagination pagination-sm">
+            {# Bouton Précédent #}
+            {% if previous is defined %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ path(route, query|merge({(pageParameterName): previous})) }}" aria-label="Précédent">
+                        <span aria-hidden="true">&laquo;</span>
+                        <span class="sr-only">Précédent</span>
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link" aria-label="Précédent">
+                        <span aria-hidden="true">&laquo;</span>
+                        <span class="sr-only">Précédent</span>
+                    </span>
+                </li>
+            {% endif %}
+
+            {# Numéros de pages #}
+            {% set start = max(1, current - 2) %}
+            {% set end = min(pageCount, current + 2) %}
+            
+            {% if start > 1 %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ path(route, query|merge({(pageParameterName): 1})) }}">1</a>
+                </li>
+                {% if start > 2 %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+            {% endif %}
+
+            {% for page in range(start, end) %}
+                {% if page == current %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ page }}</span>
+                    </li>
+                {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ path(route, query|merge({(pageParameterName): page})) }}">{{ page }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if end < pageCount %}
+                {% if end < pageCount - 1 %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ path(route, query|merge({(pageParameterName): pageCount})) }}">{{ pageCount }}</a>
+                </li>
+            {% endif %}
+
+            {# Bouton Suivant #}
+            {% if next is defined %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ path(route, query|merge({(pageParameterName): next})) }}" aria-label="Suivant">
+                        <span aria-hidden="true">Suivant</span>
+                        <span class="sr-only">&raquo;</span>
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link" aria-label="Suivant">
+                        <span aria-hidden="true">Suivant</span>
+                        <span class="sr-only">&raquo;</span>
+                    </span>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}

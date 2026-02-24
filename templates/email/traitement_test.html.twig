@@ -1,0 +1,200 @@
+{% extends 'base_psychologue.html.twig' %}
+
+{% block page_title %}Gestion des Notifications{% endblock %}
+{% block breadcrumb_title %}Gestion des Notifications{% endblock %}
+
+{% block title %}Gestion des Notifications{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h3 class="mb-0">📧 Gestion des Notifications Email</h3>
+                    <p class="mb-0">Gérez l'envoi d'emails pour les traitements</p>
+                </div>
+                <div class="card-body">
+                    {% for message in app.flashes('success') %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                    
+                    {% for message in app.flashes('error') %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                    
+                    {% for message in app.flashes('info') %}
+                        <div class="alert alert-info alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="card border-primary">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">📊 Statistiques</h5>
+                                    <p class="card-text">{{ traitements|length }} traitements disponibles</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="mb-4">🎯 Notifications par Traitement</h4>
+                    
+                    {% if traitements|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Traitement</th>
+                                    <th>Patient</th>
+                                    <th>Statut</th>
+                                    <th>Progression</th>
+                                    <th>Actions de Notification Automatique</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for traitement in traitements %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ traitement.titre }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ traitement.dateDebut|date('d/m/Y') }}</small>
+                                    </td>
+                                    <td>{{ traitement.etudiant.fullName }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if traitement.statut == 'en cours' %}bg-success
+                                            {% elseif traitement.statut == 'termine' %}bg-primary
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ traitement.statutLabel }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar bg-info" style="width: {{ traitement.pourcentageCompletion }}%;">
+                                                {{ traitement.pourcentageCompletion|number_format(1) }}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <!-- Rappel de suivi -->
+                                            <form method="post" action="{{ path('app_email_traitement_rappel_suivi', {'id': traitement.id}) }}" style="display: inline;">
+                                                <button type="submit" class="btn btn-sm btn-outline-info" title="Envoyer un rappel de suivi à l'étudiant">
+                                                    📅 Rappel
+                                                </button>
+                                            </form>
+                                            
+                                            <!-- Fin de traitement -->
+                                            <form method="post" action="{{ path('app_email_traitement_fin', {'id': traitement.id}) }}" style="display: inline;">
+                                                <button type="submit" class="btn btn-sm btn-outline-success" title="Notifier l'étudiant de la fin du traitement">
+                                                    🎉 Fin
+                                                </button>
+                                            </form>
+                                            
+                                            <!-- Suivi manquant -->
+                                            <form method="post" action="{{ path('app_email_traitement_suivi_manquant', {'id': traitement.id}) }}" style="display: inline;">
+                                                <button type="submit" class="btn btn-sm btn-outline-warning" title="Alerter l'étudiant d'un suivi manquant">
+                                                    ⚠️ Manquant
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <h4>📭 Aucun traitement disponible</h4>
+                        <p>Vous n'avez pas encore de traitements pour tester les notifications email.</p>
+                        <a href="{{ path('app_traitement_new') }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Créer un Traitement
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <hr class="my-5">
+
+                    <h4 class="mb-4">🤖 Automatisation</h4>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card border-warning">
+                                <div class="card-body text-center">
+                                    <h5 class="card-title">🔄 Envoi Automatique</h5>
+                                    <p class="card-text">Envoie automatiquement les emails de rappel pour tous les traitements selon leur statut</p>
+                                    <form method="post" action="{{ path('app_email_traitement_test_automatique') }}">
+                                        <button type="submit" class="btn btn-warning btn-lg">
+                                            <i class="fas fa-robot me-2"></i>
+                                            Lancer l'Envoi Automatique
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-success">
+                                <div class="card-body">
+                                    <h5 class="card-title">📊 Rapport Hebdomadaire</h5>
+                                    <p class="card-text">Reçoit votre rapport d'activité automatique de la semaine.</p>
+                                    <form method="post" action="{{ path('app_email_traitement_rapport_hebdomadaire') }}">
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-chart-line me-2"></i>
+                                            Recevoir le Rapport
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-5">
+
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card border-secondary">
+                                <div class="card-body">
+                                    <h5 class="card-title">📋 Types d'Emails Disponibles</h5>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6>🌟 Notification Nouveau Traitement</h6>
+                                            <p class="text-muted small">Envoyé quand un traitement est créé pour un étudiant.</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6>📅 Rappel de Suivi</h6>
+                                            <p class="text-muted small">Rappel pour encourager les suivis réguliers.</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6>🎉 Notification Fin Traitement</h6>
+                                            <p class="text-muted small">Célébration quand un traitement est terminé.</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6>⚠️ Suivi Manquant</h6>
+                                            <p class="text-muted small">Alerte quand aucun suivi n'est fait depuis longtemps.</p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6>📊 Rapport Hebdomadaire</h6>
+                                            <p class="text-muted small">Résumé d'activité pour les psychologues.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

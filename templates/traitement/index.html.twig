@@ -1,0 +1,359 @@
+{% extends 'base_psychologue.html.twig' %}
+
+{% block title %}Gestion des Traitements{% endblock %}
+{% block page_title %}Gestion des Traitements{% endblock %}
+{% block breadcrumb_title %}Traitements{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-stethoscope me-2"></i>
+                                Gestion des Traitements
+                            </h6>
+                        </div>
+                        <div class="col-auto">
+                            {% if is_granted('ROLE_PSYCHOLOGUE') and not is_granted('ROLE_ADMIN') and not is_granted('ROLE_RESPONSABLE_ETUDIANT') %}
+                            <a href="{{ path('app_dashboard') }}" class="btn btn-info btn-sm me-2">
+                                <i class="fas fa-chart-line me-1"></i>
+                                Dashboard
+                            </a>
+                            <a href="{{ path('app_email_traitement_test') }}" class="btn btn-warning btn-sm me-2">
+                                <i class="fas fa-envelope me-1"></i>
+                                Notifications Email
+                            </a>
+                            <a href="{{ path('app_traitement_new') }}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-plus me-1"></i>
+                                Nouveau Traitement
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+        <!-- Message si pas de traitements -->
+        {% if pagination is empty %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Aucun traitement trouvé. 
+                {% if is_granted('ROLE_PSYCHOLOGUE') and not is_granted('ROLE_ADMIN') and not is_granted('ROLE_RESPONSABLE_ETUDIANT') %}
+                    <a href="{{ path('app_traitement_new') }}" class="alert-link">Créez votre premier traitement</a> pour commencer.
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <!-- Statistiques Cards -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6 mb-xl-0 mb-4">
+                <div class="card card-stats">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-10">
+                                <h5 class="card-title text-uppercase text-muted mb-0">Total Traitements</h5>
+                                <span class="h2 font-weight-bold mb-0">{{ stats.total }}</span>
+                            </div>
+                            <div class="col-2 text-center">
+                                <i class="fas fa-stethoscope text-primary" style="font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-xl-0 mb-4">
+                <div class="card card-stats">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-10">
+                                <h5 class="card-title text-uppercase text-muted mb-0">En Cours</h5>
+                                <span class="h2 font-weight-bold mb-0">{{ stats.en_cours }}</span>
+                            </div>
+                            <div class="col-2 text-center">
+                                <i class="fas fa-clock text-info" style="font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-xl-0 mb-4">
+                <div class="card card-stats">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-10">
+                                <h5 class="card-title text-uppercase text-muted mb-0">Terminés</h5>
+                                <span class="h2 font-weight-bold mb-0">{{ stats.termines }}</span>
+                            </div>
+                            <div class="col-2 text-center">
+                                <i class="fas fa-check-circle text-success" style="font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6 mb-xl-0 mb-4">
+                <div class="card card-stats">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-10">
+                                <h5 class="card-title text-uppercase text-muted mb-0">Priorité Haute</h5>
+                                <span class="h2 font-weight-bold mb-0">{{ stats.priorite_haute }}</span>
+                            </div>
+                            <div class="col-2 text-center">
+                                <i class="fas fa-exclamation-triangle text-danger" style="font-size: 1.5rem;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtres et Recherche -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header pb-0">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <form method="GET" action="{{ path('app_traitement_index') }}">
+                                    <div class="input-group">
+                                        <span class="input-group-text text-body"><i class="fas fa-search" aria-hidden="true"></i></span>
+                                        <input type="text" name="search" class="form-control" placeholder="Rechercher un traitement..." value="{{ filters.search }}">
+                                        <input type="hidden" name="sort" value="{{ sort }}">
+                                        <input type="hidden" name="order" value="{{ order }}">
+                                        <button type="submit" class="btn btn-outline-primary">Rechercher</button>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-md-2">
+                                <form method="GET" action="{{ path('app_traitement_index') }}">
+                                    <select name="statut" class="form-select" onchange="this.form.submit()">
+                                        <option value="">Tous les statuts</option>
+                                        <option value="en cours" {% if filters.statut == 'en cours' %}selected{% endif %}>En cours</option>
+                                        <option value="termine" {% if filters.statut == 'termine' %}selected{% endif %}>Terminé</option>
+                                        <option value="suspendu" {% if filters.statut == 'suspendu' %}selected{% endif %}>Suspendu</option>
+                                    </select>
+                                    <input type="hidden" name="sort" value="{{ sort }}">
+                                    <input type="hidden" name="order" value="{{ order }}">
+                                    <input type="hidden" name="search" value="{{ filters.search }}">
+                                    <input type="hidden" name="priorite" value="{{ filters.priorite }}">
+                                    <input type="hidden" name="categorie" value="{{ filters.categorie }}">
+                                </form>
+                            </div>
+                            <div class="col-md-2">
+                                <form method="GET" action="{{ path('app_traitement_index') }}">
+                                    <select name="priorite" class="form-select" onchange="this.form.submit()">
+                                        <option value="">Toutes les priorités</option>
+                                        <option value="haute" {% if filters.priorite == 'haute' %}selected{% endif %}>Haute</option>
+                                        <option value="moyenne" {% if filters.priorite == 'moyenne' %}selected{% endif %}>Moyenne</option>
+                                        <option value="basse" {% if filters.priorite == 'basse' %}selected{% endif %}>Basse</option>
+                                    </select>
+                                    <input type="hidden" name="sort" value="{{ sort }}">
+                                    <input type="hidden" name="order" value="{{ order }}">
+                                    <input type="hidden" name="search" value="{{ filters.search }}">
+                                    <input type="hidden" name="statut" value="{{ filters.statut }}">
+                                    <input type="hidden" name="categorie" value="{{ filters.categorie }}">
+                                </form>
+                            </div>
+                            <div class="col-md-2">
+                                <form method="GET" action="{{ path('app_traitement_index') }}">
+                                    <select name="categorie" class="form-select" onchange="this.form.submit()">
+                                        <option value="">Toutes les catégories</option>
+                                        <option value="relaxation" {% if filters.categorie == 'relaxation' %}selected{% endif %}>Relaxation</option>
+                                        <option value="cognitif" {% if filters.categorie == 'cognitif' %}selected{% endif %}>Cognitif</option>
+                                        <option value="emotionnel" {% if filters.categorie == 'emotionnel' %}selected{% endif %}>Émotionnel</option>
+                                        <option value="comportemental" {% if filters.categorie == 'comportemental' %}selected{% endif %}>Comportemental</option>
+                                    </select>
+                                    <input type="hidden" name="sort" value="{{ sort }}">
+                                    <input type="hidden" name="order" value="{{ order }}">
+                                    <input type="hidden" name="search" value="{{ filters.search }}">
+                                    <input type="hidden" name="statut" value="{{ filters.statut }}">
+                                    <input type="hidden" name="priorite" value="{{ filters.priorite }}">
+                                </form>
+                            </div>
+                            <div class="col-md-2">
+                                <a href="{{ path('app_traitement_index') }}" class="btn btn-outline-secondary w-100">
+                                    <i class="fas fa-redo me-1"></i>Réinitialiser
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des Traitements -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card mb-4">
+                    <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Liste des Traitements</h6>
+                        <div>
+                            {% if is_granted('ROLE_PSYCHOLOGUE') or is_granted('ROLE_ETUDIANT') %}
+                            <a href="{{ path('ai_treatment_advice') }}" class="btn btn-purple btn-sm" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white;">
+                                <i class="fas fa-robot me-1"></i>Conseil IA
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="card-body px-0 pt-0 pb-2">
+                                        {% if pagination|length > 0 %}
+                                            <div class="table-responsive p-0">
+                                                <table class="table align-items-center mb-0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                                <a href="{{ path('app_traitement_index', {custom_sort: 't.titre', custom_order: sort == 't.titre' and order == 'asc' ? 'desc' : 'asc'}) }}" class="text-decoration-none text-secondary">
+                                                                    Titre 
+                                                                    {% if sort == 't.titre' %}
+                                                                        {% if order == 'asc' %}↑{% else %}↓{% endif %}
+                                                                    {% else %}
+                                                                        ↕
+                                                                    {% endif %}
+                                                                </a>
+                                                            </th>
+                                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                                <a href="{{ path('app_traitement_index', {custom_sort: 't.statut', custom_order: sort == 't.statut' and order == 'asc' ? 'desc' : 'asc'}) }}" class="text-decoration-none text-secondary">
+                                                                    Statut 
+                                                                    {% if sort == 't.statut' %}
+                                                                        {% if order == 'asc' %}↑{% else %}↓{% endif %}
+                                                                    {% else %}
+                                                                        ↕
+                                                                    {% endif %}
+                                                                </a>
+                                                            </th>
+                                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                                <a href="{{ path('app_traitement_index', {custom_sort: 't.priorite', custom_order: sort == 't.priorite' and order == 'asc' ? 'desc' : 'asc'}) }}" class="text-decoration-none text-secondary">
+                                                                    Priorité 
+                                                                    {% if sort == 't.priorite' %}
+                                                                        {% if order == 'asc' %}↑{% else %}↓{% endif %}
+                                                                    {% else %}
+                                                                        ↕
+                                                                    {% endif %}
+                                                                </a>
+                                                            </th>
+                                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                                                <a href="{{ path('app_traitement_index', {custom_sort: 't.pourcentageCompletion', custom_order: sort == 't.pourcentageCompletion' and order == 'asc' ? 'desc' : 'asc'}) }}" class="text-decoration-none text-secondary">
+                                                                    Progression 
+                                                                    {% if sort == 't.pourcentageCompletion' %}
+                                                                        {% if order == 'asc' %}↑{% else %}↓{% endif %}
+                                                                    {% else %}
+                                                                        ↕
+                                                                    {% endif %}
+                                                                </a>
+                                                            </th>
+                                                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actions</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% set current_patient = null %}
+                                                        
+                                                        {% for traitement in pagination %}
+                                                            {% set patient_key = traitement.etudiant ? traitement.etudiant.getUserId() : 'no_patient' %}
+                                                            
+                                                            <!-- Ligne de séparation patient -->
+                                                            {% if current_patient != patient_key %}
+                                                                {% if current_patient is not null %}
+                                                                    <tr>
+                                                                        <td colspan="5" class="bg-light text-center fw-bold py-2">
+                                                                            <hr class="my-0">
+                                                                        </td>
+                                                                    </tr>
+                                                                {% endif %}
+                                                                {% set current_patient = patient_key %}
+                                                            
+                                                                <tr class="patient-header">
+                                                                    <td colspan="5" class="bg-gradient-info text-white fw-bold py-2">
+                                                                        <i class="fas fa-user me-2"></i>
+                                                                        {% if traitement.etudiant %}
+                                                                            {{ traitement.etudiant.fullName }}
+                                                                            <small class="ms-2 opacity-75">{{ traitement.etudiant.email }}</small>
+                                                                        {% else %}
+                                                                            Patient non assigné
+                                                                        {% endif %}
+                                                                    </td>
+                                                                </tr>
+                                                            {% endif %}
+                                                            
+                                                            <!-- Ligne de traitement -->
+                                                            <tr class="traitement-row">
+                                                                <td class="align-middle">
+                                                                    <div class="d-flex px-2 py-1">
+                                                                        <div class="d-flex flex-column justify-content-center">
+                                                                            <h6 class="mb-0 text-sm">{{ traitement.titre }}</h6>
+                                                                            <p class="text-xs text-secondary mb-0">{{ traitement.categorieLabel }}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td class="align-middle">
+                                                                    <span class="badge badge-sm {% if traitement.statut == 'EN_COURS' %}bg-gradient-info{% elseif traitement.statut == 'TERMINE' %}bg-gradient-success{% else %}bg-gradient-warning{% endif %}">
+                                                                        {{ traitement.statutLabel }}
+                                                                    </span>
+                                                                </td>
+                                                                <td class="align-middle">
+                                                                    <span class="badge badge-sm {% if traitement.priorite == 'HAUTE' %}bg-gradient-danger{% elseif traitement.priorite == 'MOYENNE' %}bg-gradient-warning{% else %}bg-gradient-secondary{% endif %}">
+                                                                        {{ traitement.prioriteLabel }}
+                                                                    </span>
+                                                                </td>
+                                                                <td class="align-middle">
+                                                                    <div class="progress" style="height: 20px;">
+                                                                        <div class="progress-bar bg-gradient-info" role="progressbar" style="width: {{ traitement.pourcentageCompletion }}%;" aria-valuenow="{{ traitement.pourcentageCompletion }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                                                    </div>
+                                                                    <span class="text-xs">{{ traitement.pourcentageCompletion|number_format(1) }}%</span>
+                                                                </td>
+                                                                <td class="align-middle text-center">
+                                                                    <div class="d-flex gap-2 justify-content-center">
+                                                                        <a href="{{ path('app_traitement_show', {'id': traitement.id}) }}" class="btn btn-sm btn-info" data-toggle="tooltip" data-original-title="Voir">
+                                                                            <i class="fas fa-eye me-1"></i>Voir
+                                                                        </a>
+                                                                        {% if is_granted('ROLE_PSYCHOLOGUE') and not is_granted('ROLE_ADMIN') and not is_granted('ROLE_RESPONSABLE_ETUDIANT') %}
+                                                                            <a href="{{ path('app_traitement_edit', {'id': traitement.id}) }}" class="btn btn-sm btn-warning" data-toggle="tooltip" data-original-title="Modifier">
+                                                                                <i class="fas fa-edit me-1"></i>Modifier
+                                                                            </a>
+                                                                            <a href="{{ path('app_traitement_translate', {'id': traitement.id }) }}" class="btn btn-sm btn-purple" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white;" data-toggle="tooltip" data-original-title="Traduire">
+                                                                                <i class="fas fa-language me-1"></i>Traduire
+                                                                            </a>
+                                                                            <form method="post" action="{{ path('app_traitement_delete', {'id': traitement.id }) }}" style="display: inline;" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce traitement ?');">
+                                                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ traitement.id) }}">
+                                                                                <button type="submit" class="btn btn-sm btn-danger" data-toggle="tooltip" data-original-title="Supprimer">
+                                                                                    <i class="fas fa-trash me-1"></i>Supprimer
+                                                                                </button>
+                                                                            </form>
+                                                                        {% elseif is_granted('ROLE_ETUDIANT') %}
+                                                                            <a href="{{ path('app_traitement_translate', {'id': traitement.id }) }}" class="btn btn-sm btn-purple" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white;" data-toggle="tooltip" data-original-title="Traduire">
+                                                                                <i class="fas fa-language me-1"></i>Traduire
+                                                                            </a>
+                                                                            <a href="{{ path('app_pdf_interactive_traitement_etudiant', {'id': traitement.id }) }}" class="btn btn-sm btn-success" data-toggle="tooltip" data-original-title="Télécharger PDF">
+                                                                                <i class="fas fa-download me-1"></i>Mon PDF
+                                                                            </a>
+                                                                        {% endif %}
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        {% else %}
+                                            <div class="alert alert-info">
+                                                <h4>📭 Aucun traitement disponible</h4>
+                                                <p>Vous n'avez pas encore de traitements pour gérer.</p>
+                                                <a href="{{ path('app_traitement_new') }}" class="btn btn-primary">
+                                                    <i class="fas fa-plus me-2"></i>Créer un Traitement
+                                                </a>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="card-footer py-4">
+                        <nav aria-label="Page navigation">
+                            {{ knp_pagination_render(pagination, 'pagination/custom_pagination.html.twig') }}
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

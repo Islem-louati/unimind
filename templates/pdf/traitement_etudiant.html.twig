@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Mon Traitement - {{ traitement.titre }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            margin: 20px;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #28a745;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .header h1 {
+            color: white;
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .header p {
+            color: rgba(255, 255, 255, 0.8);
+            margin: 5px 0 0 0;
+            font-size: 14px;
+        }
+        .info-section {
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .info-section h3 {
+            color: #28a745;
+            margin-top: 0;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 8px;
+            font-size: 18px;
+        }
+        .info-row {
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        .info-label {
+            font-weight: bold;
+            width: 140px;
+            color: #6c757d;
+        }
+        .progress-section {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .progress-bar {
+            height: 25px;
+            background-color: #e9ecef;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            border-radius: 12px;
+            transition: width 0.3s ease;
+        }
+        .suivis-section {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .suivi-item {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-left: 4px solid #28a745;
+            background-color: #f8f9fa;
+            border-radius: 0 8px 8px 0;
+        }
+        .suivi-date {
+            font-weight: bold;
+            color: #28a745;
+            margin-bottom: 5px;
+        }
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            color: white;
+        }
+        .badge-success { background-color: #28a745; }
+        .badge-warning { background-color: #ffc107; color: #000; }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            color: #6c757d;
+            font-size: 11px;
+        }
+        .encouragement {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🌟 Mon Traitement</h1>
+        <p>Généré le {{ dateGeneration|date('d/m/Y à H:i') }}</p>
+    </div>
+
+    <div class="info-section">
+        <h3>📋 Informations du Traitement</h3>
+        <div class="info-row">
+            <span class="info-label">Titre :</span>
+            {{ traitement.titre }}
+        </div>
+        <div class="info-row">
+            <span class="info-label">Description :</span>
+            {{ traitement.description|default('Non spécifiée') }}
+        </div>
+        <div class="info-row">
+            <span class="info-label">Catégorie :</span>
+            {{ traitement.categorieLabel }}
+        </div>
+        <div class="info-row">
+            <span class="info-label">Statut :</span>
+            <span class="badge 
+                {% if traitement.statut == 'en cours' %}badge-success
+                {% elseif traitement.statut == 'termine' %}badge-warning
+                {% else %}badge-secondary{% endif %}">
+                {{ traitement.statutLabel }}
+            </span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Priorité :</span>
+            <span class="badge 
+                {% if traitement.priorite == 'haute' %}badge-danger
+                {% elseif traitement.priorite == 'moyenne' %}badge-warning
+                {% else %}badge-secondary{% endif %}">
+                {{ traitement.prioriteLabel }}
+            </span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Date début :</span>
+            {{ traitement.getDateDebut()|date('d/m/Y') }}
+        </div>
+        <div class="info-row">
+            <span class="info-label">Durée :</span>
+            {{ traitement.getDureeJours() }} jours
+        </div>
+        <div class="info-row">
+            <span class="info-label">Psychologue :</span>
+            {{ traitement.psychologue ? traitement.psychologue.fullName : 'Non assigné' }}
+        </div>
+    </div>
+
+    <div class="progress-section">
+        <h3>📈 Ma Progression</h3>
+        <div class="info-row">
+            <span class="info-label">Progression :</span>
+            <div style="flex: 1;">
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: {{ traitement.pourcentageCompletion }}%;"></div>
+                </div>
+            </div>
+            <strong>{{ traitement.pourcentageCompletion|number_format(1) }}%</strong>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Objectif :</span>
+            {{ traitement.objectif_therapeutique|default('Continuez vos efforts pour atteindre vos objectifs !') }}
+        </div>
+    </div>
+
+    <div class="encouragement">
+        <h3>💪 Message d'Encouragement</h3>
+        <p style="font-size: 16px; margin: 0;">
+            {% if traitement.pourcentageCompletion >= 80 %}
+                🎉 <strong>Félicitations !</strong> Vous avez fait d'excellents progrès dans votre traitement. Continuez ainsi !
+            {% elseif traitement.pourcentageCompletion >= 50 %}
+                💪 <strong>Bon travail !</strong> Vous êtes sur la bonne voie. Chaque pas vous rapproche de votre objectif.
+            {% else %}
+                🌱 <strong>Persévérez !</strong> Le chemin peut sembler difficile, mais chaque effort compte. Continuez à avancer pas à pas.
+            {% endif %}
+        </p>
+    </div>
+
+    <div class="suivis-section">
+        <h3>📅 Mes Suivis</h3>
+        {% if traitement.suivis|length > 0 %}
+            {% for suivi in traitement.suivis|slice(0, 5) %}
+            <div class="suivi-item">
+                <div class="suivi-date">{{ suivi.getDateSuivi()|date('d/m/Y H:i') }}</div>
+                <div><strong>Ressenti :</strong> {{ suivi.getRessenti()|default('Non spécifié') }}</div>
+                <div><strong>Évaluation :</strong> {{ suivi.getEvaluation() }}/5</div>
+                {% if suivi.getObservations() %}
+                    <div><strong>Observations :</strong> {{ suivi.getObservations() }}</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+            {% if traitement.suivis|length > 5 %}
+                <p style="text-align: center; color: #6c757d; font-style: italic;">
+                    ... et {{ traitement.suivis|length - 5 }} autre(s) suivi(s)
+                </p>
+            {% endif %}
+        {% else %}
+            <p style="text-align: center; color: #6c757d; font-style: italic;">
+                Aucun suivi enregistré pour ce traitement.
+            </p>
+        {% endif %}
+    </div>
+
+    <div class="footer">
+        <p><strong>Ce document est personnel et confidentiel.</strong></p>
+        <p>Généré automatiquement par le système de suivi psychologique Unimind</p>
+        <p>© {{ "now"|date("Y") }} Unimind - Tous droits réservés</p>
+        <p>Page 1/1</p>
+    </div>
+</body>
+</html>

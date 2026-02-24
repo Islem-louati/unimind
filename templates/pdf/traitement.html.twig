@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Fiche Traitement - {{ traitement.titre }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            margin: 20px;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            color: #007bff;
+            margin: 0;
+            font-size: 24px;
+        }
+        .info-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .info-section h3 {
+            color: #007bff;
+            margin-top: 0;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 5px;
+        }
+        .info-row {
+            margin-bottom: 8px;
+        }
+        .info-label {
+            font-weight: bold;
+            display: inline-block;
+            width: 120px;
+        }
+        .suivi-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-left: 3px solid #007bff;
+            background-color: #fff;
+        }
+        .suivi-date {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .badge {
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            color: white;
+        }
+        .badge-success { background-color: #28a745; }
+        .badge-warning { background-color: #ffc107; color: #000; }
+        .badge-info { background-color: #17a2b8; }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 10px;
+            color: #6c757d;
+            border-top: 1px solid #dee2e6;
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Fiche de Traitement</h1>
+        <p>Généré le {{ dateGeneration|date('d/m/Y H:i') }}</p>
+    </div>
+
+    <div class="info-section">
+        <h3>Informations du Traitement</h3>
+        <div class="info-row">
+            <span class="info-label">Titre :</span>
+            {{ traitement.titre }}
+        </div>
+        <div class="info-row">
+            <span class="info-label">Description :</span>
+            {{ traitement.description|default('Non spécifiée') }}
+        </div>
+        <div class="info-row">
+            <span class="info-label">Catégorie :</span>
+            {{ traitement.categorieLabel }}
+        </div>
+        <div class="info-row">
+            <span class="info-label">Statut :</span>
+            <span class="badge 
+                {% if traitement.statut == 'EN_COURS' %}badge-info
+                {% elseif traitement.statut == 'TERMINE' %}badge-success
+                {% else %}badge-warning{% endif %}">
+                {{ traitement.statutLabel }}
+            </span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Priorité :</span>
+            <span class="badge 
+                {% if traitement.priorite == 'HAUTE' %}badge-danger
+                {% elseif traitement.priorite == 'MOYENNE' %}badge-warning
+                {% else %}badge-secondary{% endif %}">
+                {{ traitement.prioriteLabel }}
+            </span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Date début :</span>
+            {{ traitement.date_debut|date('d/m/Y') }}
+        </div>
+        <div class="info-row">
+            <span class="info-label">Date fin :</span>
+            {{ traitement.date_fin ? traitement.date_fin|date('d/m/Y') : 'Non définie' }}
+        </div>
+        <div class="info-row">
+            <span class="info-label">Patient :</span>
+            {{ traitement.etudiant ? traitement.etudiant.fullName : 'Non assigné' }}
+        </div>
+        <div class="info-row">
+            <span class="info-label">Psychologue :</span>
+            {{ traitement.psychologue ? traitement.psychologue.fullName : 'Non assigné' }}
+        </div>
+        <div class="info-row">
+            <span class="info-label">Progression :</span>
+            {{ traitement.pourcentageCompletion|number_format(1) }}%
+        </div>
+    </div>
+
+    {% if suivis|length > 0 %}
+    <div class="info-section">
+        <h3>Suivis du Traitement ({{ suivis|length }})</h3>
+        {% for suivi in suivis %}
+        <div class="suivi-item">
+            <div class="suivi-date">{{ suivi.dateSuivi|date('d/m/Y H:i') }}</div>
+            <div class="info-row">
+                <span class="info-label">Ressenti :</span>
+                {{ suivi.ressenti|default('Non spécifié') }}
+            </div>
+            <div class="info-row">
+                <span class="info-label">Évaluation :</span>
+                {{ suivi.evaluation }}/5
+            </div>
+            <div class="info-row">
+                <span class="info-label">Observations :</span>
+                {{ suivi.observations|default('Aucune observation') }}
+            </div>
+            <div class="info-row">
+                <span class="info-label">Statut :</span>
+                <span class="badge 
+                    {% if suivi.effectue %}badge-success
+                    {% else %}badge-warning{% endif %}">
+                    {% if suivi.effectue %}Effectué{% else %}Non effectué{% endif %}
+                </span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="footer">
+        <p>Ce document a été généré automatiquement par le système de suivi psychologique</p>
+        <p>Page 1/1</p>
+    </div>
+</body>
+</html>

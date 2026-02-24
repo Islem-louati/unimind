@@ -1,0 +1,3 @@
+# AI Configuration (IA locale - plus besoin d'OpenAI)
+parameters:
+    # openai_api_key: '%env(OPENAI_API_KEY)%'  # Désactivé - IA locale utilisée

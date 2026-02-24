@@ -1,0 +1,296 @@
+    {% extends 'base_psychologue.html.twig' %}
+
+{% block title %}Traduction du Traitement{% endblock %}
+{% block page_title %}Traduction du Traitement{% endblock %}
+{% block breadcrumb_title %}Traduction{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h6 class="m-0 font-weight-bold text-primary">
+                                <i class="fas fa-language me-2"></i>
+                                Traduction du Traitement
+                            </h6>
+                        </div>
+                        <div class="col-auto">
+                            <a href="{{ path('app_traitement_index') }}" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+                            </a>
+                            <a href="{{ path('app_traitement_show', {'id': traitement.id}) }}" class="btn btn-info btn-sm">
+                                <i class="fas fa-eye me-1"></i>Voir les détails
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Informations du traitement -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="alert alert-info">
+                                <h6 class="alert-heading">
+                                    <i class="fas fa-stethoscope me-2"></i>
+                                    {{ traitement.titre }}
+                                </h6>
+                                <p class="mb-0">
+                                    <strong>Patient:</strong> {{ traitement.etudiant ? traitement.etudiant.fullName : 'Non défini' }} |
+                                    <strong>Psychologue:</strong> {{ traitement.psychologue ? traitement.psychologue.fullName : 'Non défini' }} |
+                                    <strong>Statut:</strong> <span class="badge badge-sm bg-gradient-info">{{ traitement.statutLabel }}</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sélecteur de langue -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <form method="post" action="{{ path('app_traitement_translate', {'id': traitement.id}) }}">
+                                        <div class="row align-items-end">
+                                            <div class="col-md-4">
+                                                <label for="target_language" class="form-label fw-bold">
+                                                    <i class="fas fa-globe me-1"></i>
+                                                    Langue de traduction
+                                                </label>
+                                                <select name="target_language" id="target_language" class="form-select form-select-lg">
+                                                    {% for code, name in supported_languages %}
+                                                        <option value="{{ code }}" {% if code == selected_language %}selected{% endif %}>
+                                                            {{ name }}
+                                                        </option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <button type="submit" class="btn btn-primary btn-lg w-100">
+                                                    <i class="fas fa-language me-2"></i>
+                                                    Traduire le traitement
+                                                </button>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="text-muted small">
+                                                    <i class="fas fa-info-circle me-1"></i>
+                                                    La traduction sera générée automatiquement pour tous les champs du traitement.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Message d'erreur -->
+                    {% if translation_error %}
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <div class="alert alert-danger">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    {{ translation_error }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Résultats de la traduction -->
+                    {% if translated_data %}
+                        <div class="row">
+                            <!-- Version originale -->
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-file-alt me-2"></i>
+                                            Version originale (Français)
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-primary">Titre</label>
+                                            <p class="form-control-plaintext">{{ traitement.titre }}</p>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-primary">Description</label>
+                                            <p class="form-control-plaintext">{{ traitement.description|nl2br }}</p>
+                                        </div>
+                                        
+                                        {% if traitement.objectifTherapeutique %}
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-primary">Objectif thérapeutique</label>
+                                            <p class="form-control-plaintext">{{ traitement.objectifTherapeutique|nl2br }}</p>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        {% if traitement.type %}
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-primary">Type</label>
+                                            <p class="form-control-plaintext">{{ traitement.type }}</p>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        {% if traitement.dosage %}
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-primary">Dosage</label>
+                                            <p class="form-control-plaintext">{{ traitement.dosage }}</p>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Version traduite -->
+                            <div class="col-md-6">
+                                <div class="card border-success">
+                                    <div class="card-header bg-success text-white">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-language me-2"></i>
+                                            Version traduite ({{ supported_languages[selected_language] }})
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-success">Titre</label>
+                                            <div class="p-2 bg-light rounded">
+                                                {{ translated_data.titre_translated|default('Non traduit') }}
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-success">Description</label>
+                                            <div class="p-2 bg-light rounded">
+                                                {{ translated_data.description_translated|default('Non traduit')|nl2br }}
+                                            </div>
+                                        </div>
+                                        
+                                        {% if translated_data.objectifTherapeutique_translated is defined %}
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-success">Objectif thérapeutique</label>
+                                            <div class="p-2 bg-light rounded">
+                                                {{ translated_data.objectifTherapeutique_translated|nl2br }}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        {% if translated_data.type_translated is defined %}
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-success">Type</label>
+                                            <div class="p-2 bg-light rounded">
+                                                {{ translated_data.type_translated }}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                        
+                                        {% if translated_data.dosage_translated is defined %}
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-success">Dosage</label>
+                                            <div class="p-2 bg-light rounded">
+                                                {{ translated_data.dosage_translated }}
+                                            </div>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Actions supplémentaires -->
+                        <div class="row mt-4">
+                            <div class="col-md-12">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <a href="{{ path('app_traitement_translate_print', {'id': traitement.id, 'language': selected_language}) }}" class="btn btn-outline-primary btn-sm" target="_blank">
+                                                    <i class="fas fa-print me-1"></i>
+                                                    Imprimer la traduction
+                                                </a>
+                                            </div>
+                                            <div class="col-md-6 text-end">
+                                                <a href="{{ path('app_traitement_translate', {'id': traitement.id, 'language': selected_language}) }}" class="btn btn-outline-secondary btn-sm">
+                                                    <i class="fas fa-redo me-1"></i>
+                                                    Traduire dans une autre langue
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Instructions si aucune traduction -->
+                    {% if not translated_data and not translation_error %}
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="text-center py-5">
+                                    <i class="fas fa-language fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">Sélectionnez une langue et cliquez sur "Traduire"</h5>
+                                    <p class="text-muted">La traduction complète du traitement s'affichera ici</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyTranslation() {
+    let text = "=== TRADUCTION DU TRAITEMENT ===\n\n";
+    text += "Titre: {{ translated_data.titre_translated|default('') }}\n";
+    text += "Description: {{ translated_data.description_translated|default('') }}\n";
+    {% if translated_data.objectifTherapeutique_translated is defined %}
+    text += "Objectif thérapeutique: {{ translated_data.objectifTherapeutique_translated }}\n";
+    {% endif %}
+    {% if translated_data.type_translated is defined %}
+    text += "Type: {{ translated_data.type_translated }}\n";
+    {% endif %}
+    {% if translated_data.dosage_translated is defined %}
+    text += "Dosage: {{ translated_data.dosage_translated }}\n";
+    {% endif %}
+    
+    navigator.clipboard.writeText(text).then(function() {
+        showNotification('Traduction copiée dans le presse-papiers', 'success');
+    });
+}
+
+function printTranslation() {
+    window.print();
+}
+
+function showNotification(message, type) {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+</script>
+
+<style>
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .card {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+}
+</style>
+{% endblock %}

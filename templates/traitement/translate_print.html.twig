@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traduction du Traitement - {{ traitement.titre }}</title>
+    <style>
+        @media print {
+            body {
+                font-family: Arial, sans-serif;
+                font-size: 12pt;
+                line-height: 1.4;
+                color: #333;
+                margin: 0;
+                padding: 20px;
+            }
+            
+            .header {
+                text-align: center;
+                border-bottom: 2px solid #333;
+                padding-bottom: 20px;
+                margin-bottom: 30px;
+            }
+            
+            .section {
+                margin-bottom: 30px;
+                page-break-inside: avoid;
+            }
+            
+            .section-title {
+                font-size: 16pt;
+                font-weight: bold;
+                margin-bottom: 15px;
+                color: #2c3e50;
+                border-bottom: 1px solid #ddd;
+                padding-bottom: 5px;
+            }
+            
+            .field-label {
+                font-weight: bold;
+                color: #34495e;
+                margin-bottom: 5px;
+            }
+            
+            .field-content {
+                margin-bottom: 15px;
+                padding: 10px;
+                background-color: #f8f9fa;
+                border-left: 4px solid #3498db;
+            }
+            
+            .original {
+                background-color: #e8f5e8;
+                border-left: 4px solid #27ae60;
+            }
+            
+            .translated {
+                background-color: #fff3cd;
+                border-left: 4px solid #f39c12;
+            }
+            
+            .info-row {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 10px;
+                padding: 5px 0;
+                border-bottom: 1px solid #eee;
+            }
+            
+            .footer {
+                text-align: center;
+                margin-top: 40px;
+                padding-top: 20px;
+                border-top: 1px solid #ddd;
+                font-size: 10pt;
+                color: #666;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+        }
+        
+        @media screen {
+            body {
+                font-family: Arial, sans-serif;
+                margin: 20px;
+                background-color: #f5f5f5;
+            }
+            
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+                background: white;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            }
+            
+            .print-button {
+                display: block;
+                margin: 20px auto;
+                padding: 10px 20px;
+                background: #007bff;
+                color: white;
+                text-decoration: none;
+                border-radius: 4px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="no-print">
+            <a href="javascript:window.print()" class="print-button">
+                <i class="fas fa-print"></i> Imprimer ce document
+            </a>
+        </div>
+        
+        <div class="header">
+            <h1>Traduction du Traitement</h1>
+            <h2>{{ traitement.titre }}</h2>
+            <p>
+                <strong>Patient:</strong> {{ traitement.etudiant ? traitement.etudiant.fullName : 'Non défini' }}<br>
+                <strong>Psychologue:</strong> {{ traitement.psychologue ? traitement.psychologue.fullName : 'Non défini' }}<br>
+                <strong>Date:</strong> {{ "now"|date("d/m/Y H:i") }}<br>
+                <strong>Langue cible:</strong> {{ supported_languages[target_language] }}
+            </p>
+        </div>
+
+        {% if translation_error %}
+            <div class="section">
+                <div class="section-title">❌ Erreur de Traduction</div>
+                <div class="field-content">
+                    <p>{{ translation_error }}</p>
+                </div>
+            </div>
+        {% else %}
+            <div class="section">
+                <div class="section-title">📋 Titre du Traitement</div>
+                <div class="info-row">
+                    <div class="field-label">Version originale (Français):</div>
+                    <div class="field-content original">{{ traitement.titre }}</div>
+                </div>
+                <div class="field-label">Version traduite ({{ supported_languages[target_language] }}):</div>
+                <div class="field-content translated">{{ translated_data.titre_translated|default('Non traduit') }}</div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">📝 Description</div>
+                <div class="info-row">
+                    <div class="field-label">Version originale (Français):</div>
+                    <div class="field-content original">{{ traitement.description|nl2br }}</div>
+                </div>
+                <div class="field-label">Version traduite ({{ supported_languages[target_language] }}):</div>
+                <div class="field-content translated">{{ translated_data.description_translated|default('Non traduit')|nl2br }}</div>
+            </div>
+
+            {% if traitement.objectifTherapeutique %}
+            <div class="section">
+                <div class="section-title">🎯 Objectif Thérapeutique</div>
+                <div class="info-row">
+                    <div class="field-label">Version originale (Français):</div>
+                    <div class="field-content original">{{ traitement.objectifTherapeutique|nl2br }}</div>
+                </div>
+                <div class="field-label">Version traduite ({{ supported_languages[target_language] }}):</div>
+                <div class="field-content translated">{{ translated_data.objectifTherapeutique_translated|default('Non traduit')|nl2br }}</div>
+            </div>
+            {% endif %}
+
+            {% if traitement.type %}
+            <div class="section">
+                <div class="section-title">🏷 Type de Traitement</div>
+                <div class="info-row">
+                    <div class="field-label">Version originale (Français):</div>
+                    <div class="field-content original">{{ traitement.type }}</div>
+                </div>
+                <div class="field-label">Version traduite ({{ supported_languages[target_language] }}):</div>
+                <div class="field-content translated">{{ translated_data.type_translated|default('Non traduit') }}</div>
+            </div>
+            {% endif %}
+
+            {% if traitement.dosage %}
+            <div class="section">
+                <div class="section-title">💊 Dosage</div>
+                <div class="info-row">
+                    <div class="field-label">Version originale (Français):</div>
+                    <div class="field-content original">{{ traitement.dosage }}</div>
+                </div>
+                <div class="field-label">Version traduite ({{ supported_languages[target_language] }}):</div>
+                <div class="field-content translated">{{ translated_data.dosage_translated|default('Non traduit') }}</div>
+            </div>
+            {% endif %}
+        {% endif %}
+
+        <div class="footer">
+            <p>
+                <strong>Document généré par Unimind - Plateforme de suivi thérapeutique</strong><br>
+                Traduction réalisée via Google Translate API<br>
+                Page générée le {{ "now"|date("d/m/Y à H:i") }}
+            </p>
+        </div>
+    </div>
+</body>
+</html>
