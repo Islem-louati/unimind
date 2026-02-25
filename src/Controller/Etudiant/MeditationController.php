@@ -15,6 +15,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Security;
+use App\Repository\FavoriRepository;
+use App\Service\FreesoundApiService;
 
 #[Route('/etudiant/meditation')]
 class MeditationController extends AbstractController
@@ -61,6 +63,7 @@ class MeditationController extends AbstractController
         CategorieMeditation $categorie,
         SeanceMeditationRepository $seanceMeditationRepository,
         PostRepository $postRepository,
+        FavoriRepository $favoriRepository,
         EntityManagerInterface $entityManager,
         Security $security
     ): Response
@@ -70,6 +73,19 @@ class MeditationController extends AbstractController
             'categorie' => $categorie,
             'is_active' => true
         ], ['created_at' => 'DESC']);
+
+        $favorisSeanceIds = [];
+
+if ($security->getUser()) {
+    $favoris = $favoriRepository->findBy([
+        'user' => $security->getUser()
+    ]);
+
+    $favorisSeanceIds = array_map(
+        fn($f) => $f->getSeance()->getSeanceId(),
+        $favoris
+    );
+}
 
         // Récupérer les posts de cette catégorie
         $posts = $postRepository->findBy(
@@ -111,21 +127,31 @@ class MeditationController extends AbstractController
         return $this->render('etudiant/meditation/categorie.html.twig', [
             'categorie' => $categorie,
             'seances' => $seances,
+            'favorisSeanceIds' => $favorisSeanceIds,
             'posts' => $posts,
             'form' => $form->createView(),
         ]);
     }
 
     #[Route('/seance/{id}', name: 'etudiant_meditation_seance', methods: ['GET'])]
-    public function seance(SeanceMeditation $seance, EntityManagerInterface $entityManager): Response
+    public function seance(SeanceMeditation $seance, FreesoundApiService $freesoundApi): Response
     {
         // Vérifier que la séance est active
         if (!$seance->isIsActif()) {
             throw $this->createAccessDeniedException('Cette séance n\'est pas disponible.');
         }
 
+        // Rechercher des sons d'ambiance pour cette séance
+    $natureSounds = [
+        'pluie' => $freesoundApi->searchSounds('rain', 3),
+        'mer' => $freesoundApi->searchSounds('sea waves', 3),
+        'foret' => $freesoundApi->searchSounds('forest', 3),
+    ];
+
+
         return $this->render('etudiant/meditation/seance.html.twig', [
             'seance' => $seance,
+            'natureSounds' => $natureSounds,
         ]);
     }
 }

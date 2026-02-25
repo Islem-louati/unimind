@@ -1,0 +1,10 @@
+# Read the documentation: https://github.com/1up-lab/OneupUploaderBundle/blob/master/Resources/doc/index.md
+oneup_uploader:
+    mappings:
+        images:
+            frontend: blueimp
+            storage:
+                type: filesystem
+                directory: '%kernel.project_dir%/public/uploads/images'
+            max_size: 5M
+            namer: oneup_uploader.namer.uniqid

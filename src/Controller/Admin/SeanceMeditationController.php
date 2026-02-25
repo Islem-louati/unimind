@@ -25,6 +25,7 @@ class SeanceMeditationController extends AbstractController
             'seance_meditations' => $seanceMeditationRepository->findAll(),
         ]);
     }
+    
 
     #[Route('/categorie/{id}', name: 'admin_seance_meditation_by_categorie', methods: ['GET'])]
     public function byCategorie(Request $request, CategorieMeditation $categorie, SeanceMeditationRepository $seanceMeditationRepository): Response
@@ -42,30 +43,32 @@ class SeanceMeditationController extends AbstractController
     }
 
     #[Route('/new/categorie/{categorieId}', name: 'admin_seance_meditation_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger, int $categorieId = null): Response
-    {
-        $seanceMeditation = new SeanceMeditation();
-        
-        if ($categorieId) {
-            $categorie = $entityManager->getRepository(CategorieMeditation::class)->find($categorieId);
-            if ($categorie) {
-                $seanceMeditation->setCategorie($categorie);
-            }
+public function new(Request $request, EntityManagerInterface $entityManager, SluggerInterface $slugger, int $categorieId = null): Response
+{
+    $isAjax = $request->isXmlHttpRequest();
+    
+    $seanceMeditation = new SeanceMeditation();
+    
+    if ($categorieId) {
+        $categorie = $entityManager->getRepository(CategorieMeditation::class)->find($categorieId);
+        if ($categorie) {
+            $seanceMeditation->setCategorie($categorie);
         }
-        
-        $form = $this->createForm(SeanceMeditationType::class, $seanceMeditation);
-        $form->handleRequest($request);
+    }
+    
+    $form = $this->createForm(SeanceMeditationType::class, $seanceMeditation);
+    $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+    if ($form->isSubmitted()) {
+        if ($form->isValid()) {
             // Gestion du fichier uploadé - OBLIGATOIRE pour new
             $fichierFile = $form->get('fichier')->getData();
             
             if (!$fichierFile) {
-                // Si requête AJAX
-                if ($request->isXmlHttpRequest()) {
+                if ($isAjax) {
                     return new JsonResponse([
                         'success' => false,
-                        'message' => 'Un fichier est obligatoire pour créer une nouvelle séance.'
+                        'errors' => ['fichier' => 'Le fichier est obligatoire pour créer une nouvelle séance.']
                     ]);
                 }
                 
@@ -81,7 +84,6 @@ class SeanceMeditationController extends AbstractController
             $safeFilename = $slugger->slug($originalFilename);
             $newFilename = $safeFilename.'-'.uniqid().'.'.$fichierFile->guessExtension();
             
-            // Déplacez le fichier
             try {
                 $fichierFile->move(
                     $this->getParameter('upload_directory'),
@@ -90,11 +92,10 @@ class SeanceMeditationController extends AbstractController
                 
                 $seanceMeditation->setFichier($newFilename);
             } catch (FileException $e) {
-                // Si requête AJAX
-                if ($request->isXmlHttpRequest()) {
+                if ($isAjax) {
                     return new JsonResponse([
                         'success' => false,
-                        'message' => 'Erreur lors du téléchargement du fichier.'
+                        'errors' => ['fichier' => 'Erreur lors du téléchargement du fichier.']
                     ]);
                 }
                 
@@ -109,8 +110,7 @@ class SeanceMeditationController extends AbstractController
             $entityManager->persist($seanceMeditation);
             $entityManager->flush();
 
-            // Si requête AJAX
-            if ($request->isXmlHttpRequest()) {
+            if ($isAjax) {
                 return new JsonResponse([
                     'success' => true,
                     'message' => 'Séance créée avec succès!',
@@ -130,45 +130,55 @@ class SeanceMeditationController extends AbstractController
             }
             
             return $this->redirectToRoute('admin_seance_meditation_index', [], Response::HTTP_SEE_OTHER);
-        }
-
-        // Si requête AJAX avec erreurs
-        if ($request->isXmlHttpRequest() && $form->isSubmitted()) {
-            $errors = [];
-            foreach ($form->getErrors(true) as $error) {
-                $field = $error->getOrigin()->getName();
-                $errors[$field] = $error->getMessage();
+        } else {
+            // FORMULAIRE INVALIDE
+            if ($isAjax) {
+                $errors = [];
+                foreach ($form->getErrors(true) as $error) {
+                    $field = $error->getOrigin()->getName();
+                    $errors[$field] = $error->getMessage();
+                }
+                
+                // Rendre le formulaire avec les erreurs
+                $html = $this->renderView('admin/seance_meditation/_form.html.twig', [
+                    'form' => $form->createView(),
+                    'seance_meditation' => $seanceMeditation,
+                    'categorie_id' => $categorieId,
+                    'button_label' => 'Créer',
+                    'form_action' => $this->generateUrl('admin_seance_meditation_new', ['categorieId' => $categorieId])
+                ]);
+                
+                return new JsonResponse([
+                    'success' => false,
+                    'html' => $html,
+                    'errors' => $errors
+                ]);
             }
-            
-            return new JsonResponse([
-                'success' => false,
-                'message' => 'Erreurs de validation',
-                'errors' => $errors
-            ]);
         }
+    }
 
-        // Si requête AJAX pour charger le formulaire
-        if ($request->isXmlHttpRequest()) {
-            $html = $this->renderView('admin/seance_meditation/_form.html.twig', [
-                'form' => $form->createView(),
-                'seance_meditation' => $seanceMeditation,
-                'categorie_id' => $categorieId,
-                'button_label' => 'Créer',
-                'form_action' => $this->generateUrl('admin_seance_meditation_new', ['categorieId' => $categorieId])
-            ]);
-            
-            return new JsonResponse([
-                'success' => true,
-                'html' => $html
-            ]);
-        }
-
-        return $this->render('admin/seance_meditation/new.html.twig', [
+    // Si requête AJAX pour charger le formulaire (GET)
+    if ($isAjax && !$form->isSubmitted()) {
+        $html = $this->renderView('admin/seance_meditation/_form.html.twig', [
+            'form' => $form->createView(),
             'seance_meditation' => $seanceMeditation,
-            'form' => $form,
-            'categorie_id' => $categorieId
+            'categorie_id' => $categorieId,
+            'button_label' => 'Créer',
+            'form_action' => $this->generateUrl('admin_seance_meditation_new', ['categorieId' => $categorieId])
+        ]);
+        
+        return new JsonResponse([
+            'success' => true,
+            'html' => $html
         ]);
     }
+
+    return $this->render('admin/seance_meditation/new.html.twig', [
+        'seance_meditation' => $seanceMeditation,
+        'form' => $form,
+        'categorie_id' => $categorieId
+    ]);
+}
 
     #[Route('/{id}', name: 'admin_seance_meditation_show', methods: ['GET'])]
     public function show(SeanceMeditation $seanceMeditation): Response
@@ -384,4 +394,6 @@ class SeanceMeditationController extends AbstractController
         return $this->redirectToRoute('admin_seance_meditation_by_categorie', 
             ['id' => $seanceMeditation->getCategorie()->getCategorieId()], Response::HTTP_SEE_OTHER);
     }
+
+    
 }

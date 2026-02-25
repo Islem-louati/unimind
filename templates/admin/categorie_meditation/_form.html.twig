@@ -5,7 +5,8 @@
     'id': form_id,
     'action': form_action,
     'class': 'form-categorie',
-    'method': 'POST'
+    'method': 'POST',
+    'novalidate': 'novalidate'  
 }}) }}
 
     <div class="row">
@@ -15,6 +16,8 @@
                 'class': 'form-control',
                 'placeholder': 'Ex: Méditation guidée'
             }}) }}
+            
+            {# UN SEUL AFFICHAGE DES ERREURS #}
             <div class="text-danger mt-1 small">
                 {{ form_errors(form.nom) }}
             </div>
@@ -27,6 +30,8 @@
                 'rows': 4,
                 'placeholder': 'Description de la catégorie...'
             }}) }}
+            
+            {# UN SEUL AFFICHAGE DES ERREURS #}
             <div class="text-danger mt-1 small">
                 {{ form_errors(form.description) }}
             </div>
@@ -41,6 +46,8 @@
                 'class': 'form-control',
                 'placeholder': 'https://example.com/icon.png'
             }}) }}
+            
+            {# UN SEUL AFFICHAGE DES ERREURS #}
             <div class="text-danger mt-1 small">
                 {{ form_errors(form.iconUrl) }}
             </div>

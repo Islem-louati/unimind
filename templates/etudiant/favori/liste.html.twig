@@ -1,0 +1,154 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Favoris - Méditation{% endblock %}
+
+{% block breadcrumb_title %}Favoris{% endblock %}
+
+{% block page_title %}Mes séances favorites{% endblock %}
+
+{% block body %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header pb-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6>Vos séances favorites</h6>
+                            <p class="text-sm mb-0">
+                                <i class="fas fa-heart text-danger me-1"></i>
+                                Retrouvez ici toutes les séances que vous avez ajoutées à vos favoris.
+                            </p>
+                        </div>
+                        <span class="badge bg-gradient-danger">{{ favoris|length }} favori(s)</span>
+                    </div>
+                </div>
+                <div class="card-body p-3">
+                    {% if favoris is not empty %}
+                    <div class="row">
+                        {% for favori in favoris %}
+                        {% set seance = favori.seance %}
+                        <div class="col-xl-3 col-md-4 col-sm-6 mb-4">
+                            <div class="card card-blog card-plain h-100">
+                                <div class="card-body p-3">
+                                    <div class="text-center mb-3">
+                                        <div class="icon icon-shape icon-lg bg-gradient-{{ seance.typeFichier == 'audio' ? 'info' : 'warning' }} shadow-{{ seance.typeFichier == 'audio' ? 'info' : 'warning' }} text-center rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
+                                            <i class="fas fa-{{ seance.typeFichier == 'audio' ? 'volume-up' : 'video' }} text-white text-2xl"></i>
+                                        </div>
+                                    </div>
+
+                                    <p class="mb-1 text-sm text-gradient text-{{ 
+                                        seance.niveau == 'débutant' ? 'success' : 
+                                        (seance.niveau == 'intermédiaire' ? 'warning' : 'danger') 
+                                    }}">
+                                        <i class="fas fa-{{ 
+                                            seance.niveau == 'débutant' ? 'seedling' : 
+                                            (seance.niveau == 'intermédiaire' ? 'tree' : 'mountain') 
+                                        }} me-1"></i>
+                                        {{ seance.niveau|capitalize }}
+                                    </p>
+
+                                    <a href="{{ path('etudiant_meditation_seance', {'id': seance.seanceId}) }}">
+                                        <h5 class="mb-2">{{ seance.titre }}</h5>
+                                    </a>
+
+                                    <p class="text-sm mb-3">
+                                        {{ seance.description|slice(0, 60) }}{% if seance.description|length > 60 %}...{% endif %}
+                                    </p>
+
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="badge badge-sm bg-gradient-{{ seance.typeFichier == 'audio' ? 'info' : 'warning' }}">
+                                                <i class="fas fa-{{ seance.typeFichier == 'audio' ? 'volume-up' : 'video' }} me-1"></i>
+                                                {{ seance.typeFichier|capitalize }}
+                                            </span>
+                                            <span class="text-xs text-muted">
+                                                <i class="fas fa-clock me-1"></i> {{ seance.getDureeFormatee() }}
+                                            </span>
+                                        </div>
+                                        <button type="button"
+                                                class="btn btn-sm btn-danger mb-0 btn-favori-liste"
+                                                data-seance-id="{{ seance.seanceId }}"
+                                                data-token="{{ csrf_token('favori') }}"
+                                                aria-label="Retirer des favoris">
+                                            <i class="fas fa-heart text-white"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <div class="icon icon-shape icon-xl bg-gradient-danger shadow-danger text-center rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-heart text-white text-2xl"></i>
+                        </div>
+                        <h6 class="text-gradient text-danger mb-0">Aucun favori</h6>
+                        <p class="text-sm mb-4">
+                            Vous n'avez pas encore ajouté de séances à vos favoris.
+                        </p>
+                        <a href="{{ path('etudiant_meditation_index') }}" class="btn btn-danger">
+                            <i class="fas fa-spa me-1"></i> Explorer les méditations
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card-blog {
+    transition: all 0.3s ease;
+    border-radius: 16px;
+}
+
+.card-blog:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+</style>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const favorisButtons = document.querySelectorAll('.btn-favori-liste');
+
+    favorisButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const seanceId = this.dataset.seanceId;
+            const token = this.dataset.token;
+
+            fetch(`/favori/toggle/${seanceId}`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({ '_token': token })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && !data.isFavori) {
+                    // Retiré des favoris : supprimer la carte de la liste
+                    const card = this.closest('.col-xl-3');
+                    if (card) card.remove();
+                    // Mettre à jour le compteur si besoin
+                } else {
+                    alert('Erreur : ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Une erreur est survenue.');
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,13 +1,12 @@
-{% extends 'base1.html.twig' %}
+{% extends 'base.html.twig' %}
 
 {% block title %}Gestion des Catégories de Méditation{% endblock %}
 
-{% block breadcrumb_current %}Catégories{% endblock %}
+{% block breadcrumb_title %}Catégories{% endblock %}
 
 {% block page_title %}Gestion des Catégories de Méditation{% endblock %}
 
-{% block content %}
-<div class="container-fluid py-4">
+{% block body %}
   {# Statistiques centrées #}
   <div class="row justify-content-center">
     <div class="col-xl-4 col-md-6 mb-4">
@@ -301,7 +300,6 @@
       </div>
     </div>
   </div>
-</div>
 
 {# Modal pour créer une nouvelle catégorie #}
 <div class="modal fade" id="modalNouvelleCategorie" tabindex="-1" aria-labelledby="modalNouvelleCategorieLabel" aria-hidden="true">

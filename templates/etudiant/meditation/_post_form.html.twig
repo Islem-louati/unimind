@@ -1,0 +1,31 @@
+{{ form_start(form, {'attr': {'id': form_id ?? 'post-form', 'novalidate': 'novalidate'}}) }}
+    <div class="mb-3">
+        {{ form_label(form.categorieMeditation) }}
+        {{ form_widget(form.categorieMeditation, {'attr': {'class': 'form-control'}}) }}
+        {{ form_errors(form.categorieMeditation) }}
+    </div>
+
+    <div class="mb-3">
+        {{ form_label(form.titre) }}
+        {{ form_widget(form.titre, {'attr': {'class': 'form-control', 'placeholder': 'Titre de votre discussion'}}) }}
+        {{ form_errors(form.titre) }}
+    </div>
+
+    <div class="mb-3">
+        {{ form_label(form.contenu) }}
+        {{ form_widget(form.contenu, {'attr': {'class': 'form-control', 'rows': 5}}) }}
+        {{ form_errors(form.contenu) }}
+    </div>
+
+    <div class="form-check mb-3">
+        {{ form_widget(form.is_anonyme, {'attr': {'class': 'form-check-input'}}) }}
+        {{ form_label(form.is_anonyme, 'Publier anonymement', {'label_attr': {'class': 'form-check-label'}}) }}
+    </div>
+
+    <div class="d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-1"></i> {{ button_label|default('Enregistrer') }}
+        </button>
+    </div>
+{{ form_end(form) }}

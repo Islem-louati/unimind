@@ -10,7 +10,8 @@
     'action': form_action,
     'class': 'form-seance',
     'method': 'POST',
-    'enctype': 'multipart/form-data'
+    'enctype': 'multipart/form-data',
+    'novalidate': 'novalidate'  
 }}) }}
 
 <div class="row">
@@ -18,7 +19,7 @@
     <div class="col-md-6 mb-3">
         {{ form_label(form.titre, 'Titre de la séance *', {'label_attr': {'class': 'form-label'}}) }}
         {{ form_widget(form.titre, {'attr': {
-            'class': 'form-control' ~ (form.titre.vars.valid ? '' : ' is-invalid'),
+            'class': 'form-control',
             'placeholder': 'Ex: Relaxation profonde'
         }}) }}
         <div class="invalid-feedback">
@@ -33,7 +34,7 @@
     <div class="col-md-6 mb-3">
         {{ form_label(form.typeFichier, 'Type de fichier *', {'label_attr': {'class': 'form-label'}}) }}
         {{ form_widget(form.typeFichier, {'attr': {
-            'class': 'form-select' ~ (form.typeFichier.vars.valid ? '' : ' is-invalid')
+            'class': 'form-select'
         }}) }}
         <div class="invalid-feedback">
             {{ form_errors(form.typeFichier) }}
@@ -44,7 +45,7 @@
     <div class="col-md-12 mb-3">
         {{ form_label(form.description, 'Description *', {'label_attr': {'class': 'form-label'}}) }}
         {{ form_widget(form.description, {'attr': {
-            'class': 'form-control' ~ (form.description.vars.valid ? '' : ' is-invalid'),
+            'class': 'form-control',
             'rows': 4,
             'placeholder': 'Description détaillée de la séance...'
         }}) }}
@@ -60,7 +61,7 @@
     <div class="col-md-4 mb-3">
         {{ form_label(form.duree, 'Durée (secondes) *', {'label_attr': {'class': 'form-label'}}) }}
         {{ form_widget(form.duree, {'attr': {
-            'class': 'form-control' ~ (form.duree.vars.valid ? '' : ' is-invalid'),
+            'class': 'form-control',
             'placeholder': '300'
         }}) }}
         <div class="invalid-feedback">
@@ -75,7 +76,7 @@
     <div class="col-md-4 mb-3">
         {{ form_label(form.niveau, 'Niveau *', {'label_attr': {'class': 'form-label'}}) }}
         {{ form_widget(form.niveau, {'attr': {
-            'class': 'form-select' ~ (form.niveau.vars.valid ? '' : ' is-invalid')
+            'class': 'form-select'
         }}) }}
         <div class="invalid-feedback">
             {{ form_errors(form.niveau) }}
@@ -86,7 +87,7 @@
     <div class="col-md-4 mb-3">
         {{ form_label(form.categorie, 'Catégorie *', {'label_attr': {'class': 'form-label'}}) }}
         {{ form_widget(form.categorie, {'attr': {
-            'class': 'form-select' ~ (form.categorie.vars.valid ? '' : ' is-invalid')
+            'class': 'form-select'
         }}) }}
         <div class="invalid-feedback">
             {{ form_errors(form.categorie) }}
@@ -102,7 +103,7 @@
         }) }}
         
         {{ form_widget(form.fichier, {'attr': {
-            'class': 'form-control' ~ (form.fichier.vars.valid ? '' : ' is-invalid')
+            'class': 'form-control'
         }}) }}
         
         <div class="invalid-feedback">
@@ -126,13 +127,13 @@
                 {% if seance_meditation.typeFichier == 'audio' %}
                     <div class="mt-2">
                         <audio controls style="width: 100%;" class="rounded">
-                            <source src="{{ asset('uploads/' ~ seance_meditation.fichier) }}" type="audio/mpeg">
+                            <source src="{{ asset('uploadsmed/' ~ seance_meditation.fichier) }}" type="audio/mpeg">
                         </audio>
                     </div>
                 {% elseif seance_meditation.typeFichier == 'video' %}
                     <div class="mt-2">
                         <video controls style="width: 100%; max-height: 200px;" class="rounded">
-                            <source src="{{ asset('uploads/' ~ seance_meditation.fichier) }}" type="video/mp4">
+                            <source src="{{ asset('uploadsmed/' ~ seance_meditation.fichier) }}" type="video/mp4">
                         </video>
                     </div>
                 {% endif %}
@@ -165,16 +166,3 @@
 </div>
 
 {{ form_end(form) }}
-
-{% if not form.vars.valid %}
-<script>
-// Ajouter la classe is-invalid aux champs invalides au chargement de la page
-document.addEventListener('DOMContentLoaded', function() {
-    {% for child in form.children %}
-        {% if not child.vars.valid and child.vars.name != '_token' %}
-            document.querySelector('[name="{{ child.vars.full_name }}"]').classList.add('is-invalid');
-        {% endif %}
-    {% endfor %}
-});
-</script>
-{% endif %}

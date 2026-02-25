@@ -1,13 +1,12 @@
-{% extends 'base1.html.twig' %}
+{% extends 'base.html.twig' %}
 
 {% block title %}Séances de Méditation - {{ categorie.nom }}{% endblock %}
 
-{% block breadcrumb_current %}{{ categorie.nom }}{% endblock %}
+{% block breadcrumb_title %}{{ categorie.nom }}{% endblock %}
 
 {% block page_title %}Séances de Méditation - {{ categorie.nom }}{% endblock %}
 
-{% block content %}
-<div class="container-fluid py-4">
+{% block body %}
   
   {# En-tête de la catégorie #}
   <div class="row mb-4">
@@ -160,28 +159,26 @@
                       {# Bouton Écouter/Regarder #}
                       {% if seance.fichier %}
                       <button type="button" 
-                              class="btn btn-sm mb-0 btn-action-play" 
-                              data-bs-toggle="modal" 
-                              data-bs-target="#modalMedia{{ seance.seanceId }}"
-                              data-bs-toggle="tooltip" 
-                              data-bs-placement="top" 
-                              title="{{ seance.typeFichier == 'audio' ? 'Écouter' : 'Regarder' }}">
-                        <i class="fas fa-play text-primary"></i>
-                      </button>
+        class="btn btn-sm mb-0 btn-action-play has-tooltip"
+        data-bs-toggle="modal" 
+        data-bs-target="#modalMedia{{ seance.seanceId }}"
+        data-bs-placement="top" 
+        title="{{ seance.typeFichier == 'audio' ? 'Écouter' : 'Regarder' }}">
+    <i class="fas fa-play text-primary"></i>
+</button>
                       {% endif %}
                       
                       {# Bouton Modifier #}
                       <button type="button" 
-                              class="btn btn-sm mb-0 btn-action-edit btn-edit-seance" 
-                              data-bs-toggle="modal" 
-                              data-bs-target="#modalEditSeance"
-                              data-id="{{ seance.seanceId }}"
-                              data-action="{{ path('admin_seance_meditation_edit', {'id': seance.seanceId}) }}"
-                              data-bs-toggle="tooltip" 
-                              data-bs-placement="top" 
-                              title="Modifier">
-                        <i class="fas fa-edit text-warning"></i>
-                      </button>
+        class="btn btn-sm mb-0 btn-action-edit btn-edit-seance has-tooltip"
+        data-bs-toggle="modal" 
+        data-bs-target="#modalEditSeance"
+        data-id="{{ seance.seanceId }}"
+        data-action="{{ path('admin_seance_meditation_edit', {'id': seance.seanceId}) }}"
+        data-bs-placement="top" 
+        title="Modifier">
+    <i class="fas fa-edit text-warning"></i>
+</button>
                       
                       {# Bouton Activer/Désactiver #}
                       <form method="post" 
@@ -190,12 +187,11 @@
                             onsubmit="return confirm('{{ seance.isActif ? 'Désactiver' : 'Activer' }} cette séance ?');">
                         <input type="hidden" name="_token" value="{{ csrf_token('toggle-active' ~ seance.seanceId) }}">
                         <button type="submit" 
-                                class="btn btn-sm mb-0 btn-action-toggle" 
-                                data-bs-toggle="tooltip" 
-                                data-bs-placement="top" 
-                                title="{{ seance.isActif ? 'Désactiver' : 'Activer' }}">
-                          <i class="fas {{ seance.isActif ? 'fa-toggle-off' : 'fa-toggle-on' }} text-{{ seance.isActif ? 'secondary' : 'success' }}"></i>
-                        </button>
+        class="btn btn-sm mb-0 btn-action-toggle has-tooltip"
+        data-bs-placement="top" 
+        title="{{ seance.isActif ? 'Désactiver' : 'Activer' }}">
+    <i class="fas {{ seance.isActif ? 'fa-toggle-off' : 'fa-toggle-on' }} text-{{ seance.isActif ? 'secondary' : 'success' }}"></i>
+</button>
                       </form>
                       
                       {# Bouton Supprimer #}
@@ -205,50 +201,17 @@
                             onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette séance ?');">
                         <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ seance.seanceId) }}">
                         <button type="submit" 
-                                class="btn btn-sm mb-0 btn-action-delete" 
-                                data-bs-toggle="tooltip" 
-                                data-bs-placement="top" 
-                                title="Supprimer">
-                          <i class="fas fa-trash-alt text-danger"></i>
-                        </button>
+        class="btn btn-sm mb-0 btn-action-delete has-tooltip"
+        data-bs-placement="top" 
+        title="Supprimer">
+    <i class="fas fa-trash-alt text-danger"></i>
+</button>
                       </form>
                     </div>
                   </td>
                 </tr>
                 
-                {# Modal pour le média #}
-                {% if seance.fichier %}
-                <div class="modal fade" id="modalMedia{{ seance.seanceId }}" tabindex="-1" aria-hidden="true">
-                  <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title">
-                          <i class="fas fa-{{ seance.typeFichier == 'audio' ? 'music' : 'video' }} me-2"></i>
-                          {{ seance.titre }}
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                      </div>
-                      <div class="modal-body text-center">
-                        {% if seance.typeFichier == 'audio' %}
-                          <audio controls style="width: 100%;" class="mb-3">
-                            <source src="{{ asset('uploads/' ~ seance.fichier) }}" type="audio/mpeg">
-                          </audio>
-                        {% else %}
-                          <video controls style="width: 100%; max-height: 70vh;" class="mb-3">
-                            <source src="{{ asset('uploads/' ~ seance.fichier) }}" type="video/mp4">
-                          </video>
-                        {% endif %}
-                        <div class="text-start">
-                          <p><strong>Description :</strong> {{ seance.description }}</p>
-                          <p><strong>Durée :</strong> {{ seance.getDureeFormatee() }}</p>
-                          <p><strong>Niveau :</strong> {{ seance.niveau|capitalize }}</p>
-                          <p><strong>Créée le :</strong> {{ seance.createdAt|date('d/m/Y H:i') }}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                {% endif %}
+                
                 
                 {% endfor %}
               </tbody>
@@ -287,7 +250,42 @@
       </div>
     </div>
   </div>
-</div>
+
+  {# === MODALS MÉDIA – placés APRÈS la carte === #}
+  {% for seance in seance_meditations %}
+    {% if seance.fichier %}
+      <div class="modal fade" id="modalMedia{{ seance.seanceId }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">
+                <i class="fas fa-{{ seance.typeFichier == 'audio' ? 'music' : 'video' }} me-2"></i>
+                {{ seance.titre }}
+              </h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center">
+              {% if seance.typeFichier == 'audio' %}
+                <audio controls style="width: 100%;" class="mb-3">
+                  <source src="{{ asset('uploadsmed/' ~ seance.fichier) }}" type="audio/mpeg">
+                </audio>
+              {% else %}
+                <video controls style="width: 100%; max-height: 70vh;" class="mb-3">
+                  <source src="{{ asset('uploadsmed/' ~ seance.fichier) }}" type="video/mp4">
+                </video>
+              {% endif %}
+              <div class="text-start">
+                <p><strong>Description :</strong> {{ seance.description }}</p>
+                <p><strong>Durée :</strong> {{ seance.getDureeFormatee() }}</p>
+                <p><strong>Niveau :</strong> {{ seance.niveau|capitalize }}</p>
+                <p><strong>Créée le :</strong> {{ seance.createdAt|date('d/m/Y H:i') }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  {% endfor %}
 
 {# Modal pour créer une nouvelle séance #}
 <div class="modal fade" id="modalNouvelleSeance" tabindex="-1" aria-labelledby="modalNouvelleSeanceLabel" aria-hidden="true">
@@ -484,6 +482,22 @@ audio, video {
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
+
+.is-invalid {
+    border-color: #dc3545 !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.invalid-feedback {
+    display: block !important;
+    width: 100%;
+    margin-top: 0.25rem;
+    font-size: 0.875em;
+    color: #dc3545;
+}
 </style>
 {% endblock %}
 
@@ -624,89 +638,125 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // ============ GESTION SOUMISSION FORMULAIRES SÉANCE ============
     function handleSeanceFormSubmit(e) {
-        e.preventDefault();
+    e.preventDefault();
+    
+    const form = this;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> En cours...';
+    submitBtn.disabled = true;
+    
+    const formData = new FormData(form);
+    const isEdit = form.action.includes('/edit');
+    
+    console.log('Soumission formulaire séance:', form.action);
+    
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Réponse soumission:', data);
         
-        const form = this;
-        const submitBtn = form.querySelector('button[type="submit"]');
-        const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> En cours...';
-        submitBtn.disabled = true;
-        
-        const formData = new FormData(form);
-        const isEdit = form.action.includes('/edit');
-        
-        console.log('Soumission formulaire séance:', form.action);
-        
-        fetch(form.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Réponse soumission:', data);
+        if (data.success) {
+            // Succès
+            // Utiliser une notification plus élégante
+            const toast = document.createElement('div');
+            toast.className = 'alert alert-success position-fixed top-0 end-0 m-3';
+            toast.style.zIndex = '9999';
+            toast.innerHTML = data.message || 'Opération réussie!';
+            document.body.appendChild(toast);
             
-            if (data.success) {
-                // Succès
-                alert(data.message || 'Opération réussie!');
-                
-                // Fermer le modal
-                let modal;
-                if (isEdit) {
-                    modal = bootstrap.Modal.getInstance(document.getElementById('modalEditSeance'));
-                } else {
-                    modal = bootstrap.Modal.getInstance(document.getElementById('modalNouvelleSeance'));
-                }
-                
-                if (modal) {
-                    modal.hide();
-                }
-                
-                // Recharger la page après un délai
-                setTimeout(() => {
-                    location.reload();
-                }, 1000);
+            setTimeout(() => toast.remove(), 2000);
+            
+            // Fermer le modal
+            let modal;
+            if (isEdit) {
+                modal = bootstrap.Modal.getInstance(document.getElementById('modalEditSeance'));
             } else {
-                // Échec - afficher les erreurs
-                if (data.html) {
-                    let modalBody;
-                    if (isEdit) {
-                        modalBody = document.getElementById('modalEditSeanceBody');
-                    } else {
-                        modalBody = document.querySelector('#modalNouvelleSeance .modal-body');
+                modal = bootstrap.Modal.getInstance(document.getElementById('modalNouvelleSeance'));
+            }
+            
+            if (modal) {
+                modal.hide();
+            }
+            
+            // Recharger la page après un délai
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        } else {
+            // 🔴 ÉCHEC - Afficher les erreurs
+            if (data.html) {
+                // Remplacer le contenu du modal par le nouveau HTML
+                let modalBody;
+                if (isEdit) {
+                    modalBody = document.getElementById('modalEditSeanceBody');
+                } else {
+                    modalBody = document.querySelector('#modalNouvelleSeance .modal-body');
+                }
+                
+                if (modalBody) {
+                    modalBody.innerHTML = data.html;
+                    
+                    // 🔴 IMPORTANT : Ajouter la classe is-invalid aux champs en erreur
+                    if (data.errors) {
+                        Object.keys(data.errors).forEach(field => {
+                            // Chercher l'input correspondant
+                            const input = modalBody.querySelector(`[name="seance_meditation[${field}]"]`);
+                            if (input) {
+                                input.classList.add('is-invalid');
+                                
+                                // Ajouter un message d'erreur personnalisé si nécessaire
+                                const feedback = input.closest('.mb-3')?.querySelector('.invalid-feedback');
+                                if (feedback) {
+                                    // Le feedback existe déjà dans le HTML, mais on peut le vider
+                                    // pour éviter les doublons
+                                    feedback.innerHTML = `<ul><li>${data.errors[field]}</li></ul>`;
+                                }
+                            }
+                        });
                     }
                     
-                    if (modalBody) {
-                        modalBody.innerHTML = data.html;
-                        // Réattacher l'événement
-                        const newForm = modalBody.querySelector('form');
-                        if (newForm) {
-                            newForm.addEventListener('submit', handleSeanceFormSubmit);
-                        }
+                    // Réattacher l'événement au nouveau formulaire
+                    const newForm = modalBody.querySelector('form');
+                    if (newForm) {
+                        newForm.addEventListener('submit', handleSeanceFormSubmit);
                     }
-                } else {
-                    alert('Erreur: ' + (data.message || 'Inconnue'));
+                    
+                    // Faire défiler jusqu'au premier champ en erreur
+                    const firstError = modalBody.querySelector('.is-invalid');
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
                 }
-                
-                submitBtn.innerHTML = originalText;
-                submitBtn.disabled = false;
+            } else {
+                // Fallback si pas de HTML
+                alert('Erreur de validation: ' + JSON.stringify(data.errors || data.message || 'Inconnue'));
             }
-        })
-        .catch(error => {
-            console.error('Erreur soumission:', error);
-            alert('Erreur: ' + error.message);
+            
+            // Restaurer le bouton
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
-        });
-    }
+        }
+    })
+    .catch(error => {
+        console.error('Erreur soumission:', error);
+        alert('Erreur réseau: ' + error.message);
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+}
     
     // ============ GESTION SUPPRESSION AJAX ============
     document.querySelectorAll('form[action*="delete"]').forEach(form => {
@@ -748,10 +798,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Initialiser les tooltips
-    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-    tooltipTriggerList.forEach(tooltipTriggerEl => {
-        new bootstrap.Tooltip(tooltipTriggerEl);
-    });
+    document.querySelectorAll('.has-tooltip').forEach(el => {
+    new bootstrap.Tooltip(el);
+});
     
     // Gérer la lecture automatique dans les modaux média
     document.querySelectorAll('.modal').forEach(modal => {

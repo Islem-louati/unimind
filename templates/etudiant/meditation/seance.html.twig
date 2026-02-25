@@ -1,12 +1,12 @@
-{% extends 'base2.html.twig' %}
+{% extends 'base.html.twig' %}
 
 {% block title %}{{ seance.titre }} - Méditation{% endblock %}
 
-{% block breadcrumb_current %}{{ seance.titre }}{% endblock %}
+{% block breadcrumb_title %}{{ seance.titre }}{% endblock %}
 
 {% block page_title %}{{ seance.titre }}{% endblock %}
 
-{% block content %}
+{% block body %}
 <div class="container-fluid py-4">
   
   {# Statistiques de la séance #}
@@ -143,7 +143,7 @@
               <div class="card card-plain">
                 <div class="card-body p-3">
                   <audio controls class="w-100" id="meditationAudio">
-                    <source src="{{ asset('uploads/' ~ seance.fichier) }}" type="audio/mpeg">
+                    <source src="{{ asset('uploadsmed/' ~ seance.fichier) }}" type="audio/mpeg">
                     Votre navigateur ne supporte pas l'élément audio.
                   </audio>
                   
@@ -162,7 +162,7 @@
                 <div class="card-header p-0 mx-3 mt-n4">
                   <div class="bg-gradient-{{ seance.typeFichier == 'audio' ? 'info' : 'warning' }} shadow-{{ seance.typeFichier == 'audio' ? 'info' : 'warning' }} border-radius-lg">
                     <video controls class="w-100 border-radius-lg" id="meditationVideo" style="max-height: 400px;">
-                      <source src="{{ asset('uploads/' ~ seance.fichier) }}" type="video/mp4">
+                      <source src="{{ asset('uploadsmed/' ~ seance.fichier) }}" type="video/mp4">
                       Votre navigateur ne supporte pas l'élément vidéo.
                     </video>
                   </div>
@@ -293,6 +293,63 @@
           </div>
         </div>
       </div>
+
+      <!-- Sons d'ambiance (Freesound API) -->
+<div class="card mb-4">
+    <div class="card-header pb-0">
+        <h6>Sons d'ambiance</h6>
+    </div>
+    <div class="card-body p-3">
+        <p class="text-xs text-muted mb-3">
+            <i class="fas fa-headphones me-1"></i>
+            Ajoutez un son de fond pour améliorer votre immersion.
+        </p>
+        <div class="d-flex flex-wrap gap-2">
+            <button type="button" 
+                    class="btn btn-sm btn-outline-info sound-option" 
+                    data-src="{{ natureSounds.pluie[0]['previews']['preview-lq-mp3']|default('') }}"
+                    data-label="Pluie"
+                    aria-label="Jouer le son de pluie">
+                <i class="fas fa-cloud-rain me-1"></i> Pluie
+            </button>
+            <button type="button" 
+                    class="btn btn-sm btn-outline-info sound-option" 
+                    data-src="{{ natureSounds.mer[0]['previews']['preview-lq-mp3']|default('') }}"
+                    data-label="Mer"
+                    aria-label="Jouer le son de la mer">
+                <i class="fas fa-water me-1"></i> Mer
+            </button>
+            <button type="button" 
+                    class="btn btn-sm btn-outline-info sound-option" 
+                    data-src="{{ natureSounds.foret[0]['previews']['preview-lq-mp3']|default('') }}"
+                    data-label="Forêt"
+                    aria-label="Jouer le son de la forêt">
+                <i class="fas fa-tree me-1"></i> Forêt
+            </button>
+        </div>
+        <div class="mt-3" id="ambiance-controls" style="display: none;">
+            <hr class="horizontal dark my-2">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="text-sm" id="current-sound-label">Pluie</span>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="stop-sound" title="Arrêter le son">
+                        <i class="fas fa-stop"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="mute-sound" title="Couper le son">
+                        <i class="fas fa-volume-mute"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="mt-2">
+                <input type="range" id="ambiance-volume" min="0" max="1" step="0.1" value="0.5" class="form-range">
+                <div class="d-flex justify-content-between text-xs text-muted">
+                    <span>Faible</span>
+                    <span>Fort</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
       
       <!-- Conseils pour la méditation -->
       <div class="card mb-4">
@@ -363,6 +420,11 @@
   </div>
 </div>
 
+<!-- Élément audio pour le son de fond (Freesound) -->
+<audio id="background-sound" loop style="display: none;">
+    <source src="" type="audio/mpeg">
+</audio>
+
 
 
 <style>
@@ -416,6 +478,12 @@ audio::-webkit-media-controls-play-button,
 video::-webkit-media-controls-play-button {
   background-color: #5e72e4;
   border-radius: 50%;
+}
+
+.sound-option.active {
+    background-color: #5e72e4;
+    color: white;
+    border-color: #5e72e4;
 }
 </style>
 
@@ -502,5 +570,74 @@ document.addEventListener('DOMContentLoaded', function() {
     return new bootstrap.Tooltip(tooltipTriggerEl);
   });
 });
+
+// Gestion des sons d'ambiance (Freesound)
+const backgroundAudio = document.getElementById('background-sound');
+const soundOptions = document.querySelectorAll('.sound-option');
+const ambianceControls = document.getElementById('ambiance-controls');
+const currentSoundLabel = document.getElementById('current-sound-label');
+const stopSoundBtn = document.getElementById('stop-sound');
+const muteSoundBtn = document.getElementById('mute-sound');
+const ambianceVolume = document.getElementById('ambiance-volume');
+
+let currentSound = null;
+
+if (backgroundAudio) {
+    function playSound(src, label) {
+        if (!src) {
+            alert('Son non disponible pour le moment.');
+            return;
+        }
+        if (backgroundAudio.src !== src) {
+            backgroundAudio.src = src;
+            backgroundAudio.load();
+        }
+        backgroundAudio.volume = ambianceVolume ? ambianceVolume.value : 0.5;
+        backgroundAudio.play().catch(e => {
+            console.log('Lecture auto bloquée, veuillez interagir avec la page.', e);
+            alert('Cliquez sur le bouton pour lancer le son (autoplay bloqué par le navigateur).');
+        });
+        currentSound = { src, label };
+        if (ambianceControls) ambianceControls.style.display = 'block';
+        if (currentSoundLabel) currentSoundLabel.textContent = label;
+    }
+
+    soundOptions.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const src = this.dataset.src;
+            const label = this.dataset.label;
+            playSound(src, label);
+        });
+    });
+
+    if (stopSoundBtn) {
+        stopSoundBtn.addEventListener('click', function() {
+            backgroundAudio.pause();
+            backgroundAudio.currentTime = 0;
+            if (ambianceControls) ambianceControls.style.display = 'none';
+        });
+    }
+
+    if (muteSoundBtn) {
+        muteSoundBtn.addEventListener('click', function() {
+            backgroundAudio.muted = !backgroundAudio.muted;
+            const icon = this.querySelector('i');
+            if (backgroundAudio.muted) {
+                icon.classList.remove('fa-volume-mute');
+                icon.classList.add('fa-volume-up');
+            } else {
+                icon.classList.remove('fa-volume-up');
+                icon.classList.add('fa-volume-mute');
+            }
+        });
+    }
+
+    if (ambianceVolume) {
+        ambianceVolume.addEventListener('input', function() {
+            backgroundAudio.volume = this.value;
+        });
+    }
+}
 </script>
 {% endblock %}

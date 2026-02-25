@@ -14,6 +14,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Length;
 
+
 class PostType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
@@ -35,11 +36,12 @@ class PostType extends AbstractType
                     ])
                 ]
             ])
-            ->add('contenu', TextareaType::class, [
+            ->add('contenu', TextareaType ::class, [
                 'label' => 'Contenu',
                 'attr' => [
+                    'id' => 'post_contenu', 
                     'placeholder' => 'Partagez vos pensées, questions ou expériences...',
-                    'rows' => 5,
+                    'rows' => 10,
                     'class' => 'form-control'
                 ],
                 'constraints' => [
@@ -74,7 +76,6 @@ class PostType extends AbstractType
                 ]
             ]);
             ;
-        // NE PAS ajouter : created_at, updated_at, user (gérés automatiquement)
     }
 
     public function configureOptions(OptionsResolver $resolver): void

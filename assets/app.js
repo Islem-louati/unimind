@@ -1,4 +1,6 @@
 import './bootstrap.js';
+// assets/app.js
+ // Rendre global pour Twig
 /*
  * Welcome to your app's main JavaScript file!
  *

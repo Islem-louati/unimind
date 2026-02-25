@@ -1,12 +1,12 @@
-{% extends 'base2.html.twig' %}
+{% extends 'base.html.twig' %}
 
 {% block title %}Méditation & Forum - Espace Étudiant{% endblock %}
 
-{% block breadcrumb_current %}Méditation{% endblock %}
+{% block breadcrumb_title %}Méditation{% endblock %}
 
 {% block page_title %}Méditation & Forum{% endblock %}
 
-{% block content %}
+{% block body %}
 <div class="container-fluid py-4">
   
   {# En-tête avec statistiques #}
@@ -307,422 +307,251 @@
     </div>
   </div>
 
-  {# Section Discussions - TOUTES LES FONCTIONNALITÉS INTÉGRÉES #}
-  <div class="row mt-4">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-header pb-0">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6>Forum Communautaire - Toutes les discussions</h6>
-              <p class="text-sm mb-0">
-                <i class="fas fa-comments me-1"></i>
-                Participez aux échanges et partagez vos expériences
-              </p>
-            </div>
-            <div>
-              <span class="badge bg-gradient-success me-2">{{ posts|length }} discussions</span>
-              <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalNewPost">
-                <i class="fas fa-plus me-1"></i> Nouveau post
-              </button>
-            </div>
+  {# Section Discussions #}
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header pb-0">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h6>Forum Communautaire - Toutes les discussions</h6>
+            <p class="text-sm mb-0">
+              <i class="fas fa-comments me-1"></i>
+              Participez aux échanges et partagez vos expériences
+            </p>
+          </div>
+          <div>
+            <span class="badge bg-gradient-success me-2">{{ posts|length }} discussions</span>
+            <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#modalNewPost">
+              <i class="fas fa-plus me-1"></i> Nouveau post
+            </button>
           </div>
         </div>
-        
-        <div class="card-body">
-          {% if posts is not empty %}
+      </div>
+
+      <div class="card-body">
+        {% if posts is not empty %}
           <div class="list-group list-group-flush">
             {% for post in posts %}
-            <div class="list-group-item border-0 px-0 py-4 mb-4" id="post-{{ post.postId }}">
-              <div class="row">
-                <!-- Avatar et info auteur -->
-                <div class="col-auto">
-                  <div class="avatar avatar-lg me-3 bg-gradient-{{ post.isAnonyme ? 'secondary' : 'info' }} shadow-{{ post.isAnonyme ? 'secondary' : 'info' }} text-center rounded-circle d-flex align-items-center justify-content-center">
-                    {% if post.isAnonyme %}
-                      <i class="fas fa-user-secret text-white"></i>
-                    {% else %}
-                      <i class="fas fa-user text-white"></i>
-                    {% endif %}
-                  </div>
-                </div>
-                
-                <!-- Contenu du post -->
-                <div class="col">
-                  <!-- En-tête du post -->
-                  <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div>
-                      <h5 class="mb-1 text-primary">{{ post.titre }}</h5>
-                      <div class="d-flex align-items-center gap-2 mb-2">
-                        <span class="badge badge-sm bg-gradient-info">
-                          <i class="fas fa-folder me-1"></i> {{ post.categorieMeditation.nom }}
-                        </span>
-                        <span class="text-xs text-muted">
-                          {% if post.isAnonyme %}
-                            <i class="fas fa-user-secret me-1"></i> Anonyme
-                          {% else %}
-                            <i class="fas fa-user me-1"></i> {{ post.user.prenom }}
-                          {% endif %}
-                        </span>
-                        <span class="text-xs text-muted">
-                          <i class="far fa-clock me-1"></i> {{ post.createdAt|date('d/m/Y H:i') }}
-                        </span>
-                        {% if post.updatedAt and post.updatedAt != post.createdAt %}
-                        <span class="text-xs text-muted">
-                          <i class="fas fa-edit me-1"></i> Modifié
-                        </span>
-                        {% endif %}
-                      </div>
-                    </div>
-                    
-                    <!-- Menu actions post -->
-                    <div class="dropdown">
-                      <button class="btn btn-link text-dark p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fas fa-ellipsis-v"></i>
-                      </button>
-                      <ul class="dropdown-menu">
-                        <li>
-                          <a class="dropdown-item" href="{{ path('etudiant_meditation_categorie', {'id': post.categorieMeditation.categorieId}) }}">
-                            <i class="fas fa-external-link-alt me-2"></i> Voir dans la catégorie
-                          </a>
-                        </li>
-                        {% if app.user and app.user.userId == post.user.userId %}
-                        <li>
-                          <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#modalEditPost{{ post.postId }}">
-                            <i class="fas fa-edit me-2"></i> Modifier
-                          </button>
-                        </li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li>
-                          <button type="button" class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#modalDeletePost{{ post.postId }}">
-                            <i class="fas fa-trash me-2"></i> Supprimer
-                          </button>
-                        </li>
-                        {% endif %}
-                      </ul>
-                    </div>
-                  </div>
-                  
-                  <!-- Contenu complet du post -->
-                  <div class="post-content mb-3">
-                    <p class="mb-0" style="white-space: pre-wrap;">{{ post.contenu }}</p>
-                  </div>
-                  
-                  <!-- Actions et statistiques -->
-                  <div class="d-flex justify-content-between align-items-center border-top pt-3">
-                    <div class="d-flex gap-3">
-                      <span class="text-xs">
-                        <i class="far fa-comment me-1"></i> {{ post.commentaires|length }} commentaire{{ post.commentaires|length > 1 ? 's' : '' }}
-                      </span>
-                    </div>
-                    <div class="d-flex gap-2">
-                      <button type="button" 
-                              class="btn btn-sm btn-outline-primary add-comment-btn" 
-                              data-post-id="{{ post.postId }}"
-                              title="Répondre à cette discussion">
-                        <i class="fas fa-reply me-1"></i> Répondre
-                      </button>
-                      
-                      {% if app.user and app.user.userId == post.user.userId %}
-                      <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modalEditPost{{ post.postId }}">
-                        <i class="fas fa-edit me-1"></i> Modifier
-                      </button>
-                       <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalDeletePost{{ post.postId }}">
-            <i class="fas fa-trash me-1"></i> Supprimer
-        </button>
+              <div class="list-group-item border-0 px-0 py-4 mb-4" id="post-{{ post.postId }}">
+                <div class="row">
+                  <!-- Avatar et info auteur -->
+                  <div class="col-auto">
+                    <div class="avatar avatar-lg me-3 bg-gradient-{{ post.isAnonyme ? 'secondary' : 'info' }} shadow-{{ post.isAnonyme ? 'secondary' : 'info' }} text-center rounded-circle d-flex align-items-center justify-content-center">
+                      {% if post.isAnonyme %}
+                        <i class="fas fa-user-secret text-white"></i>
+                      {% else %}
+                        <i class="fas fa-user text-white"></i>
                       {% endif %}
                     </div>
                   </div>
-                  
-                  <!-- Formulaire de commentaire rapide -->
-                  <div class="quick-comment-form mt-3" id="quick-comment-{{ post.postId }}" style="display: none;">
-                    <form method="post" 
-                          action="{{ path('etudiant_forum_comment_new', {'id': post.postId}) }}" 
-                          class="card card-body p-2">
-                      <div class="mb-2">
-                        <textarea name="contenu" 
-                                class="form-control form-control-sm" 
-                                rows="2"
-                                placeholder="Votre commentaire..." 
-                                required></textarea>
-                      </div>
-                      <div class="d-flex justify-content-between align-items-center">
-                        <div class="form-check form-check-inline mb-0">
-                          <input type="checkbox" class="form-check-input" 
-                                 id="anonyme-quick-{{ post.postId }}" 
-                                 name="is_anonyme">
-                          <label class="form-check-label text-xs mb-0" for="anonyme-quick-{{ post.postId }}">
-                            Publier anonymement
-                          </label>
-                        </div>
-                        <div class="d-flex gap-2">
-                          <button type="button" 
-                                  class="btn btn-sm btn-outline-secondary cancel-comment-btn" 
-                                  data-post-id="{{ post.postId }}">
-                            Annuler
-                          </button>
-                          <button type="submit" class="btn btn-sm btn-primary">
-                            <i class="fas fa-paper-plane me-1"></i> Envoyer
-                          </button>
-                        </div>
-                      </div>
-                      <input type="hidden" name="_token" value="{{ csrf_token('comment_' ~ post.postId) }}">
-                    </form>
-                  </div>
-                  
-                  <!-- Liste des commentaires -->
-                  {% if post.commentaires|length > 0 %}
-                  <div class="mt-4">
-                    <h6 class="text-sm mb-3">
-                      <i class="far fa-comments me-1"></i> Commentaires ({{ post.commentaires|length }})
-                    </h6>
-                    <div class="list-group list-group-flush">
-                      {% for commentaire in post.commentaires %}
-                      <div class="list-group-item border-0 px-0 py-2">
-                        <div class="d-flex">
-                          <!-- Avatar commentaire -->
-                          <div class="avatar avatar-xs me-2">
-                            {% if commentaire.isAnonyme %}
-                              <div class="avatar avatar-xs bg-gradient-secondary d-flex align-items-center justify-content-center">
-                                <i class="fas fa-user-secret text-white text-xxs"></i>
-                              </div>
+
+                  <!-- Contenu du post -->
+                  <div class="col">
+                    <!-- En-tête du post -->
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                      <div>
+                        <h5 class="mb-1 text-primary">{{ post.titre }}</h5>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                          <span class="badge badge-sm bg-gradient-info">
+                            <i class="fas fa-folder me-1"></i> {{ post.categorieMeditation.nom }}
+                          </span>
+                          <span class="text-xs text-muted">
+                            {% if post.isAnonyme %}
+                              <i class="fas fa-user-secret me-1"></i> Anonyme
                             {% else %}
-                              <div class="avatar avatar-xs bg-gradient-primary d-flex align-items-center justify-content-center">
-                                <i class="fas fa-user text-white text-xxs"></i>
-                              </div>
+                              <i class="fas fa-user me-1"></i> {{ post.user.prenom }}
                             {% endif %}
-                          </div>
-                          
-                          <!-- Contenu commentaire -->
-                          <div class="flex-fill">
-                            <div class="d-flex justify-content-between">
-                              <small class="text-xs font-weight-bold">
-                                {% if commentaire.isAnonyme %}
-                                  <i class="fas fa-user-secret me-1"></i> Anonyme
-                                {% else %}
-                                  <i class="fas fa-user me-1"></i> {{ commentaire.user.prenom }}
-                                {% endif %}
-                              </small>
-                              <small class="text-xs text-muted">
-                                {{ commentaire.createdAt|date('d/m H:i') }}
-                                {% if app.user and app.user.userId == commentaire.user.userId %}
-                                <div class="d-flex gap-1 ms-2">
-        <button type="button" class="btn btn-sm btn-outline-warning py-0 px-2" 
-                data-bs-toggle="modal" 
-                data-bs-target="#modalEditComment{{ commentaire.commentaireId }}"
-                title="Modifier ce commentaire">
-            <i class="fas fa-edit fa-xs"></i>
-        </button>
-        <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2"
-                data-bs-toggle="modal" 
-                data-bs-target="#modalDeleteComment{{ commentaire.commentaireId }}"
-                title="Supprimer ce commentaire">
-            <i class="fas fa-trash fa-xs"></i>
-        </button>
-    </div>
-                                {% endif %}
-                              </small>
-                            </div>
-                            <p class="text-xs mb-1" style="white-space: pre-wrap;">{{ commentaire.contenu }}</p>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <!-- Modal Modification Commentaire -->
-                      <div class="modal fade" id="modalEditComment{{ commentaire.commentaireId }}" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog">
-                          <div class="modal-content">
-                            <div class="modal-header bg-warning text-dark">
-                              <h5 class="modal-title">
-                                <i class="fas fa-edit me-1"></i> Modifier le commentaire
-                              </h5>
-                              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body">
-                              <form method="post" action="{{ path('etudiant_forum_comment_edit', {'id': commentaire.commentaireId}) }}" 
-                                    id="editCommentForm{{ commentaire.commentaireId }}">
-                                <div class="mb-3">
-                                  <label class="form-label">Commentaire</label>
-                                  <textarea name="contenu" class="form-control" rows="3" required>{{ commentaire.contenu }}</textarea>
-                                </div>
-                                <div class="form-check mb-3">
-                                  <input type="checkbox" class="form-check-input" 
-                                         id="anonyme-edit-comment-{{ commentaire.commentaireId }}" 
-                                         name="is_anonyme" {{ commentaire.isAnonyme ? 'checked' : '' }}>
-                                  <label class="form-check-label" for="anonyme-edit-comment-{{ commentaire.commentaireId }}">
-                                    Publier anonymement
-                                  </label>
-                                </div>
-                                <input type="hidden" name="_token" value="{{ csrf_token('edit_comment_' ~ commentaire.commentaireId) }}">
-                                <div class="d-flex justify-content-end gap-2">
-                                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                                  <button type="submit" class="btn btn-warning">
-                                    <i class="fas fa-save me-1"></i> Enregistrer
-                                  </button>
-                                </div>
-                              </form>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <!-- Modal Suppression Commentaire -->
-                      <div class="modal fade" id="modalDeleteComment{{ commentaire.commentaireId }}" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-sm">
-                          <div class="modal-content">
-                            <div class="modal-header bg-danger text-white">
-                              <h5 class="modal-title">
-                                <i class="fas fa-trash me-1"></i> Supprimer
-                              </h5>
-                              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body text-center">
-                              <div class="mb-3">
-                                <i class="fas fa-exclamation-triangle text-danger fa-2x"></i>
-                              </div>
-                              <p class="mb-3">Supprimer ce commentaire ?</p>
-                              <p class="text-muted small mb-0">Cette action est irréversible.</p>
-                            </div>
-                            <div class="modal-footer justify-content-center">
-                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                              <form method="post" action="{{ path('etudiant_forum_comment_delete', {'id': commentaire.commentaireId}) }}" 
-                                    class="d-inline">
-                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ commentaire.commentaireId) }}">
-                                <button type="submit" class="btn btn-danger">
-                                  <i class="fas fa-trash me-1"></i> Supprimer
-                                </button>
-                              </form>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      {% endfor %}
-                    </div>
-                  </div>
-                  {% endif %}
-                </div>
-              </div>
-              
-              <!-- Modal Modification Post -->
-              <div class="modal fade" id="modalEditPost{{ post.postId }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog modal-lg">
-                  <div class="modal-content">
-                    <div class="modal-header bg-warning text-dark">
-                      <h5 class="modal-title">
-                        <i class="fas fa-edit me-1"></i> Modifier la discussion
-                      </h5>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                      <form method="post" action="{{ path('etudiant_forum_post_edit', {'id': post.postId}) }}" 
-                            id="editPostForm{{ post.postId }}" data-post-id="{{ post.postId }}">
-                        <div class="mb-3">
-                          <label class="form-label">Titre *</label>
-                          <input type="text" name="titre" class="form-control" 
-                                 value="{{ post.titre }}" required maxlength="255">
-                          <small class="form-text text-muted">Donnez un titre clair à votre discussion.</small>
-                        </div>
-                        <div class="mb-3">
-                          <label class="form-label">Contenu *</label>
-                          <textarea name="contenu" class="form-control" rows="6" required>{{ post.contenu }}</textarea>
-                          <small class="form-text text-muted">Partagez vos pensées avec la communauté.</small>
-                        </div>
-                        <div class="form-check mb-4">
-                          <input type="checkbox" class="form-check-input" 
-                                 id="anonyme-edit-post-{{ post.postId }}" 
-                                 name="is_anonyme" {{ post.isAnonyme ? 'checked' : '' }}>
-                          <label class="form-check-label" for="anonyme-edit-post-{{ post.postId }}">
-                            Publier anonymement
-                          </label>
-                          <small class="form-text text-muted d-block">
-                            Votre nom ne sera pas affiché si cette case est cochée.
-                          </small>
-                        </div>
-                        
-                        {# Champ caché pour le token CSRF #}
-                        <input type="hidden" name="_token" value="{{ csrf_token('edit_post_' ~ post.postId) }}">
-                        
-                        <div class="d-flex justify-content-end gap-2">
-                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                          <button type="submit" class="btn btn-warning">
-                            <i class="fas fa-save me-1"></i> Enregistrer
-                          </button>
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <!-- Modal Suppression Post -->
-              <div class="modal fade" id="modalDeletePost{{ post.postId }}" tabindex="-1" aria-hidden="true">
-                <div class="modal-dialog">
-                  <div class="modal-content">
-                    <div class="modal-header bg-danger text-white">
-                      <h5 class="modal-title">
-                        <i class="fas fa-trash me-1"></i> Supprimer la discussion
-                      </h5>
-                      <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                      <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        <strong>Attention !</strong> Cette action est irréversible.
-                      </div>
-                      <p class="mb-3">Êtes-vous sûr de vouloir supprimer cette discussion ?</p>
-                      <div class="card border-warning mb-3">
-                        <div class="card-body p-3">
-                          <h6 class="card-title">{{ post.titre }}</h6>
-                          <p class="card-text small text-muted mb-2">
-                            {{ post.contenu|slice(0, 100) }}{% if post.contenu|length > 100 %}...{% endif %}
-                          </p>
-                          <div class="d-flex justify-content-between small">
-                            <span>
-                              <i class="fas fa-comment me-1"></i> 
-                              {{ post.commentaires|length }} commentaire{{ post.commentaires|length > 1 ? 's' : '' }}
+                          </span>
+                          <span class="text-xs text-muted">
+                            <i class="far fa-clock me-1"></i> {{ post.createdAt|date('d/m/Y H:i') }}
+                          </span>
+                          {% if post.updatedAt and post.updatedAt != post.createdAt %}
+                            <span class="text-xs text-muted">
+                              <i class="fas fa-edit me-1"></i> Modifié
                             </span>
-                            <span>
-                              <i class="fas fa-calendar me-1"></i> 
-                              {{ post.createdAt|date('d/m/Y') }}
-                            </span>
-                          </div>
+                          {% endif %}
                         </div>
                       </div>
-                      <p class="text-muted small">
-                        <i class="fas fa-info-circle me-1"></i>
-                        Tous les commentaires associés seront également supprimés.
-                      </p>
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                      <form method="post" action="{{ path('etudiant_forum_post_delete', {'id': post.postId}) }}" 
-                            id="deletePostForm{{ post.postId }}">
-                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ post.postId) }}">
-                        <button type="submit" class="btn btn-danger">
-                          <i class="fas fa-trash me-1"></i> Supprimer définitivement
+
+                      <!-- Menu actions post -->
+                      <div class="dropdown">
+                        <button class="btn btn-link text-dark p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                          <i class="fas fa-ellipsis-v"></i>
                         </button>
+                        <ul class="dropdown-menu">
+                          <li>
+                            <a class="dropdown-item" href="{{ path('etudiant_meditation_categorie', {'id': post.categorieMeditation.categorieId}) }}">
+                              <i class="fas fa-external-link-alt me-2"></i> Voir dans la catégorie
+                            </a>
+                          </li>
+                          {% if app.user and app.user.userId == post.user.userId %}
+                            <li>
+                              <button type="button" class="dropdown-item" data-bs-toggle="modal" data-bs-target="#modalEditPost{{ post.postId }} data-id="{{ post.postId }}">">
+                                <i class="fas fa-edit me-2"></i> Modifier
+                              </button>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                              <button type="button" class="dropdown-item text-danger" data-bs-toggle="modal" data-bs-target="#modalDeletePost{{ post.postId }}">
+                                <i class="fas fa-trash me-2"></i> Supprimer
+                              </button>
+                            </li>
+                          {% endif %}
+                        </ul>
+                      </div>
+                    </div>
+
+                    <!-- Contenu complet du post -->
+                    <div class="post-content mb-3">
+                      <p class="mb-0" style="white-space: pre-wrap;">{{ post.contenu|raw }}</p>
+                    </div>
+
+                    <!-- Actions et statistiques -->
+                    <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                      <div class="d-flex gap-3">
+                        <span class="text-xs">
+                          <i class="far fa-comment me-1"></i> {{ post.commentaires|length }} commentaire{{ post.commentaires|length > 1 ? 's' : '' }}
+                        </span>
+                      </div>
+                      <div class="d-flex gap-2">
+                        <button type="button"
+                                class="btn btn-sm btn-outline-primary add-comment-btn"
+                                data-post-id="{{ post.postId }}"
+                                title="Répondre à cette discussion">
+                          <i class="fas fa-reply me-1"></i> Répondre
+                        </button>
+
+                        {% if app.user and app.user.userId == post.user.userId %}
+                          <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#modalEditPost{{ post.postId }}">
+                            <i class="fas fa-edit me-1"></i> Modifier
+                          </button>
+                          <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#modalDeletePost{{ post.postId }}">
+                            <i class="fas fa-trash me-1"></i> Supprimer
+                          </button>
+                        {% endif %}
+                      </div>
+                    </div>
+
+                    <!-- Formulaire de commentaire rapide -->
+                    <div class="quick-comment-form mt-3" id="quick-comment-{{ post.postId }}" style="display: none;">
+                      <form method="post"
+                            action="{{ path('etudiant_forum_comment_new', {'id': post.postId}) }}"
+                            class="card card-body p-2">
+                        <div class="mb-2">
+                          <textarea name="contenu"
+                                    class="form-control form-control-sm"
+                                    rows="2"
+                                    placeholder="Votre commentaire..."
+                                    required></textarea>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                          <div class="form-check form-check-inline mb-0">
+                            <input type="checkbox" class="form-check-input"
+                                   id="anonyme-quick-{{ post.postId }}"
+                                   name="is_anonyme">
+                            <label class="form-check-label text-xs mb-0" for="anonyme-quick-{{ post.postId }}">
+                              Publier anonymement
+                            </label>
+                          </div>
+                          <div class="d-flex gap-2">
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-secondary cancel-comment-btn"
+                                    data-post-id="{{ post.postId }}">
+                              Annuler
+                            </button>
+                            <button type="submit" class="btn btn-sm btn-primary">
+                              <i class="fas fa-paper-plane me-1"></i> Envoyer
+                            </button>
+                          </div>
+                        </div>
+                        <input type="hidden" name="_token" value="{{ csrf_token('comment_' ~ post.postId) }}">
                       </form>
                     </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {% if not loop.last %}
-            <hr class="horizontal dark my-3">
-            {% endif %}
-            
-            {% endfor %}
-          </div>
-          
+
+                    <!-- Liste des commentaires -->
+                    {% if post.commentaires|length > 0 %}
+                      <div class="mt-4">
+                        <h6 class="text-sm mb-3">
+                          <i class="far fa-comments me-1"></i> Commentaires ({{ post.commentaires|length }})
+                        </h6>
+                        <div class="list-group list-group-flush">
+                          {% for commentaire in post.commentaires %}
+                            <div class="list-group-item border-0 px-0 py-2">
+                              <div class="d-flex">
+                                <!-- Avatar commentaire -->
+                                <div class="avatar avatar-xs me-2">
+                                  {% if commentaire.isAnonyme %}
+                                    <div class="avatar avatar-xs bg-gradient-secondary d-flex align-items-center justify-content-center">
+                                      <i class="fas fa-user-secret text-white text-xxs"></i>
+                                    </div>
+                                  {% else %}
+                                    <div class="avatar avatar-xs bg-gradient-primary d-flex align-items-center justify-content-center">
+                                      <i class="fas fa-user text-white text-xxs"></i>
+                                    </div>
+                                  {% endif %}
+                                </div>
+
+                                <!-- Contenu commentaire -->
+                                <div class="flex-fill">
+                                  <div class="d-flex justify-content-between">
+                                    <small class="text-xs font-weight-bold">
+                                      {% if commentaire.isAnonyme %}
+                                        <i class="fas fa-user-secret me-1"></i> Anonyme
+                                      {% else %}
+                                        <i class="fas fa-user me-1"></i> {{ commentaire.user.prenom }}
+                                      {% endif %}
+                                    </small>
+                                    <small class="text-xs text-muted">
+                                      {{ commentaire.createdAt|date('d/m H:i') }}
+                                      {% if app.user and app.user.userId == commentaire.user.userId %}
+                                        <div class="d-flex gap-1 ms-2">
+                                          <button type="button" class="btn btn-sm btn-outline-warning py-0 px-2"
+                                                  data-bs-toggle="modal"
+                                                  data-bs-target="#modalEditComment{{ commentaire.commentaireId }}"
+                                                  title="Modifier ce commentaire">
+                                            <i class="fas fa-edit fa-xs"></i>
+                                          </button>
+                                          <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2"
+                                                  data-bs-toggle="modal"
+                                                  data-bs-target="#modalDeleteComment{{ commentaire.commentaireId }}"
+                                                  title="Supprimer ce commentaire">
+                                            <i class="fas fa-trash fa-xs"></i>
+                                          </button>
+                                        </div>
+                                      {% endif %}
+                                    </small>
+                                  </div>
+                                  <p class="text-xs mb-1" style="white-space: pre-wrap;">{{ commentaire.contenu }}</p>
+                                </div>
+                              </div>
+                            </div>
+                          {% endfor %} {# fin de la boucle des commentaires #}
+                        </div> {# fin du list-group des commentaires #}
+                      </div> {# fin du bloc des commentaires #}
+                    {% endif %} {# fin du if post.commentaires|length > 0 #}
+                  </div> {# fin de la colonne contenant le post #}
+                </div> {# fin de la row #}
+              </div> {# fin du list-group-item du post #}
+
+              {# Séparateur entre les posts #}
+              {% if not loop.last %}
+                <hr class="horizontal dark my-3">
+              {% endif %}
+
+            {% endfor %} {# fin de la boucle des posts #}
+          </div> {# fin du list-group principal #}
+
+          {# Bouton "Charger plus" (optionnel) #}
           {% if posts|length >= 10 %}
-          <div class="text-center mt-4">
-            <button type="button" class="btn btn-outline-primary">
-              <i class="fas fa-arrow-down me-1"></i> Charger plus de discussions
-            </button>
-          </div>
+            <div class="text-center mt-4">
+              <button type="button" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-down me-1"></i> Charger plus de discussions
+              </button>
+            </div>
           {% endif %}
-          
-          {% else %}
+
+        {% else %} {# si posts est vide #}
           <div class="text-center py-5">
             <div class="icon icon-shape icon-xl bg-gradient-warning shadow-warning text-center rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
               <i class="fas fa-comments text-white text-2xl"></i>
@@ -735,12 +564,11 @@
               <i class="fas fa-plus-circle me-1"></i> Créer une discussion
             </button>
           </div>
-          {% endif %}
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+        {% endif %} {# fin du if posts is not empty #}
+      </div> {# fin du card-body #}
+    </div> {# fin de la card #}
+  </div> {# fin du col-12 #}
+</div> {# fin du row #}
 
 <!-- Modal Nouveau Post -->
 <div class="modal fade" id="modalNewPost" tabindex="-1" aria-hidden="true">
@@ -754,7 +582,7 @@
       </div>
       <div class="modal-body">
         {% if form is defined %}
-        {{ form_start(form, {'attr': {'id': 'new-post-form'}}) }}
+        {{ form_start(form, {'attr': {'id': 'new-post-form', 'novalidate': 'novalidate'}, 'action': path('etudiant_forum_post_new')}) }}
           <div class="mb-3">
             {{ form_label(form.categorieMeditation) }}
             {{ form_widget(form.categorieMeditation, {'attr': {
@@ -807,6 +635,252 @@
       </div>
     </div>
   </div>
+</div>
+
+
+{# ========== MODALS ========== #}
+
+{# Modals pour les posts #}
+{% for post in posts %}
+    <!-- Modal Modification Post {{ post.postId }} -->
+    <div class="modal fade" id="modalEditPost{{ post.postId }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-warning text-dark">
+                    <h5 class="modal-title">
+                        <i class="fas fa-edit me-1"></i> Modifier la discussion
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="{{ path('etudiant_forum_post_edit', {'id': post.postId}) }}" 
+                          id="editPostForm{{ post.postId }}" data-post-id="{{ post.postId }}">
+                        <div class="mb-3">
+                            <label class="form-label">Titre *</label>
+                            <input type="text" name="titre" class="form-control" 
+                                   value="{{ post.titre }}" required maxlength="255">
+                            <small class="form-text text-muted">Donnez un titre clair à votre discussion.</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Contenu *</label>
+                            <textarea name="contenu" class="form-control" rows="6" required id="edit-contenu-{{ post.postId }}">{{ post.contenu }}</textarea>
+                            <small class="form-text text-muted">Partagez vos pensées avec la communauté.</small>
+                        </div>
+                        <div class="form-check mb-4">
+                            <input type="checkbox" class="form-check-input" 
+                                   id="anonyme-edit-post-{{ post.postId }}" 
+                                   name="is_anonyme" {{ post.isAnonyme ? 'checked' : '' }}>
+                            <label class="form-check-label" for="anonyme-edit-post-{{ post.postId }}">
+                                Publier anonymement
+                            </label>
+                            <small class="form-text text-muted d-block">
+                                Votre nom ne sera pas affiché si cette case est cochée.
+                            </small>
+                        </div>
+                        <input type="hidden" name="_token" value="{{ csrf_token('edit_post_' ~ post.postId) }}">
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save me-1"></i> Enregistrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Suppression Post {{ post.postId }} -->
+    <div class="modal fade" id="modalDeletePost{{ post.postId }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-trash me-1"></i> Supprimer la discussion
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>Attention !</strong> Cette action est irréversible.
+                    </div>
+                    <p class="mb-3">Êtes-vous sûr de vouloir supprimer cette discussion ?</p>
+                    <div class="card border-warning mb-3">
+                        <div class="card-body p-3">
+                            <h6 class="card-title">{{ post.titre }}</h6>
+                            <p class="card-text small text-muted mb-2">
+                                {{ post.contenu|slice(0, 100) }}{% if post.contenu|length > 100 %}...{% endif %}
+                            </p>
+                            <div class="d-flex justify-content-between small">
+                                <span>
+                                    <i class="fas fa-comment me-1"></i> 
+                                    {{ post.commentaires|length }} commentaire{{ post.commentaires|length > 1 ? 's' : '' }}
+                                </span>
+                                <span>
+                                    <i class="fas fa-calendar me-1"></i> 
+                                    {{ post.createdAt|date('d/m/Y') }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-muted small">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Tous les commentaires associés seront également supprimés.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <form method="post" action="{{ path('etudiant_forum_post_delete', {'id': post.postId}) }}" 
+                          id="deletePostForm{{ post.postId }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ post.postId) }}">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash me-1"></i> Supprimer définitivement
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+{# Modals pour les commentaires #}
+{% for post in posts %}
+    {% for commentaire in post.commentaires %}
+        <!-- Modal Modification Commentaire {{ commentaire.commentaireId }} -->
+        <div class="modal fade" id="modalEditComment{{ commentaire.commentaireId }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header bg-warning text-dark">
+                        <h5 class="modal-title">
+                            <i class="fas fa-edit me-1"></i> Modifier le commentaire
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" action="{{ path('etudiant_forum_comment_edit', {'id': commentaire.commentaireId}) }}" 
+                              id="editCommentForm{{ commentaire.commentaireId }}">
+                            <div class="mb-3">
+                                <label class="form-label">Commentaire</label>
+                                <textarea name="contenu" class="form-control" rows="3" required>{{ commentaire.contenu }}</textarea>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input type="checkbox" class="form-check-input" 
+                                       id="anonyme-edit-comment-{{ commentaire.commentaireId }}" 
+                                       name="is_anonyme" {{ commentaire.isAnonyme ? 'checked' : '' }}>
+                                <label class="form-check-label" for="anonyme-edit-comment-{{ commentaire.commentaireId }}">
+                                    Publier anonymement
+                                </label>
+                            </div>
+                            <input type="hidden" name="_token" value="{{ csrf_token('edit_comment_' ~ commentaire.commentaireId) }}">
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-save me-1"></i> Enregistrer
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Suppression Commentaire {{ commentaire.commentaireId }} -->
+        <div class="modal fade" id="modalDeleteComment{{ commentaire.commentaireId }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-trash me-1"></i> Supprimer
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div class="mb-3">
+                            <i class="fas fa-exclamation-triangle text-danger fa-2x"></i>
+                        </div>
+                        <p class="mb-3">Supprimer ce commentaire ?</p>
+                        <p class="text-muted small mb-0">Cette action est irréversible.</p>
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <form method="post" action="{{ path('etudiant_forum_comment_delete', {'id': commentaire.commentaireId}) }}" 
+                              class="d-inline">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ commentaire.commentaireId) }}">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash me-1"></i> Supprimer
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% endfor %}
+
+<!-- Bouton flottant pour ouvrir le chat -->
+<button type="button" class="btn btn-primary rounded-circle position-fixed bottom-0 end-0 m-4" 
+        style="width: 60px; height: 60px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);" 
+        data-bs-toggle="modal" data-bs-target="#chatModal">
+    <i class="fas fa-comment-dots fa-2x"></i>
+</button>
+
+<!-- Modal du chat -->
+<div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width: 500px;">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="chatModalLabel">
+                    <i class="fas fa-robot me-2"></i>Assistant bien-être
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <!-- Zone des messages -->
+                <div id="chat-messages" class="p-3" style="height: 350px; overflow-y: auto; background-color: #f8f9fa;">
+                    {% for message in app.session.get('chat_history', []) %}
+                        <div class="mb-3">
+                            {% if message.role == 'user' %}
+                                <div class="d-flex justify-content-end">
+                                    <div class="bg-primary text-white rounded-3 p-2" style="max-width: 80%;">
+                                        <strong>Vous :</strong> {{ message.text|nl2br }}
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="d-flex justify-content-start">
+                                    <div class="bg-light rounded-3 p-2" style="max-width: 80%;">
+                                        <strong>Assistant :</strong> {{ message.text|nl2br }}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <p class="text-center text-muted my-5">Démarrez une conversation avec l'assistant.</p>
+                    {% endfor %}
+                </div>
+                <!-- Formulaire d'envoi -->
+                <div class="p-3 border-top">
+                    <form id="chat-form">
+                        <div class="input-group">
+                            <input type="text" id="chat-input" class="form-control" placeholder="Votre message..." autofocus>
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
+                    <small class="text-muted d-block mt-2">
+                        <i class="fas fa-info-circle me-1"></i>Je suis un assistant virtuel, pas un professionnel de santé.
+                    </small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="{{ path('app_chat_clear') }}" class="btn btn-sm btn-outline-secondary" onclick="return confirm('Effacer la conversation ?')">
+                    <i class="fas fa-trash-alt me-1"></i>Effacer
+                </a>
+                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>
@@ -1018,6 +1092,26 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   });
+
+  // Initialiser CKEditor dans les modals d'édition
+// Initialiser CKEditor dans les modals d'édition
+document.querySelectorAll('.modal[id^="modalEditPost"]').forEach(modal => {
+    modal.addEventListener('shown.bs.modal', function () {
+        const postId = this.id.replace('modalEditPost', '');
+        const textarea = document.getElementById(`edit-contenu-${postId}`);
+        if (textarea && !textarea.hasAttribute('data-ck-initialized')) {
+            ClassicEditor.create(textarea, {
+                simpleUpload: {
+                    uploadUrl: '{{ path('upload_image') }}',
+                }
+            }).then(editor => {
+                // Stocker l'instance sur le textarea
+                textarea.ckEditorInstance = editor;
+                textarea.setAttribute('data-ck-initialized', 'true');
+            }).catch(error => console.error(error));
+        }
+    });
+});
   
   // Annuler le formulaire de commentaire
   document.querySelectorAll('.cancel-comment-btn').forEach(btn => {
@@ -1077,70 +1171,174 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   // Gestion de la soumission du formulaire de nouveau post
-  const newPostForm = document.getElementById('new-post-form');
-  if (newPostForm) {
-    newPostForm.addEventListener('submit', function(e) {
-      const modal = bootstrap.Modal.getInstance(document.getElementById('modalNewPost'));
-      if (modal) {
-        modal.hide();
-      }
+ // Gestion de la soumission du formulaire de nouveau post
+const newPostForm = document.getElementById('new-post-form');
+if (newPostForm) {
+    newPostForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        if (typeof ClassicEditor !== 'undefined' && ClassicEditor.instances) {
+    Object.values(ClassicEditor.instances).forEach(editor => {
+        if (editor && typeof editor.updateSourceElement === 'function') {
+            editor.updateSourceElement();
+        }
     });
-  }
+}
+        
+        const formData = new FormData(this);
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        const modal = bootstrap.Modal.getInstance(document.getElementById('modalNewPost'));
+        
+        // Désactiver le bouton
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Publication...';
+        submitBtn.disabled = true;
+        
+        // Supprimer les anciennes erreurs
+        this.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        this.querySelectorAll('.invalid-feedback').forEach(el => el.remove());
+        
+        try {
+            const response = await fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                // Succès
+                if (modal) modal.hide();
+                this.reset();
+                showToast('success', data.message || 'Discussion créée avec succès !');
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                // Afficher les erreurs
+                if (data.errors) {
+                    Object.keys(data.errors).forEach(field => {
+                        // Chercher l'input correspondant
+                        let input;
+                        if (field === 'categorieMeditation') {
+                            input = this.querySelector(`#${field.replace(/([a-z])([A-Z])/g, '$1_$2').toLowerCase()}`);
+                        } else {
+                            input = this.querySelector(`[name="post[${field}]"], [name="${field}"]`);
+                        }
+                        
+                        if (input) {
+                            input.classList.add('is-invalid');
+                            
+                            // Créer le message d'erreur
+                            let feedback = input.nextElementSibling;
+                            if (!feedback || !feedback.classList.contains('invalid-feedback')) {
+                                feedback = document.createElement('div');
+                                feedback.className = 'invalid-feedback';
+                                input.parentNode.insertBefore(feedback, input.nextSibling);
+                            }
+                            feedback.innerHTML = data.errors[field];
+                        }
+                    });
+                    
+                    showToast('error', 'Veuillez corriger les erreurs.');
+                } else {
+                    showToast('error', data.message || 'Une erreur est survenue.');
+                }
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('error', 'Erreur de communication avec le serveur.');
+        } finally {
+            // Réactiver le bouton
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+}
+
+// Ajouter novalidate à tous les formulaires
+document.querySelectorAll('form').forEach(form => {
+    if (!form.hasAttribute('novalidate')) {
+        form.setAttribute('novalidate', 'novalidate');
+    }
+});
   
   // =============================================
   // NOUVELLES FONCTIONNALITÉS AJAX POUR LES EDITIONS
   // =============================================
   
   // 1. Gestion des formulaires d'édition de posts
-  document.querySelectorAll('form[id^="editPostForm"]').forEach(form => {
+document.querySelectorAll('form[id^="editPostForm"]').forEach(form => {
     form.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      const formData = new FormData(this);
-      const url = this.action;
-      const postId = this.getAttribute('data-post-id');
-      const modal = bootstrap.Modal.getInstance(document.getElementById(`modalEditPost${postId}`));
-      
-      try {
-        // Afficher un indicateur de chargement
+        e.preventDefault();
+
+        const postId = this.getAttribute('data-post-id');
+        const textarea = document.getElementById(`edit-contenu-${postId}`);
+        
+        // Mettre à jour le textarea avec le contenu de CKEditor
+        if (textarea && textarea.ckEditorInstance) {
+            textarea.ckEditorInstance.updateSourceElement();
+            // Débogage : afficher la valeur après mise à jour
+            console.log('Nouveau contenu envoyé :', textarea.value);
+        }
+
+        const formData = new FormData(this);
+        const url = this.action;
+        const modal = bootstrap.Modal.getInstance(document.getElementById(`modalEditPost${postId}`));
         const submitBtn = this.querySelector('button[type="submit"]');
         const originalText = submitBtn.innerHTML;
+
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Enregistrement...';
         submitBtn.disabled = true;
-        
-        const response = await fetch(url, {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-          }
-        });
-        
-        if (response.ok) {
-          // Fermer le modal
-          if (modal) modal.hide();
-          
-          // Afficher un message de succès
-          showToast('success', 'Discussion modifiée avec succès !');
-          
-          // Rafraîchir la page après un court délai
-          setTimeout(() => {
-            window.location.reload();
-          }, 1500);
-        } else {
-          throw new Error('Erreur lors de la modification');
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                if (modal) modal.hide();
+                showToast('success', data.message || 'Discussion modifiée avec succès !');
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                // Afficher les erreurs
+                if (data.errors) {
+                    Object.keys(data.errors).forEach(field => {
+                        const input = this.querySelector(`[name="${field}"]`);
+                        if (input) {
+                            input.classList.add('is-invalid');
+                            let feedback = input.nextElementSibling;
+                            if (!feedback || !feedback.classList.contains('invalid-feedback')) {
+                                feedback = document.createElement('div');
+                                feedback.className = 'invalid-feedback';
+                                input.parentNode.insertBefore(feedback, input.nextSibling);
+                            }
+                            feedback.innerHTML = data.errors[field];
+                        }
+                    });
+                    showToast('error', 'Veuillez corriger les erreurs.');
+                } else {
+                    showToast('error', data.message || 'Une erreur est survenue.');
+                }
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('error', 'Erreur de communication avec le serveur.');
+        } finally {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
         }
-      } catch (error) {
-        console.error('Error:', error);
-        showToast('error', 'Une erreur est survenue. Veuillez réessayer.');
-        
-        // Réactiver le bouton
-        const submitBtn = this.querySelector('button[type="submit"]');
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-      }
     });
-  });
+});
   
   // 2. Gestion des formulaires de suppression de posts
   document.querySelectorAll('form[id^="deletePostForm"]').forEach(form => {
@@ -1312,61 +1510,52 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
   // 5. Gestion des formulaires de commentaire rapide (déjà existant, ajout de l'AJAX)
-  document.querySelectorAll('.quick-comment-form form').forEach(form => {
+ document.querySelectorAll('.quick-comment-form form').forEach(form => {
     form.addEventListener('submit', async function(e) {
-      e.preventDefault();
-      
-      const formData = new FormData(this);
-      const url = this.action;
-      const postIdMatch = url.match(/post\/(\d+)/);
-      
-      if (!postIdMatch) return;
-      
-      const postId = postIdMatch[1];
-      const quickForm = document.getElementById(`quick-comment-${postId}`);
-      
-      try {
-        // Afficher un indicateur de chargement
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const url = this.action;
+        const postIdMatch = url.match(/post\/(\d+)/);
+        if (!postIdMatch) return;
+
+        const postId = postIdMatch[1];
+        const quickForm = document.getElementById(`quick-comment-${postId}`);
         const submitBtn = this.querySelector('button[type="submit"]');
+        if (!submitBtn) return; // Sécurité : si le bouton n'existe pas, on arrête
+
         const originalText = submitBtn.innerHTML;
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Envoi...';
-        submitBtn.disabled = true;
-        
-        const response = await fetch(url, {
-          method: 'POST',
-          body: formData,
-          headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-          }
-        });
-        
-        if (response.ok) {
-          // Masquer le formulaire rapide
-          if (quickForm) quickForm.style.display = 'none';
-          
-          // Réinitialiser le formulaire
-          this.reset();
-          
-          // Afficher un message de succès
-          showToast('success', 'Commentaire ajouté avec succès !');
-          
-          // Rafraîchir la page après un court délai
-          setTimeout(() => {
-            window.location.reload();
-          }, 1500);
-        } else {
-          throw new Error('Erreur lors de l\'ajout du commentaire');
+
+        try {
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Envoi...';
+            submitBtn.disabled = true;
+
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+
+            if (response.ok) {
+                quickForm.style.display = 'none';
+                this.reset();
+                showToast('success', 'Commentaire ajouté avec succès !');
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                throw new Error('Erreur lors de l\'ajout du commentaire');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showToast('error', error.message);
+        } finally {
+            // Réactiver le bouton seulement s'il existe
+            if (submitBtn) {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
         }
-      } catch (error) {
-        console.error('Error:', error);
-        showToast('error', 'Une erreur est survenue. Veuillez réessayer.');
-        
-        // Réactiver le bouton
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-      }
     });
-  });
+});
   
   // Fonction pour afficher les notifications toast
   function showToast(type, message) {
@@ -1454,6 +1643,107 @@ document.addEventListener('DOMContentLoaded', function() {
   styleSheet.innerText = toastStyles;
   document.head.appendChild(styleSheet);
 });
+
+// Gestion du chat dans la modale
+// Gestion du chat dans la modale
+document.addEventListener('DOMContentLoaded', function() {
+    const chatModal = document.getElementById('chatModal');
+    const chatMessages = document.getElementById('chat-messages');
+    const chatForm = document.getElementById('chat-form');
+    const chatInput = document.getElementById('chat-input');
+
+    if (!chatForm || !chatInput) return;
+
+    // Fonction pour ajouter un message dans la zone
+    function appendMessage(role, text) {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('mb-3');
+        if (role === 'user') {
+            messageDiv.innerHTML = `
+                <div class="d-flex justify-content-end">
+                    <div class="bg-primary text-white rounded-3 p-2" style="max-width: 80%; word-wrap: break-word;">
+                        <strong>Vous :</strong> ${text.replace(/\n/g, '<br>')}
+                    </div>
+                </div>
+            `;
+        } else {
+            messageDiv.innerHTML = `
+                <div class="d-flex justify-content-start">
+                    <div class="bg-light rounded-3 p-2" style="max-width: 80%; word-wrap: break-word;">
+                        <strong>Assistant :</strong> ${text.replace(/\n/g, '<br>')}
+                    </div>
+                </div>
+            `;
+        }
+        chatMessages.appendChild(messageDiv);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Soumission du formulaire
+    chatForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const message = chatInput.value.trim();
+        if (!message) return;
+
+        // Afficher le message de l'utilisateur
+        appendMessage('user', message);
+        chatInput.value = '';
+        chatInput.disabled = true;
+
+        try {
+            const response = await fetch('{{ path('app_chat') }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: new URLSearchParams({ message: message })
+            });
+            const data = await response.json();
+            if (data.reply) {
+                appendMessage('assistant', data.reply);
+            } else {
+                appendMessage('assistant', 'Erreur : réponse invalide.');
+            }
+        } catch (error) {
+            appendMessage('assistant', 'Erreur de connexion. Veuillez réessayer.');
+        } finally {
+            chatInput.disabled = false;
+            chatInput.focus();
+            
+        }
+    });
+
+    // Envoi avec Entrée
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            chatForm.dispatchEvent(new Event('submit'));
+        }
+    });
+
+    // Scroll en bas à l'ouverture de la modale
+    chatModal.addEventListener('shown.bs.modal', function () {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+        chatInput.focus();
+    });
+});
 </script>
 
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/classic/ckeditor.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+           ClassicEditor.create(document.querySelector('#post_contenu'), {
+    simpleUpload: {
+        uploadUrl: '{{ path('upload_image') }}',  // route Symfony
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    }
+})
+        });
+    </script>
 {% endblock %}

@@ -36,7 +36,7 @@ class CategorieMeditationController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'admin_categorie_meditation_new', methods: ['GET', 'POST'])]
+#[Route('/new', name: 'admin_categorie_meditation_new', methods: ['GET', 'POST'])]
 public function new(Request $request, EntityManagerInterface $entityManager): Response
 {
     // DEBUG: Vérifier si c'est AJAX
@@ -47,26 +47,45 @@ public function new(Request $request, EntityManagerInterface $entityManager): Re
     $form = $this->createForm(CategorieMeditationType::class, $categorieMeditation);
     $form->handleRequest($request);
 
-    if ($form->isSubmitted() && $form->isValid()) {
-        $entityManager->persist($categorieMeditation);
-        $entityManager->flush();
+    if ($form->isSubmitted()) {
+        if ($form->isValid()) {
+            $entityManager->persist($categorieMeditation);
+            $entityManager->flush();
 
-        error_log("NEW - Formulaire valide, AJAX: " . ($isAjax ? 'YES' : 'NO'));
+            error_log("NEW - Formulaire valide, AJAX: " . ($isAjax ? 'YES' : 'NO'));
 
-        if ($isAjax) {
-            return new JsonResponse([
-                'success' => true,
-                'message' => 'Catégorie créée avec succès!'
-            ]);
+            if ($isAjax) {
+                return new JsonResponse([
+                    'success' => true,
+                    'message' => 'Catégorie créée avec succès!'
+                ]);
+            }
+
+            $this->addFlash('success', 'Catégorie créée avec succès.');
+            return $this->redirectToRoute('admin_categorie_meditation_index', [], Response::HTTP_SEE_OTHER);
+        } else {
+            // FORMULAIRE INVALIDE
+            error_log("NEW - Formulaire invalide, erreurs: " . json_encode($form->getErrors(true, false)));
+            
+            if ($isAjax) {
+                $html = $this->renderView('admin/categorie_meditation/_form.html.twig', [
+                    'form' => $form->createView(),
+                    'button_label' => 'Créer',
+                    'form_action' => $this->generateUrl('admin_categorie_meditation_new')
+                ]);
+                
+                return new JsonResponse([
+                    'success' => false,  // ← Maintenant c'est false !
+                    'html' => $html,
+                    'errors' => $this->getFormErrors($form) // Optionnel: pour debug
+                ]);
+            }
         }
-
-        $this->addFlash('success', 'Catégorie créée avec succès.');
-        return $this->redirectToRoute('admin_categorie_meditation_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    // Si c'est une requête AJAX
-    if ($isAjax) {
-        error_log("NEW - Retour JSON pour AJAX");
+    // Si c'est une requête AJAX en GET (premier chargement du modal)
+    if ($isAjax && !$form->isSubmitted()) {
+        error_log("NEW - Premier chargement du formulaire AJAX");
         
         $html = $this->renderView('admin/categorie_meditation/_form.html.twig', [
             'form' => $form->createView(),
@@ -87,13 +106,15 @@ public function new(Request $request, EntityManagerInterface $entityManager): Re
     ]);
 }
 
-    #[Route('/{id}', name: 'admin_categorie_meditation_show', methods: ['GET'])]
-    public function show(CategorieMeditation $categorieMeditation): Response
-    {
-        return $this->render('admin/categorie_meditation/show.html.twig', [
-            'categorie_meditation' => $categorieMeditation,
-        ]);
+// Ajoutez cette méthode helper dans votre contrôleur
+private function getFormErrors($form): array
+{
+    $errors = [];
+    foreach ($form->getErrors(true) as $error) {
+        $errors[] = $error->getMessage();
     }
+    return $errors;
+}
 
     #[Route('/{id}/edit', name: 'admin_categorie_meditation_edit', methods: ['GET', 'POST'])]
 public function edit(Request $request, CategorieMeditation $categorieMeditation, EntityManagerInterface $entityManager): Response

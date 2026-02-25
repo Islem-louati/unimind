@@ -55,10 +55,13 @@ class Post
     #[ORM\JoinColumn(name: 'categorie_id', referencedColumnName: 'categorie_id')]
     private ?CategorieMeditation $categorieMeditation = null;
 
+    
+
     public function __construct()
     {
         $this->commentaires = new ArrayCollection();
         $this->created_at = new \DateTime();
+       
     }
 
     #[ORM\PreUpdate]
@@ -205,6 +208,7 @@ class Post
 
         return $this->user?->getFullName() ?? 'Utilisateur';
     }
+
 
     public function __toString(): string
     {

@@ -7,6 +7,9 @@ use App\Entity\Enum\TypeNiveau;
 use App\Repository\SeanceMeditationRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use App\Entity\Favori;
 
 #[ORM\Entity(repositoryClass: SeanceMeditationRepository::class)]
 class SeanceMeditation
@@ -63,10 +66,14 @@ class SeanceMeditation
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTime $updated_at = null;
 
+    #[ORM\OneToMany(mappedBy: 'seance', targetEntity: Favori::class, cascade: ['remove'])]
+    private Collection $favoris;
+
     public function __construct()
     {
         $this->created_at = new \DateTime();
         $this->is_active = true;
+        $this->favoris = new ArrayCollection();
     }
 
     // Getters et Setters
@@ -207,4 +214,37 @@ class SeanceMeditation
     {
         return $this->titre ?? '';
     }
+
+    /**
+ * @return Collection<int, Favori>
+ */
+public function getFavoris(): Collection
+{
+    return $this->favoris;
+}
+
+
+public function addFavori(Favori $favori): self
+{
+    if (!$this->favoris->contains($favori)) {
+        $this->favoris->add($favori);
+        $favori->setSeance($this); // synchronisation côté Favori
+    }
+
+    return $this;
+}
+
+
+public function removeFavori(Favori $favori): self
+{
+    if ($this->favoris->removeElement($favori)) {
+        // Si le favori appartient encore à cet utilisateur
+        if ($favori->getUser() === $this) {
+            $favori->setSeance(null);
+        }
+    }
+
+    return $this;
+}
+
 }
