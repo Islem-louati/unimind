@@ -1,6 +1,7 @@
+{# templates/profile/edit.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Modifier mon profil - Plateforme Psy{% endblock %}
+{% block title %}Modifier mon profil - UniMind{% endblock %}
 
 {% block breadcrumb_title %}Modifier mon profil{% endblock %}
 {% block page_title %}Modifier mon profil{% endblock %}
@@ -35,8 +36,8 @@
                         </div>
                     {% endfor %}
 
-                    {{ form_start(form) }}
-                    
+                    {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+
                     <h6 class="text-uppercase text-sm mb-4">Informations générales</h6>
                     <div class="row">
                         <div class="col-md-6">
@@ -68,7 +69,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row mt-3">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -84,32 +85,24 @@
                             </div>
                         </div>
                         <div class="col-md-6">
+                            {# Champ photoFile géré par VichImageType #}
                             <div class="form-group">
-                                {{ form_label(form.photo) }}
-                                {{ form_widget(form.photo, {
+                                {{ form_label(form.photoFile) }}
+                                {{ form_widget(form.photoFile, {
                                     'attr': {
-                                        'class': 'form-control' ~ (form.photo.vars.errors|length ? ' is-invalid' : '')
+                                        'class': 'form-control' ~ (form.photoFile.vars.errors|length ? ' is-invalid' : '')
                                     }
                                 }) }}
                                 <div class="invalid-feedback">
-                                    {{ form_errors(form.photo) }}
+                                    {{ form_errors(form.photoFile) }}
                                 </div>
                                 <small class="form-text text-muted">
                                     Formats acceptés: JPG, PNG, GIF (max 2MB)
                                 </small>
-                                {% if profil and profil.photo %}
-                                    <div class="mt-2">
-                                        <strong>Photo actuelle:</strong><br>
-                                        <img src="{{ asset('uploads/photos/' ~ profil.photo) }}" 
-                                             alt="Photo actuelle" 
-                                             class="img-thumbnail mt-2"
-                                             style="max-width: 150px;">
-                                    </div>
-                                {% endif %}
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row mt-3">
                         <div class="col-md-12">
                             <div class="form-group">
@@ -127,10 +120,10 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <hr class="horizontal dark my-4">
-                    
-                    <!-- Informations spécifiques au rôle -->
+
+                    {# Champs spécifiques au rôle (inchangés) #}
                     {% if user.role.value == 'Etudiant' %}
                         <h6 class="text-uppercase text-sm mb-4">Informations étudiant</h6>
                         <div class="row">
@@ -163,7 +156,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                     {% elseif user.role.value == 'Psychologue' %}
                         <h6 class="text-uppercase text-sm mb-4">Informations professionnelles</h6>
                         <div class="row">
@@ -216,7 +209,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                     {% elseif user.role.value == 'Responsable Etudiant' %}
                         <h6 class="text-uppercase text-sm mb-4">Informations professionnelles</h6>
                         <div class="row">
@@ -266,7 +259,7 @@
                             </div>
                         </div>
                     {% endif %}
-                    
+
                     <div class="text-center mt-4">
                         <button type="submit" class="btn btn-primary btn-lg px-5">
                             <i class="bi bi-save me-2"></i>Enregistrer les modifications
@@ -275,7 +268,7 @@
                             <i class="bi bi-x-circle me-2"></i>Annuler
                         </a>
                     </div>
-                    
+
                     {{ form_end(form) }}
                 </div>
             </div>

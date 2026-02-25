@@ -20,7 +20,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class TraitementType extends AbstractType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options): void
+    public function buildForm(FormBuilderInterface $builder, array
+$options): void
     {
         $builder
             ->add('titre', TextType::class, [
@@ -52,8 +53,10 @@ class TraitementType extends AbstractType
                 'label' => 'Catégorie',
                 'required' => true,
                 'choices' => array_combine(
-                    array_map(fn($case) => $case->getLabel(), CategorieTraitement::cases()),
-                    array_map(fn($case) => $case->value, CategorieTraitement::cases())
+                    array_map(fn($case) => $case->getLabel(),
+CategorieTraitement::cases()),
+                    array_map(fn($case) => $case->value,
+CategorieTraitement::cases())
                 ),
                 'attr' => [
                     'class' => 'form-control'
@@ -95,8 +98,10 @@ class TraitementType extends AbstractType
                 'label' => 'Statut',
                 'required' => true,
                 'choices' => array_combine(
-                    array_map(fn($case) => $case->getLabel(), StatutTraitement::cases()),
-                    array_map(fn($case) => $case->value, StatutTraitement::cases())
+                    array_map(fn($case) => $case->getLabel(),
+StatutTraitement::cases()),
+                    array_map(fn($case) => $case->value,
+StatutTraitement::cases())
                 ),
                 'attr' => [
                     'class' => 'form-control'
@@ -106,8 +111,10 @@ class TraitementType extends AbstractType
                 'label' => 'Priorité',
                 'required' => true,
                 'choices' => array_combine(
-                    array_map(fn($case) => $case->getLabel(), PrioriteTraitement::cases()),
-                    array_map(fn($case) => $case->value, PrioriteTraitement::cases())
+                    array_map(fn($case) => $case->getLabel(),
+PrioriteTraitement::cases()),
+                    array_map(fn($case) => $case->value,
+PrioriteTraitement::cases())
                 ),
                 'attr' => [
                     'class' => 'form-control'
@@ -119,7 +126,8 @@ class TraitementType extends AbstractType
                 'attr' => [
                     'class' => 'form-control',
                     'rows' => 3,
-                    'placeholder' => 'Quel est l\'objectif visé par ce traitement ?'
+                    'placeholder' => 'Quel est l\'objectif visé par ce
+traitement ?'
                 ]
             ]);
 
@@ -129,7 +137,8 @@ class TraitementType extends AbstractType
                 'label' => 'Étudiant',
                 'class' => User::class,
                 'choice_label' => function(User $user) {
-                    return $user->getFullName() . ' (' . $user->getEmail() . ')';
+                    return $user->getFullName() . ' (' .
+$user->getEmail() . ')';
                 },
                 'query_builder' => function ($repository) {
                     return $repository->createQueryBuilder('u')

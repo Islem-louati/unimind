@@ -1,0 +1,365 @@
+{# templates/security/face_login.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion par reconnaissance faciale - UniMind{% endblock %}
+
+{% block unauthenticated_body %}
+<section>
+    <div class="page-header min-vh-100">
+        <div class="container">
+            <div class="row">
+                {# Colonne formulaire #}
+                <div class="col-xl-4 col-lg-5 col-md-7 d-flex flex-column mx-lg-0 mx-auto">
+                    <div class="card card-plain">
+                        <div class="card-header pb-0 text-start">
+                            <h4 class="font-weight-bolder">
+                                <i class="fas fa-camera me-2 text-primary"></i>
+                                Connexion par visage
+                            </h4>
+                            <p class="mb-0">Connectez-vous avec votre visage en 3 secondes</p>
+                        </div>
+
+                        {# Flash messages #}
+                        {% for message in app.flashes('error') %}
+                            <div class="alert alert-danger alert-dismissible fade show mx-4 mt-3" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+
+                        <div class="card-body">
+
+                            {# === ÉTAPE 1 : Saisie de l'email === #}
+                            <div id="step-email">
+                                <p class="text-sm text-muted mb-3">
+                                    <i class="fas fa-info-circle text-info me-1"></i>
+                                    Entrez votre email pour que le système retrouve votre photo de profil.
+                                </p>
+
+                                <div class="mb-3">
+                                    <label class="form-label">Adresse email</label>
+                                    <input type="email" id="userEmail" class="form-control form-control-lg"
+                                           placeholder="votre@email.com" required>
+                                </div>
+
+                                <div id="emailError" class="alert alert-danger d-none"></div>
+
+                                <div class="text-center">
+                                    <button type="button" id="btnPrepare" class="btn btn-primary btn-lg w-100 mt-2">
+                                        <i class="fas fa-arrow-right me-2"></i>
+                                        Continuer
+                                    </button>
+                                </div>
+                            </div>
+
+                            {# === ÉTAPE 2 : Capture webcam === #}
+                            <div id="step-camera" style="display:none;">
+                                <div class="text-center mb-3">
+                                    <p class="text-sm text-muted">
+                                        Bonjour <strong id="userName"></strong> !
+                                        Positionnez votre visage dans le cadre et cliquez sur "Vérifier".
+                                    </p>
+                                </div>
+
+                                {# Vidéo webcam #}
+                                <div class="position-relative text-center mb-3">
+                                    <video id="webcam" autoplay playsinline muted
+                                           style="width:100%; border-radius:12px; border:3px solid #5e72e4; transform: scaleX(-1);">
+                                    </video>
+                                    {# Overlay guide visage #}
+                                    <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+                                                width:160px; height:200px; border:3px dashed rgba(94,114,228,0.8);
+                                                border-radius:50%; pointer-events:none;"></div>
+                                    <canvas id="snapshot" style="display:none;"></canvas>
+                                </div>
+
+                                {# Indicateur de statut #}
+                                <div id="statusBar" class="alert alert-info text-center mb-3" style="display:none;"></div>
+
+                                <div id="cameraError" class="alert alert-danger d-none"></div>
+
+                                {# Résultat confiance #}
+                                <div id="confidenceBar" style="display:none;" class="mb-3">
+                                    <label class="form-label text-sm">Niveau de confiance</label>
+                                    <div class="progress" style="height:20px; border-radius:10px;">
+                                        <div id="confidenceProgress" class="progress-bar" role="progressbar"
+                                             style="width:0%; border-radius:10px; transition: width 1s ease;">
+                                        </div>
+                                    </div>
+                                    <small id="confidenceText" class="text-muted"></small>
+                                </div>
+
+                                <div class="d-grid gap-2">
+                                    <button type="button" id="btnCapture" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-camera me-2"></i>
+                                        Vérifier mon identité
+                                    </button>
+                                    <button type="button" id="btnRetry" class="btn btn-outline-secondary" style="display:none;">
+                                        <i class="fas fa-redo me-2"></i>
+                                        Réessayer
+                                    </button>
+                                    <button type="button" id="btnBack" class="btn btn-outline-secondary btn-sm">
+                                        <i class="fas fa-arrow-left me-1"></i>
+                                        Changer d'email
+                                    </button>
+                                </div>
+                            </div>
+
+                            {# === ÉTAPE 3 : Succès === #}
+                            <div id="step-success" style="display:none;" class="text-center py-4">
+                                <div class="mb-3">
+                                    <i class="fas fa-check-circle text-success" style="font-size:4rem;"></i>
+                                </div>
+                                <h5 class="text-success">Identité vérifiée !</h5>
+                                <p class="text-muted">Redirection en cours...</p>
+                                <div class="spinner-border text-primary" role="status"></div>
+                            </div>
+
+                        </div>
+
+                        <div class="card-footer text-center pt-0 px-lg-2 px-1">
+                            <p class="mb-2 text-sm mx-auto">
+                                Préférez la connexion classique ?
+                                <a href="{{ path('app_login') }}" class="text-primary text-gradient fw-bold">
+                                    Se connecter
+                                </a>
+                            </p>
+                            <p class="mb-0 text-sm mx-auto">
+                                Pas encore de compte ?
+                                <a href="{{ path('app_register') }}" class="text-primary text-gradient fw-bold">
+                                    S'inscrire
+                                </a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {# Colonne droite décorative #}
+                <div class="col-6 d-lg-flex d-none h-100 my-auto pe-0 position-absolute top-0 end-0 text-center justify-content-center flex-column">
+                    <div class="position-relative bg-gradient-primary h-100 m-3 px-7 border-radius-lg d-flex flex-column justify-content-center overflow-hidden"
+                         style="background-image: url('https://images.unsplash.com/photo-1559757175-0eb30cd8c063?auto=format&fit=crop&w=1600&q=80');
+                                background-size: cover;">
+                        <span class="mask bg-gradient-primary opacity-6"></span>
+                        <i class="fas fa-user-circle position-relative text-white mb-4" style="font-size:5rem;"></i>
+                        <h4 class="mt-2 text-white font-weight-bolder position-relative">Connexion sécurisée</h4>
+                        <p class="text-white position-relative">Notre système de reconnaissance faciale IA identifie votre visage en moins de 3 secondes.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    // ===== VARIABLES GLOBALES =====
+    let stream = null;
+    let userId = null;
+    let userPhoto = null;
+    let loginToken = null;
+
+    const stepEmail = document.getElementById('step-email');
+    const stepCamera = document.getElementById('step-camera');
+    const stepSuccess = document.getElementById('step-success');
+    const webcam = document.getElementById('webcam');
+    const canvas = document.getElementById('snapshot');
+    const statusBar = document.getElementById('statusBar');
+    const emailError = document.getElementById('emailError');
+    const cameraError = document.getElementById('cameraError');
+
+    // ===== ÉTAPE 1 : Préparer la connexion (trouver l'utilisateur) =====
+    document.getElementById('btnPrepare').addEventListener('click', async () => {
+        const email = document.getElementById('userEmail').value.trim();
+        emailError.classList.add('d-none');
+
+        if (!email || !email.includes('@')) {
+            emailError.textContent = 'Veuillez entrer un email valide.';
+            emailError.classList.remove('d-none');
+            return;
+        }
+
+        const btn = document.getElementById('btnPrepare');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Recherche...';
+
+        try {
+            const response = await fetch('{{ path("api_face_login_prepare") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok || data.error) {
+                emailError.textContent = data.error || 'Erreur lors de la recherche.';
+                emailError.classList.remove('d-none');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-arrow-right me-2"></i>Continuer';
+                return;
+            }
+
+            // Stocker les infos utilisateur
+            userId = data.user_id;
+            userPhoto = data.photo;
+            document.getElementById('userName').textContent = data.name;
+
+            // Passer à l'étape caméra
+            stepEmail.style.display = 'none';
+            stepCamera.style.display = 'block';
+            await startCamera();
+
+        } catch (err) {
+            emailError.textContent = 'Erreur réseau. Vérifiez votre connexion.';
+            emailError.classList.remove('d-none');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-arrow-right me-2"></i>Continuer';
+        }
+    });
+
+    // Permettre la touche Entrée sur l'email
+    document.getElementById('userEmail').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') document.getElementById('btnPrepare').click();
+    });
+
+    // ===== DÉMARRER LA CAMÉRA =====
+    async function startCamera() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: { width: 640, height: 480, facingMode: 'user' }
+            });
+            webcam.srcObject = stream;
+            showStatus('📷 Caméra prête. Positionnez votre visage dans le cadre.', 'info');
+        } catch (err) {
+            cameraError.textContent = 'Impossible d\'accéder à la caméra. Autorisez l\'accès dans votre navigateur.';
+            cameraError.classList.remove('d-none');
+        }
+    }
+
+    // ===== ÉTAPE 2 : Capturer et vérifier le visage =====
+    document.getElementById('btnCapture').addEventListener('click', async () => {
+        if (!stream) {
+            cameraError.textContent = 'Caméra non disponible.';
+            cameraError.classList.remove('d-none');
+            return;
+        }
+
+        const btn = document.getElementById('btnCapture');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Analyse en cours...';
+        showStatus('🔍 Analyse de votre visage en cours...', 'info');
+        cameraError.classList.add('d-none');
+
+        // Capturer une frame de la vidéo
+        canvas.width = webcam.videoWidth;
+        canvas.height = webcam.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(webcam, 0, 0);
+
+        // Convertir en base64
+        const capturedImage = canvas.toDataURL('image/jpeg', 0.9);
+
+        try {
+            const response = await fetch('{{ path("api_face_login_verify") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    user_id: userId,
+                    captured_image: capturedImage,
+                    user_photo: userPhoto
+                })
+            });
+
+            const data = await response.json();
+
+            // Afficher la barre de confiance
+            showConfidence(data.confidence || 0, data.success || false);
+
+            if (data.success) {
+                // ✅ Succès !
+                stopCamera();
+                showStatus('✅ Identité vérifiée ! Connexion en cours...', 'success');
+                loginToken = data.login_token;
+
+                setTimeout(() => {
+                    stepCamera.style.display = 'none';
+                    stepSuccess.style.display = 'block';
+                    // Rediriger vers la confirmation
+                    window.location.href = data.redirect;
+                }, 1500);
+
+            } else {
+                // ❌ Échec
+                showStatus('❌ ' + (data.message || 'Visage non reconnu. Réessayez.'), 'danger');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-camera me-2"></i>Vérifier mon identité';
+                document.getElementById('btnRetry').style.display = 'block';
+            }
+
+        } catch (err) {
+            showStatus('❌ Erreur de connexion au serveur.', 'danger');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-camera me-2"></i>Vérifier mon identité';
+        }
+    });
+
+    // ===== RÉESSAYER =====
+    document.getElementById('btnRetry').addEventListener('click', () => {
+        document.getElementById('btnRetry').style.display = 'none';
+        document.getElementById('btnCapture').disabled = false;
+        document.getElementById('btnCapture').innerHTML = '<i class="fas fa-camera me-2"></i>Vérifier mon identité';
+        document.getElementById('confidenceBar').style.display = 'none';
+        showStatus('📷 Réessayez. Assurez-vous d\'être bien éclairé et face à la caméra.', 'info');
+    });
+
+    // ===== RETOUR À L'EMAIL =====
+    document.getElementById('btnBack').addEventListener('click', () => {
+        stopCamera();
+        stepCamera.style.display = 'none';
+        stepEmail.style.display = 'block';
+        document.getElementById('confidenceBar').style.display = 'none';
+        statusBar.style.display = 'none';
+        document.getElementById('btnPrepare').disabled = false;
+        document.getElementById('btnPrepare').innerHTML = '<i class="fas fa-arrow-right me-2"></i>Continuer';
+    });
+
+    // ===== FONCTIONS UTILITAIRES =====
+    function stopCamera() {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop());
+            stream = null;
+        }
+    }
+
+    function showStatus(message, type) {
+        statusBar.className = `alert alert-${type} text-center mb-3`;
+        statusBar.textContent = message;
+        statusBar.style.display = 'block';
+    }
+
+    function showConfidence(confidence, isSuccess) {
+        const bar = document.getElementById('confidenceBar');
+        const progress = document.getElementById('confidenceProgress');
+        const text = document.getElementById('confidenceText');
+        const percent = Math.round(confidence * 100);
+
+        bar.style.display = 'block';
+        progress.style.width = percent + '%';
+        progress.textContent = percent + '%';
+
+        if (isSuccess) {
+            progress.className = 'progress-bar bg-success';
+            text.textContent = `Confiance: ${percent}% ✅`;
+        } else if (percent > 40) {
+            progress.className = 'progress-bar bg-warning';
+            text.textContent = `Confiance insuffisante: ${percent}% (minimum 50%)`;
+        } else {
+            progress.className = 'progress-bar bg-danger';
+            text.textContent = `Visage non reconnu: ${percent}%`;
+        }
+    }
+
+    // Arrêter la caméra si on quitte la page
+    window.addEventListener('beforeunload', stopCamera);
+</script>
+{% endblock %}

@@ -28,7 +28,7 @@ class TraitementController extends AbstractController
     public function search(): Response
     {
         $user = $this->security->getUser();
-        
+
         if (!$user) {
             return $this->redirectToRoute('app_login');
         }
@@ -42,7 +42,7 @@ class TraitementController extends AbstractController
     public function index(TraitementRepository $traitementRepository): Response
     {
         $user = $this->security->getUser();
-        
+
         if (!$user) {
             // Mode test : créer des données fictives
             $traitements = $this->createTestTraitements();
@@ -50,8 +50,9 @@ class TraitementController extends AbstractController
         } else {
             // Mode normal : utiliser les données réelles
             $traitements = [];
-            
-            if ($this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_RESPONSABLE_ETUDIANT')) {
+
+            if ($this->isGranted('ROLE_ADMIN') ||
+$this->isGranted('ROLE_RESPONSABLE_ETUDIANT')) {
                 // Admin et responsable peuvent voir tous les traitements
                 $traitements = $traitementRepository->createQueryBuilder('t')
                     ->leftJoin('t.etudiant', 'e')
@@ -91,47 +92,44 @@ class TraitementController extends AbstractController
 
     #[Route('/new', name: 'app_traitement_new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_PSYCHOLOGUE')]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface
+$entityManager): Response
     {
         $traitement = new Traitement();
         $form = $this->createForm(TraitementType::class, $traitement, [
             'show_etudiant_field' => true
         ]);
-        
+
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Définir le psychologue actuel comme créateur du traitement
             $traitement->setPsychologue($this->security->getUser());
-            
+
             // Vérification supplémentaire que l'étudiant est bien un étudiant
             $etudiant = $traitement->getEtudiant();
             if ($etudiant && !$etudiant->isEtudiant()) {
-                $this->addFlash('error', 'L\'utilisateur sélectionné n\'est pas un étudiant valide.');
+                $this->addFlash('error', 'L\'utilisateur sélectionné
+n\'est pas un étudiant valide.');
                 return $this->render('traitement/new.html.twig', [
                     'traitement' => $traitement,
                     'form' => $form->createView(),
                 ]);
             }
-            
+
             $entityManager->persist($traitement);
             $entityManager->flush();
-            
+
             $this->addFlash('success', 'Le traitement a été créé avec succès.');
 
-            return $this->redirectToRoute('app_traitement_show', ['id' => $traitement->getId()]);
+            return $this->redirectToRoute('app_traitement_show', ['id'
+=> $traitement->getId()]);
         }
 
         // Afficher les erreurs de validation si le formulaire est invalide
         if ($form->isSubmitted() && !$form->isValid()) {
-            $errors = $form->getErrors(true);
-            $errorMessages = [];
-            
-            foreach ($errors as $error) {
-                $errorMessages[] = $error->getMessage();
-            }
-            
-            $this->addFlash('error', 'Le formulaire contient des erreurs. Veuillez corriger les champs indiqués.');
+            $this->addFlash('error', 'Le formulaire contient des
+erreurs. Veuillez corriger les champs obligatoires.');
         }
 
         return $this->render('traitement/new.html.twig', [
@@ -144,14 +142,15 @@ class TraitementController extends AbstractController
     public function show(Traitement $traitement): Response
     {
         $user = $this->security->getUser();
-        
+
         if (!$user) {
             return $this->redirectToRoute('app_login');
         }
 
         // Vérifier les droits d'accès
         if (!$this->canAccessTraitement($traitement, $user)) {
-            throw $this->createAccessDeniedException('Vous n\'avez pas accès à ce traitement.');
+            throw $this->createAccessDeniedException('Vous n\'avez pas
+accès à ce traitement.');
         }
 
         return $this->render('traitement/show.html.twig', [
@@ -162,14 +161,17 @@ class TraitementController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_traitement_edit', methods: ['GET', 'POST'])]
+    #[Route('/{id}/edit', name: 'app_traitement_edit', methods:
+['GET', 'POST'])]
     #[IsGranted('ROLE_PSYCHOLOGUE')]
-    public function edit(Request $request, Traitement $traitement, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, Traitement $traitement,
+EntityManagerInterface $entityManager): Response
     {
         $user = $this->security->getUser();
-        
+
         if ($traitement->getPsychologue() !== $user) {
-            throw $this->createAccessDeniedException('Vous ne pouvez modifier que vos propres traitements.');
+            throw $this->createAccessDeniedException('Vous ne pouvez
+modifier que vos propres traitements.');
         }
 
         $form = $this->createForm(TraitementType::class, $traitement, [
@@ -181,18 +183,26 @@ class TraitementController extends AbstractController
             // Vérification supplémentaire que l'étudiant est bien un étudiant
             $etudiant = $traitement->getEtudiant();
             if ($etudiant && !$etudiant->isEtudiant()) {
-                $this->addFlash('error', 'L\'utilisateur sélectionné n\'est pas un étudiant valide.');
+                $this->addFlash('error', 'L\'utilisateur sélectionné
+n\'est pas un étudiant valide.');
                 return $this->render('traitement/edit.html.twig', [
                     'traitement' => $traitement,
                     'form' => $form->createView(),
                 ]);
             }
-            
+
             $entityManager->flush();
 
-            $this->addFlash('success', 'Le traitement a été modifié avec succès.');
+            $this->addFlash('success', 'Le traitement a été modifié
+avec succès.');
 
-            return $this->redirectToRoute('app_traitement_show', ['id' => $traitement->getId()]);
+            return $this->redirectToRoute('app_traitement_show', ['id'
+=> $traitement->getId()]);
+        }
+
+        if ($form->isSubmitted() && !$form->isValid()) {
+            $this->addFlash('error', 'Le formulaire contient des
+erreurs. Veuillez corriger les champs obligatoires.');
         }
 
         return $this->render('traitement/edit.html.twig', [
@@ -203,21 +213,27 @@ class TraitementController extends AbstractController
 
     #[Route('/{id}', name: 'app_traitement_delete', methods: ['POST'])]
     #[IsGranted('ROLE_PSYCHOLOGUE')]
-    public function delete(Request $request, Traitement $traitement, EntityManagerInterface $entityManager): Response
+    public function delete(Request $request, Traitement $traitement,
+EntityManagerInterface $entityManager): Response
     {
         $user = $this->security->getUser();
-        
-        if ($traitement->getPsychologue() !== $user && !$this->isGranted('ROLE_ADMIN')) {
-            throw $this->createAccessDeniedException('Vous ne pouvez supprimer que vos propres traitements.');
+
+        if ($traitement->getPsychologue() !== $user &&
+!$this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException('Vous ne pouvez
+supprimer que vos propres traitements.');
         }
 
-        if ($this->isCsrfTokenValid('delete'.$traitement->getId(), $request->request->get('_token'))) {
+        if ($this->isCsrfTokenValid('delete'.$traitement->getId(),
+$request->request->get('_token'))) {
             try {
                 $entityManager->remove($traitement);
                 $entityManager->flush();
-                $this->addFlash('success', 'Le traitement a été supprimé avec succès.');
+                $this->addFlash('success', 'Le traitement a été
+supprimé avec succès.');
             } catch (\Exception $e) {
-                $this->addFlash('error', 'Erreur lors de la suppression: ' . $e->getMessage());
+                $this->addFlash('error', 'Erreur lors de la
+suppression: ' . $e->getMessage());
             }
         } else {
             $this->addFlash('error', 'Token CSRF invalide.');
@@ -226,20 +242,24 @@ class TraitementController extends AbstractController
         return $this->redirectToRoute('app_traitement_index');
     }
 
-    private function canAccessTraitement(Traitement $traitement, User $user): bool
+    private function canAccessTraitement(Traitement $traitement, User
+$user): bool
     {
         // Admin et responsable peuvent tout voir
-        if ($this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_RESPONSABLE_ETUDIANT')) {
+        if ($this->isGranted('ROLE_ADMIN') ||
+$this->isGranted('ROLE_RESPONSABLE_ETUDIANT')) {
             return true;
         }
 
         // Psychologue peut voir ses traitements
-        if ($this->isGranted('ROLE_PSYCHOLOGUE') && $traitement->getPsychologue() === $user) {
+        if ($this->isGranted('ROLE_PSYCHOLOGUE') &&
+$traitement->getPsychologue() === $user) {
             return true;
         }
 
         // Étudiant peut voir ses traitements
-        if ($this->isGranted('ROLE_ETUDIANT') && $traitement->getEtudiant() === $user) {
+        if ($this->isGranted('ROLE_ETUDIANT') &&
+$traitement->getEtudiant() === $user) {
             return true;
         }
 
@@ -254,7 +274,8 @@ class TraitementController extends AbstractController
         }
 
         // Psychologue peut modifier ses traitements
-        if ($this->isGranted('ROLE_PSYCHOLOGUE') && $traitement->getPsychologue() === $user) {
+        if ($this->isGranted('ROLE_PSYCHOLOGUE') &&
+$traitement->getPsychologue() === $user) {
             return true;
         }
 
@@ -269,12 +290,14 @@ class TraitementController extends AbstractController
         }
 
         // Psychologue peut gérer les suivis de ses traitements
-        if ($this->isGranted('ROLE_PSYCHOLOGUE') && $traitement->getPsychologue() === $user) {
+        if ($this->isGranted('ROLE_PSYCHOLOGUE') &&
+$traitement->getPsychologue() === $user) {
             return true;
         }
 
         // Étudiant peut gérer ses suivis (effectuer, commenter)
-        if ($this->isGranted('ROLE_ETUDIANT') && $traitement->getEtudiant() === $user) {
+        if ($this->isGranted('ROLE_ETUDIANT') &&
+$traitement->getEtudiant() === $user) {
             return true;
         }
 
@@ -284,7 +307,7 @@ class TraitementController extends AbstractController
     private function getMainRole(User $user): string
     {
         $roles = $user->getRoles();
-        
+
         if (in_array('ROLE_ADMIN', $roles)) {
             return 'admin';
         } elseif (in_array('ROLE_PSYCHOLOGUE', $roles)) {
@@ -294,7 +317,7 @@ class TraitementController extends AbstractController
         } elseif (in_array('ROLE_RESPONSABLE_ETUDIANT', $roles)) {
             return 'responsable';
         }
-        
+
         return 'user';
     }
 
@@ -304,7 +327,8 @@ class TraitementController extends AbstractController
             [
                 'id' => 1,
                 'titre' => 'Thérapie Comportementale',
-                'description' => 'Thérapie basée sur la modification des comportements problématiques',
+                'description' => 'Thérapie basée sur la modification
+des comportements problématiques',
                 'categorie' => 'Comportemental',
                 'statut' => 'EN_COURS',
                 'priorite' => 'HAUTE',
@@ -327,7 +351,8 @@ class TraitementController extends AbstractController
             [
                 'id' => 2,
                 'titre' => 'Thérapie Cognitive',
-                'description' => 'Thérapie axée sur la modification des schémas de pensée',
+                'description' => 'Thérapie axée sur la modification
+des schémas de pensée',
                 'categorie' => 'Thérapie',
                 'statut' => 'EN_COURS',
                 'priorite' => 'MOYENNE',
@@ -373,7 +398,8 @@ class TraitementController extends AbstractController
             [
                 'id' => 4,
                 'titre' => 'Thérapie de Groupe',
-                'description' => 'Sessions de thérapie en groupe pour le soutien mutuel',
+                'description' => 'Sessions de thérapie en groupe pour
+le soutien mutuel',
                 'categorie' => 'Thérapie',
                 'statut' => 'EN_ATTENTE',
                 'priorite' => 'MOYENNE',

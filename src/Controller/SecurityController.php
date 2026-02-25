@@ -20,187 +20,222 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Uid\Uuid;
+use Symfony\Component\Form\FormError;
+use App\Service\EmailManager;
+
 
 class SecurityController extends AbstractController
 {
-    private EntityManagerInterface $entityManager;
-    private MailerInterface $mailer;
-    private UrlGeneratorInterface $urlGenerator;
+    public function __construct(
+        private EntityManagerInterface $entityManager,
+        private \Symfony\Component\Mailer\MailerInterface $mailer,
+        private UrlGeneratorInterface $urlGenerator,
+        private EmailManager $emailManager
+    ) {}
 
-    public function __construct(EntityManagerInterface $entityManager, MailerInterface $mailer, UrlGeneratorInterface $urlGenerator)
-    {
-        $this->entityManager = $entityManager;
-        $this->mailer = $mailer;
-        $this->urlGenerator = $urlGenerator;
-    }
-#[Route('/inscription', name: 'app_register')]
-public function register(Request $request, UserPasswordHasherInterface $userPasswordHasher): Response
-{
-    if ($this->getUser()) {
-        return $this->redirectToRoute('app_dashboard');
-    }
-
-    $user = new User();
-    $form = $this->createForm(RegistrationFormType::class, $user);
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid()) {
-        try {
-            // Récupérer le rôle depuis le formulaire (c'est déjà un enum grâce au ChoiceType)
-            $role = $user->getRole();
-            
-            if (!$role) {
-                throw new \Exception('Le rôle est obligatoire.');
-            }
-
-            // Valider les champs selon le rôle
-            $validationErrors = [];
-            
-            if ($role === RoleType::ETUDIANT) {
-                if (!$user->getIdentifiant()) {
-                    $validationErrors[] = 'L\'identifiant étudiant est obligatoire.';
-                }
-                if (!$user->getNomEtablissement()) {
-                    $validationErrors[] = 'Le nom de l\'établissement est obligatoire.';
-                }
-            } elseif ($role === RoleType::PSYCHOLOGUE) {
-                if (!$user->getSpecialite()) {
-                    $validationErrors[] = 'La spécialité est obligatoire.';
-                }
-                if (!$user->getAdresse()) {
-                    $validationErrors[] = 'L\'adresse est obligatoire.';
-                }
-                if (!$user->getTelephone()) {
-                    $validationErrors[] = 'Le téléphone est obligatoire.';
-                }
-            } elseif ($role === RoleType::RESPONSABLE_ETUDIANT) {
-                if (!$user->getPoste()) {
-                    $validationErrors[] = 'Le poste est obligatoire.';
-                }
-                if (!$user->getEtablissement()) {
-                    $validationErrors[] = 'L\'établissement est obligatoire.';
-                }
-            }
-
-            if (!empty($validationErrors)) {
-                throw new \Exception(implode(' ', $validationErrors));
-            }
-
-            // Créer le profil
-            $profil = new Profil();
-            
-            // Remplir les informations du profil selon le rôle
-            if ($role === RoleType::ETUDIANT) {
-                $profil->setEtablissement($user->getNomEtablissement());
-            } elseif ($role === RoleType::PSYCHOLOGUE) {
-                $profil->setSpecialite($user->getSpecialite());
-                $profil->setTel($user->getTelephone());
-                $profil->setEtablissement($user->getAdresse());
-            } elseif ($role === RoleType::RESPONSABLE_ETUDIANT) {
-                $profil->setEtablissement($user->getEtablissement());
-                $profil->setFonction($user->getPoste());
-            }
-
-            // Encoder le mot de passe
-            $user->setPassword(
-                $userPasswordHasher->hashPassword(
-                    $user,
-                    $form->get('plainPassword')->getData()
-                )
-            );
-
-            // Générer le token de vérification - Utiliser DateTime au lieu de DateTimeImmutable
-            $user->setVerificationToken(Uuid::v4()->toRfc4122());
-            $user->setTokenExpiresAt(new \DateTime('+24 hours')); // Changé
-            $user->setIsActive(false);
-            $user->setIsVerified(false);
-
-            // Lier le profil à l'utilisateur
-            $user->setProfil($profil);
-            $profil->setUser($user);
-
-            $this->entityManager->persist($user);
-            $this->entityManager->persist($profil);
-            $this->entityManager->flush();
-
-            // Envoyer l'email de vérification
-            $this->sendVerificationEmail($user);
-
-            $this->addFlash('success', 'Votre compte a été créé avec succès ! Veuillez vérifier votre email pour activer votre compte.');
-            return $this->redirectToRoute('app_login');
-
-        } catch (\Exception $e) {
-            $this->addFlash('error', 'Une erreur est survenue lors de l\'inscription : ' . $e->getMessage());
-        }
-    }
-
-    return $this->render('security/register.html.twig', [
-        'registrationForm' => $form->createView(),
-    ]);
-}
-
-
-   #[Route('/verification/{token}', name: 'app_verify_email')]
-public function verifyEmail(string $token): Response
-{
-    // Correction: Utilisez 'verificationToken' (le nom de la propriété PHP)
-    $user = $this->entityManager->getRepository(User::class)->findOneBy([
-        'verificationToken' => $token
-    ]);
-
-    if (!$user) {
-        // Debug: Vérifiez si le token existe
-        error_log("Token non trouvé: " . $token);
-        
-        // Essayez aussi avec verification_token
-        $user = $this->entityManager->getRepository(User::class)->findOneBy([
-            'verification_token' => $token
-        ]);
-        
-        if (!$user) {
-            $this->addFlash('error', 'Token de vérification invalide.');
-            return $this->redirectToRoute('app_register');
-        }
-    }
-
-    $expiresAt = $user->getTokenExpiresAt();
-    if ($expiresAt && $expiresAt < new \DateTime()) {
-        $this->addFlash('error', 'Le lien de vérification a expiré.');
-        return $this->redirectToRoute('app_register');
-    }
-
-    $user->setIsVerified(true);
-    $user->setVerificationToken(null);
-    $user->setTokenExpiresAt(null);
-    
-    // L'administrateur doit encore activer le compte
-    $user->setIsActive(false);
-
-    $this->entityManager->flush();
-
-    // Ajoutez un log pour debug
-    error_log("✅ Utilisateur vérifié: " . $user->getEmail());
-    
-    return $this->render('security/verification_success.html.twig');
-}
-
-
-    #[Route('/connexion', name: 'app_login')]
-    public function login(AuthenticationUtils $authenticationUtils): Response
+    #[Route('/inscription', name: 'app_register')]
+    public function register(Request $request, UserPasswordHasherInterface $passwordHasher): Response
     {
         if ($this->getUser()) {
             return $this->redirectToRoute('app_dashboard');
         }
 
-        $error = $authenticationUtils->getLastAuthenticationError();
-        $lastUsername = $authenticationUtils->getLastUsername();
+        $user = new User();
+        // On passe le FormType qui définit validation_groups=['Registration']
+        $form = $this->createForm(RegistrationFormType::class, $user);
+        $form->handleRequest($request);
 
-        return $this->render('security/login.html.twig', [
-            'last_username' => $lastUsername,
-            'error' => $error,
+        if ($form->isSubmitted()) {
+
+            // 1) Rôle (mapped=false) → lire depuis le champ du formulaire
+            $roleValue = (string) ($form->get('role')->getData() ?? '');
+            $allowedRoles = [
+                RoleType::ETUDIANT->value,
+                RoleType::PSYCHOLOGUE->value,
+                RoleType::RESPONSABLE_ETUDIANT->value,
+            ];
+            if ($roleValue === '' || !in_array($roleValue, $allowedRoles, true)) {
+                $form->addError(new FormError('Veuillez sélectionner un rôle.'));
+            }
+
+            // 2) Email unique
+            $email = $form->get('email')->getData();
+            if ($email) {
+                $exists = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+                if ($exists) {
+                    $form->get('email')->addError(new FormError('Cet email est déjà utilisé.'));
+                }
+            }
+
+            // 3) Validation serveur spécifique selon rôle
+            if (in_array($roleValue, $allowedRoles, true)) {
+                switch ($roleValue) {
+                    case RoleType::ETUDIANT->value:
+                        if (empty($user->getIdentifiant())) {
+                            $form->get('identifiant')->addError(new FormError('L\'identifiant étudiant est obligatoire.'));
+                        }
+                        if (empty($user->getNomEtablissement())) {
+                            $form->get('nom_etablissement')->addError(new FormError('Le nom de l\'établissement est obligatoire.'));
+                        }
+                        break;
+
+                    case RoleType::PSYCHOLOGUE->value:
+                        if (empty($user->getSpecialite())) {
+                            $form->get('specialite')->addError(new FormError('La spécialité est obligatoire.'));
+                        }
+                        if (empty($user->getAdresse())) {
+                            $form->get('adresse')->addError(new FormError('L\'adresse est obligatoire.'));
+                        }
+                        if (empty($user->getTelephone())) {
+                            $form->get('telephone')->addError(new FormError('Le téléphone est obligatoire.'));
+                        } elseif (!preg_match('/^[0-9]{8}$/', $user->getTelephone())) { // Tunisie: 8 chiffres
+                            $form->get('telephone')->addError(new FormError('Le téléphone doit contenir 8 chiffres.'));
+                        }
+                        break;
+
+                    case RoleType::RESPONSABLE_ETUDIANT->value:
+                        if (empty($user->getPoste())) {
+                            $form->get('poste')->addError(new FormError('Le poste est obligatoire.'));
+                        }
+                        if (empty($user->getEtablissement())) {
+                            $form->get('etablissement')->addError(new FormError('L\'établissement est obligatoire.'));
+                        }
+                        break;
+                }
+            }
+
+            // 4) Si tout OK → création
+            if ($form->isValid() && \count($form->getErrors(true)) === 0) {
+                try {
+                    // Appliquer l'enum rôle à l'entité
+                    $user->setRole(RoleType::from($roleValue));
+
+                    // Mot de passe (hash) depuis plainPassword (mapped=false)
+                    $plainPassword = $form->get('plainPassword')->getData();
+                    $user->setPassword($passwordHasher->hashPassword($user, $plainPassword));
+
+                    // Profil lié
+                    $profil = new Profil();
+                    if ($roleValue === RoleType::ETUDIANT->value) {
+                        $profil->setEtablissement($user->getNomEtablissement());
+                    } elseif ($roleValue === RoleType::PSYCHOLOGUE->value) {
+                        $profil->setSpecialite($user->getSpecialite());
+                        $profil->setTel($user->getTelephone());
+                    } elseif ($roleValue === RoleType::RESPONSABLE_ETUDIANT->value) {
+                        $profil->setEtablissement($user->getEtablissement());
+                        $profil->setFonction($user->getPoste());
+                    }
+
+                    // Statuts / vérif
+                    $user->setVerificationToken(Uuid::v4()->toRfc4122());
+                    $user->setTokenExpiresAt(new \DateTime('+24 hours'));
+                    $user->setIsActive(false);
+                    $user->setIsVerified(false);
+                    $user->setStatut('en_attente');
+
+                    // Liaison
+                    $user->setProfil($profil);
+                    $profil->setUser($user);
+
+                    $this->entityManager->persist($user);
+                    $this->entityManager->persist($profil);
+                    $this->entityManager->flush();
+
+                    // Envoyer les emails
+                    $this->emailManager->sendVerificationEmail($user);
+                    $this->emailManager->notifyAdminNewPendingUser($user);
+
+                    $this->addFlash('success', 'Votre compte a été créé avec succès ! Veuillez vérifier votre email pour activer votre compte.');
+                    return $this->redirectToRoute('app_login');
+
+                } catch (\Exception $e) {
+                    $this->addFlash('error', 'Une erreur est survenue lors de l\'inscription : ' . $e->getMessage());
+                }
+            } else {
+                $this->addFlash('error', 'Veuillez corriger les erreurs dans le formulaire.');
+            }
+        }
+
+        return $this->render('security/register.html.twig', [
+            'registrationForm' => $form->createView(),
         ]);
     }
 
+
+    #[Route('/verification/{token}', name: 'app_verify_email')]
+    public function verifyEmail(string $token): Response
+    {
+        $user = $this->entityManager->getRepository(User::class)->findOneBy([
+            'verificationToken' => $token
+        ]);
+
+        if (!$user) {
+            $this->addFlash('error', 'Token de vérification invalide.');
+            return $this->redirectToRoute('app_register');
+        }
+
+        $expiresAt = $user->getTokenExpiresAt();
+        if ($expiresAt && $expiresAt < new \DateTime()) {
+            $this->addFlash('error', 'Le lien de vérification a expiré.');
+            return $this->redirectToRoute('app_register');
+        }
+
+        $user->setIsVerified(true);
+        $user->setVerificationToken(null);
+        $user->setTokenExpiresAt(null);
+        $user->setIsActive(false); // activation finale par admin si c'est votre règle
+
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Votre email a été vérifié avec succès. Votre compte sera activé par un administrateur.');
+        return $this->redirectToRoute('app_login');
+    }
+
+    #[Route('/connexion', name: 'app_login')]
+    public function login(
+        AuthenticationUtils $authenticationUtils,
+        Request $request
+    ): Response {
+        if ($this->getUser()) {
+            return $this->redirectToRoute('app_dashboard');
+        }
+
+        $error        = $authenticationUtils->getLastAuthenticationError();
+        $lastUsername = $authenticationUtils->getLastUsername();
+
+        // ── Validation PHP pure lors de la soumission ─────────────────
+        $loginErrors = [];
+
+        if ($request->isMethod('POST')) {
+            $email    = trim($request->request->get('email', ''));
+            $password = $request->request->get('password', '');
+
+            // Validation email
+            if (empty($email)) {
+                $loginErrors['email'] = 'L\'adresse email est obligatoire.';
+            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $loginErrors['email'] = 'Veuillez entrer une adresse email valide.';
+            } elseif (strlen($email) > 180) {
+                $loginErrors['email'] = 'L\'email ne peut pas dépasser 180 caractères.';
+            }
+
+            // Validation mot de passe
+            if (empty($password)) {
+                $loginErrors['password'] = 'Le mot de passe est obligatoire.';
+            } elseif (strlen($password) < 8) {
+                $loginErrors['password'] = 'Le mot de passe doit contenir au moins 8 caractères.';
+            }
+
+            // Si erreurs de validation → ne pas laisser Symfony authentifier
+            // Les erreurs sont passées au template directement
+        }
+
+        return $this->render('security/login.html.twig', [
+            'last_username' => $lastUsername,
+            'error'         => $error,
+            'login_errors'  => $loginErrors,  // ← erreurs PHP pures
+        ]);
+    }
     #[Route('/deconnexion', name: 'app_logout')]
     public function logout(): void
     {
@@ -208,212 +243,115 @@ public function verifyEmail(string $token): Response
     }
 
     #[Route('/mot-de-passe-oublie', name: 'app_forgot_password')]
-public function forgotPassword(Request $request): Response
-{
-    if ($this->getUser()) {
-        return $this->redirectToRoute('app_dashboard');
+    public function forgotPassword(Request $request): Response
+    {
+        if ($this->getUser()) {
+            return $this->redirectToRoute('app_dashboard');
+        }
+
+        $form = $this->createForm(ResetPasswordRequestFormType::class);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $email = $form->get('email')->getData();
+            $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+
+            if ($user && $user->isVerified()) {
+                $user->setResetToken(Uuid::v4()->toRfc4122());
+                $user->setResetTokenExpiresAt(new \DateTime('+24 hours'));
+                $this->entityManager->flush();
+                $this->emailManager->sendResetPasswordEmail($user);
+            }
+
+            $this->addFlash('success', 'Si votre email existe dans notre système, vous recevrez un lien de réinitialisation.');
+            return $this->redirectToRoute('app_login');
+        }
+
+        return $this->render('security/forgot_password.html.twig', [
+            'requestForm' => $form->createView(),
+        ]);
     }
 
-    $form = $this->createForm(ResetPasswordRequestFormType::class);
-    $form->handleRequest($request);
+    #[Route('/reinitialiser-mot-de-passe/{token}', name: 'app_reset_password')]
+    public function resetPassword(string $token, Request $request, UserPasswordHasherInterface $passwordHasher): Response
+    {
+        $user = $this->entityManager->getRepository(User::class)->findOneBy(['resetToken' => $token]);
+        
+        if (!$user || !$user->isResetTokenValid()) {
+            $this->addFlash('error', 'Le lien de réinitialisation est invalide ou expiré.');
+            return $this->redirectToRoute('app_forgot_password');
+        }
 
-    if ($form->isSubmitted() && $form->isValid()) {
-        $email = $form->get('email')->getData();
-        $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+        $form = $this->createForm(ChangePasswordFormType::class);
+        $form->handleRequest($request);
 
-        if ($user && $user->isVerified()) {
-            // Générer le token de réinitialisation - Utiliser DateTime
-            $user->setResetToken(Uuid::v4()->toRfc4122());
-            $user->setResetTokenExpiresAt(new \DateTime('+24 hours'));
+        if ($form->isSubmitted() && $form->isValid()) {
+            $user->setPassword(
+                $passwordHasher->hashPassword(
+                    $user,
+                    $form->get('plainPassword')->getData()
+                )
+            );
+
+            $user->setResetToken(null);
+            $user->setResetTokenExpiresAt(null);
             $this->entityManager->flush();
 
-            // Envoyer l'email de réinitialisation
-            $this->sendResetPasswordEmail($user);
-
-            $this->addFlash('success', 'Si votre email existe dans notre système, vous recevrez un lien de réinitialisation.');
-        } else {
-            // Pour la sécurité, on affiche le même message même si l'email n'existe pas
-            $this->addFlash('success', 'Si votre email existe dans notre système, vous recevrez un lien de réinitialisation.');
+            $this->addFlash('success', 'Mot de passe modifié avec succès.');
+            return $this->redirectToRoute('app_login');
         }
 
-        return $this->redirectToRoute('app_login');
+        return $this->render('security/reset_password.html.twig', [
+            'resetForm' => $form->createView(),
+        ]);
     }
-
-    return $this->render('security/forgot_password.html.twig', [
-        'requestForm' => $form->createView(),
-    ]);
-}
-    #[Route('/reinitialiser-mot-de-passe/{token}', name: 'app_reset_password')]
-public function resetPassword(string $token, Request $request, UserPasswordHasherInterface $passwordHasher): Response
-{
-    error_log("=== DÉBUT resetPassword ===");
-    error_log("Token reçu: " . $token);
-    
-    $user = $this->entityManager
-        ->getRepository(User::class)
-        ->findOneBy(['resetToken' => $token]);
-    
-    error_log("Utilisateur trouvé: " . ($user ? 'OUI - ' . $user->getEmail() : 'NON'));
-    
-    if (!$user) {
-        error_log("❌ Utilisateur non trouvé avec ce token");
-        // Essayez avec reset_token
-        $user = $this->entityManager
-            ->getRepository(User::class)
-            ->findOneBy(['reset_token' => $token]);
-            
-        error_log("Deuxième tentative: " . ($user ? 'OUI' : 'NON'));
-    }
-    
-    if (!$user || !$user->isResetTokenValid()) {
-        error_log("❌ Token invalide ou expiré");
-        $this->addFlash('error', 'Le lien de réinitialisation est invalide ou expiré.');
-        return $this->redirectToRoute('app_forgot_password');
-    }
-    
-    error_log("✅ Token valide pour: " . $user->getEmail());
-
-    $form = $this->createForm(ChangePasswordFormType::class);
-    $form->handleRequest($request);
-
-    if ($form->isSubmitted() && $form->isValid()) {
-        error_log("Formulaire soumis et valide");
-        
-        $user->setPassword(
-            $passwordHasher->hashPassword(
-                $user,
-                $form->get('plainPassword')->getData()
-            )
-        );
-
-        $user->setResetToken(null);
-        $user->setResetTokenExpiresAt(null);
-
-        $this->entityManager->flush();
-        
-        error_log("✅ Mot de passe mis à jour pour: " . $user->getEmail());
-
-        $this->addFlash('success', 'Mot de passe modifié avec succès.');
-        return $this->redirectToRoute('app_login');
-    } else {
-        if ($form->isSubmitted()) {
-            error_log("Formulaire soumis mais invalide");
-            error_log("Erreurs: " . print_r($form->getErrors(true, true), true));
-        }
-    }
-
-    error_log("Rendu du template reset_password.html.twig");
-    
-    return $this->render('security/reset_password.html.twig', [
-        'resetForm' => $form->createView(),
-    ]);
-}
-
 
     private function sendVerificationEmail(User $user): void
-{
-    try {
-        // LOG pour voir ce qui se passe
-        error_log("[EMAIL DEBUG] Tentative d'envoi d'email de vérification à: " . $user->getEmail());
-        
-        $verificationUrl = $this->urlGenerator->generate('app_verify_email', [
-            'token' => $user->getVerificationToken()
-        ], UrlGeneratorInterface::ABSOLUTE_URL);
+    {
+        try {
+            $verificationUrl = $this->urlGenerator->generate('app_verify_email', [
+                'token' => $user->getVerificationToken()
+            ], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        error_log("[EMAIL DEBUG] URL générée: " . $verificationUrl);
+            $email = (new TemplatedEmail())
+                ->from(new Address('noreply@unimind.local', 'UniMind'))
+                ->to($user->getEmail())
+                ->subject('Vérification de votre email - UniMind')
+                ->htmlTemplate('security/verification_email.html.twig')
+                ->context([
+                    'user' => $user,
+                    'verificationUrl' => $verificationUrl,
+                    'expiresAt' => $user->getTokenExpiresAt(),
+                ]);
 
-        $email = (new TemplatedEmail())
-            ->from(new Address('louatiislem74@gmail.com', 'UniMind'))
-            ->to($user->getEmail())
-            ->subject('Vérification de votre email - UniMind')
-            ->htmlTemplate('security/verification_email.html.twig')
-            ->context([
-                'user' => $user,
-                'verificationUrl' => $verificationUrl,
-                'expiresAt' => $user->getTokenExpiresAt(),
-            ]);
-
-        error_log("[EMAIL DEBUG] Email préparé, envoi en cours...");
-        
-        // Envoyer l'email
-        $this->mailer->send($email);
-        
-        error_log("[EMAIL DEBUG] ✅ Email envoyé avec succès à: " . $user->getEmail());
-        
-    } catch (\Exception $e) {
-        // LOG l'erreur complète
-        error_log("[EMAIL ERROR] Erreur d'envoi: " . $e->getMessage());
-        error_log("[EMAIL ERROR] Trace: " . $e->getTraceAsString());
-        
-        // Vous pouvez aussi logger dans un fichier
-        file_put_contents(
-            __DIR__ . '/../../var/log/email_errors.log',
-            date('Y-m-d H:i:s') . " - Erreur email vérification: " . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n\n",
-            FILE_APPEND
-        );
-        
-        // Pour le développement, lancez l'exception pour voir l'erreur
-        throw $e;
+            $this->mailer->send($email);
+        } catch (\Exception $e) {
+            // log silencieux
+        }
     }
-}
 
-private function sendResetPasswordEmail(User $user): void
-{
-    try {
-        error_log("[EMAIL DEBUG] Tentative d'envoi d'email de réinitialisation à: " . $user->getEmail());
-        
-        $resetUrl = $this->urlGenerator->generate('app_reset_password', [
-            'token' => $user->getResetToken()
-        ], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $email = (new TemplatedEmail())
-            ->from(new Address('louatiislem74@gmail.com', 'UniMind'))
-            ->to($user->getEmail())
-            ->subject('Réinitialisation de votre mot de passe - UniMind')
-            ->htmlTemplate('security/reset_password_email.html.twig')
-            ->context([
-                'user' => $user,
-                'resetUrl' => $resetUrl,
-                'expiresAt' => $user->getResetTokenExpiresAt(),
-            ]);
+    private function sendResetPasswordEmail(User $user): void
+    {
+        try {
+            $resetUrl = $this->urlGenerator->generate('app_reset_password', [
+                'token' => $user->getResetToken()
+            ], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $this->mailer->send($email);
-        
-        error_log("[EMAIL DEBUG] ✅ Email de réinitialisation envoyé à: " . $user->getEmail());
-        
-    } catch (\Exception $e) {
-        error_log("[EMAIL ERROR] Erreur réinitialisation: " . $e->getMessage());
-        error_log("[EMAIL ERROR] Trace: " . $e->getTraceAsString());
-        
-        file_put_contents(
-            __DIR__ . '/../../var/log/email_errors.log',
-            date('Y-m-d H:i:s') . " - Erreur email réinitialisation: " . $e->getMessage() . "\n" . $e->getTraceAsString() . "\n\n",
-            FILE_APPEND
-        );
-        
-        throw $e;
+            $email = (new TemplatedEmail())
+                ->from(new Address('louatiislem74@gmail.com', 'UniMind'))
+                ->to($user->getEmail())
+                ->subject('Réinitialisation de votre mot de passe - UniMind')
+                ->htmlTemplate('security/reset_password_email.html.twig')
+                ->context([
+                    'user' => $user,
+                    'resetUrl' => $resetUrl,
+                    'expiresAt' => $user->getResetTokenExpiresAt(),
+                ]);
+
+            $this->mailer->send($email);
+        } catch (\Exception $e) {
+            error_log("Erreur envoi email réinitialisation: " . $e->getMessage());
+        }
     }
-}
-#[Route('/debug-email', name: 'app_debug_email')]
-public function debugEmail(): Response
-{
-    // Créez un email de test simple
-    try {
-        $email = (new \Symfony\Component\Mime\Email())
-            ->from('louatiislem74@gmail.com')
-            ->to('louatiislem74@gmail.com')
-            ->subject('Test debug - ' . date('H:i:s'))
-            ->text('Ceci est un test depuis le debug endpoint')
-            ->html('<p>Ceci est un <strong>test</strong> depuis le debug endpoint</p>');
-
-        $this->mailer->send($email);
-        
-        return new Response('✅ Email de test envoyé avec succès !');
-        
-    } catch (\Exception $e) {
-        return new Response('❌ Erreur: ' . $e->getMessage() . '<pre>' . $e->getTraceAsString() . '</pre>');
-    }
-}
-
-
 }

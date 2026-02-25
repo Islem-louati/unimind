@@ -23,6 +23,12 @@ services:
     App\Controller\:
         resource: '../src/Controller/'
         tags: ['controller.service_arguments']
+    
+    App\Service\EmailManager:
+        arguments:
+            $mailerFrom: '%env(MAILER_FROM)%'
+            $mailerFromName: '%env(MAILER_FROM_NAME)%'
+            $adminEmail: '%env(ADMIN_EMAIL)%'
 
     
 

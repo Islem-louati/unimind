@@ -11,8 +11,12 @@
         "doctrine/doctrine-migrations-bundle": "^3.1",
         "doctrine/orm": "^3.6",
         "dompdf/dompdf": "^3.1",
+        "knplabs/knp-snappy-bundle": "^1.10",
         "phpdocumentor/reflection-docblock": "^5.2",
         "phpstan/phpdoc-parser": "^2.3",
+        "setasign/fpdf": "^1.8",
+        "setasign/fpdi": "^2.6",
+        "setasign/fpdi-tcpdf": "^2.3",
         "symfony/asset": "6.4.*",
         "symfony/asset-mapper": "6.4.*",
         "symfony/console": "6.4.*",
@@ -28,6 +32,7 @@
         "symfony/http-foundation": "6.4.*",
         "symfony/intl": "6.4.*",
         "symfony/mailer": "6.4.*",
+        "symfony/mailjet-mailer": "6.4.*",
         "symfony/mime": "6.4.*",
         "symfony/monolog-bundle": "^3.0|^4.0",
         "symfony/notifier": "6.4.*",
@@ -47,8 +52,10 @@
         "symfony/web-link": "6.4.*",
         "symfony/yaml": "6.4.*",
         "symfonycasts/verify-email-bundle": "^1.18",
+        "tecnickcom/tcpdf": "^6.10",
         "twig/extra-bundle": "^3.0",
-        "twig/twig": "^3.0"
+        "twig/twig": "^3.0",
+        "vich/uploader-bundle": "^2.9"
     },
     "config": {
         "allow-plugins": {

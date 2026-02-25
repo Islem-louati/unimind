@@ -67,7 +67,8 @@ class Traitement
     #[Assert\Range(
         min: 1,
         max: 365,
-        notInRangeMessage: 'La durée doit être comprise entre {{ min }} et {{ max }} jours'
+        notInRangeMessage: 'La durée doit être comprise entre {{ min
+}} et {{ max }} jours'
     )]
     private ?int $duree_jours = null;
 
@@ -78,12 +79,14 @@ class Traitement
     #[ORM\Column(type: 'date')]
     #[Groups(['traitement:read', 'traitement:write'])]
     #[Assert\NotBlank(message: 'La date de début est obligatoire')]
-    #[Assert\Type(\DateTimeInterface::class, message: 'La date de début doit être valide')]
+    #[Assert\Type(\DateTimeInterface::class, message: 'La date de
+début doit être valide')]
     private ?\DateTimeInterface $date_debut = null;
 
     #[ORM\Column(type: 'date', nullable: true)]
     #[Groups(['traitement:read', 'traitement:write'])]
-    #[Assert\Type(\DateTimeInterface::class, message: 'La date de fin doit être valide')]
+    #[Assert\Type(\DateTimeInterface::class, message: 'La date de fin
+doit être valide')]
     #[Assert\Expression(
         "this.getDateFin() == null or this.getDateFin() >= this.getDateDebut()",
         message: 'La date de fin doit être postérieure à la date de début'
@@ -106,8 +109,10 @@ class Traitement
     #[Assert\Length(
         min: 10,
         max: 1000,
-        minMessage: 'L\'objectif thérapeutique doit faire au moins {{ limit }} caractères',
-        maxMessage: 'L\'objectif thérapeutique ne peut pas dépasser {{ limit }} caractères'
+        minMessage: 'L\'objectif thérapeutique doit faire au moins {{
+limit }} caractères',
+        maxMessage: 'L\'objectif thérapeutique ne peut pas dépasser {{
+limit }} caractères'
     )]
     private ?string $objectif_therapeutique = null;
 
@@ -119,17 +124,23 @@ class Traitement
     #[Groups(['traitement:read'])]
     private ?\DateTimeInterface $updated_at = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'traitementsPsychologue')]
-    #[ORM\JoinColumn(name: 'psychologue_id', referencedColumnName: 'user_id', nullable: false)]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy:
+'traitementsPsychologue')]
+    #[ORM\JoinColumn(name: 'psychologue_id', referencedColumnName:
+'user_id', nullable: false)]
     #[Groups(['traitement:read', 'traitement:detail'])]
     private ?User $psychologue = null;
 
-    #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'traitementsEtudiant')]
-    #[ORM\JoinColumn(name: 'etudiant_id', referencedColumnName: 'user_id', nullable: false)]
+    #[ORM\ManyToOne(targetEntity: User::class, inversedBy:
+'traitementsEtudiant')]
+    #[ORM\JoinColumn(name: 'etudiant_id', referencedColumnName:
+'user_id', nullable: false)]
     #[Groups(['traitement:read', 'traitement:write', 'traitement:detail'])]
     private ?User $etudiant = null;
 
-    #[ORM\OneToMany(mappedBy: 'traitement', targetEntity: SuiviTraitement::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'traitement', targetEntity:
+SuiviTraitement::class, cascade: ['persist', 'remove'], orphanRemoval:
+true)]
     #[Groups(['traitement:detail'])]
     private Collection $suivis;
 
@@ -195,7 +206,8 @@ class Traitement
     public function setCategorie(string $categorie): self
     {
         if (!in_array($categorie, CategorieTraitement::getValues(), true)) {
-            throw new \InvalidArgumentException('Catégorie de traitement invalide');
+            throw new \InvalidArgumentException('Catégorie de
+traitement invalide');
         }
         $this->categorie = $categorie;
         return $this;
@@ -264,7 +276,8 @@ class Traitement
     public function setStatut(string $statut): self
     {
         if (!in_array($statut, StatutTraitement::getValues(), true)) {
-            throw new \InvalidArgumentException('Statut de traitement invalide');
+            throw new \InvalidArgumentException('Statut de traitement
+invalide');
         }
         $this->statut = $statut;
         return $this;
@@ -289,7 +302,8 @@ class Traitement
     public function setPriorite(string $priorite): self
     {
         if (!in_array($priorite, PrioriteTraitement::getValues(), true)) {
-            throw new \InvalidArgumentException('Priorité de traitement invalide');
+            throw new \InvalidArgumentException('Priorité de
+traitement invalide');
         }
         $this->priorite = $priorite;
         return $this;
@@ -311,7 +325,8 @@ class Traitement
         return $this->objectif_therapeutique;
     }
 
-    public function setObjectifTherapeutique(string $objectif_therapeutique): self
+    public function setObjectifTherapeutique(string
+$objectif_therapeutique): self
     {
         $this->objectif_therapeutique = $objectif_therapeutique;
         return $this;
@@ -348,7 +363,8 @@ class Traitement
     {
         // Vérifier que l'utilisateur est bien un psychologue
         if ($psychologue && !$psychologue->isPsychologue()) {
-            throw new \InvalidArgumentException('L\'utilisateur doit être un psychologue');
+            throw new \InvalidArgumentException('L\'utilisateur doit
+être un psychologue');
         }
 
         $this->psychologue = $psychologue;
@@ -374,8 +390,9 @@ class Traitement
             'roles' => $etudiant->getRoles(),
             'isEtudiant_method' => $etudiant->isEtudiant(),
         ]);
-        
-        throw new \InvalidArgumentException('L\'utilisateur doit être un étudiant. Role actuel: ' . $etudiant->getRole()->value);
+
+        throw new \InvalidArgumentException('L\'utilisateur doit être
+un étudiant. Role actuel: ' . $etudiant->getRole()->value);
     }
 
     $this->etudiant = $etudiant;
@@ -413,7 +430,8 @@ class Traitement
     // Méthodes utilitaires
     public function __toString(): string
     {
-        return sprintf('%s - %s', $this->titre, $this->etudiant ? $this->etudiant->getFullName() : 'N/A');
+        return sprintf('%s - %s', $this->titre, $this->etudiant ?
+$this->etudiant->getFullName() : 'N/A');
     }
 
     #[ORM\PreUpdate]
@@ -553,7 +571,8 @@ class Traitement
                 "Date fin estimée: %s",
             $this->titre,
             $this->etudiant ? $this->etudiant->getFullName() : 'Non défini',
-            $this->psychologue ? $this->psychologue->getFullName() : 'Non défini',
+            $this->psychologue ? $this->psychologue->getFullName() :
+'Non défini',
             $this->getCategorieLabel(),
             $this->getStatutLabel(),
             $this->getPrioriteLabel(),

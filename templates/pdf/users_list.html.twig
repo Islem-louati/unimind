@@ -1,0 +1,63 @@
+{% extends 'pdf/base.html.twig' %}
+
+{% block document_title %}Liste des utilisateurs{% endblock %}
+{% block document_subtitle %}Export au {{ 'now'|date('d/m/Y') }}{% endblock %}
+
+{% block content %}
+<h2>Liste complète des utilisateurs ({{ users|length }})</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nom & Prénom</th>
+            <th>Email</th>
+            <th>CIN</th>
+            <th>Rôle</th>
+            <th>Statut</th>
+            <th>Inscription</th>
+            <th>Actif</th>
+            <th>Vérifié</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.userId }}</td>
+            <td>{{ user.prenom }} {{ user.nom }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.cin ?? '-' }}</td>
+            <td>
+                {% if user.role.value == 'Etudiant' %}
+                    <span class="badge badge-info">Étudiant</span>
+                {% elseif user.role.value == 'Psychologue' %}
+                    <span class="badge badge-warning">Psychologue</span>
+                {% elseif user.role.value == 'Responsable Etudiant' %}
+                    <span class="badge badge-success">Responsable</span>
+                {% else %}
+                    <span class="badge badge-secondary">{{ user.role.value }}</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if user.statut == 'actif' %}
+                    <span class="badge badge-success">Actif</span>
+                {% elseif user.statut == 'en_attente' %}
+                    <span class="badge badge-warning">En attente</span>
+                {% elseif user.statut == 'inactif' %}
+                    <span class="badge badge-danger">Inactif</span>
+                {% else %}
+                    <span class="badge badge-secondary">{{ user.statut }}</span>
+                {% endif %}
+            </td>
+            <td>{{ user.createdAt|date('d/m/Y') }}</td>
+            <td>{{ user.isActive ? 'Oui' : 'Non' }}</td>
+            <td>{{ user.isVerified ? 'Oui' : 'Non' }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<p style="text-align: right; margin-top: 20px;">
+    <strong>Total :</strong> {{ users|length }} utilisateur(s)
+</p>
+{% endblock %}

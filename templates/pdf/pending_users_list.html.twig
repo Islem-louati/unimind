@@ -1,0 +1,43 @@
+{% extends 'pdf/base.html.twig' %}
+
+{% block document_title %}Inscriptions en attente de validation{% endblock %}
+{% block document_subtitle %}Export au {{ 'now'|date('d/m/Y') }}{% endblock %}
+
+{% block content %}
+<h2>Liste des utilisateurs en attente ({{ users|length }})</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nom & Prénom</th>
+            <th>Email</th>
+            <th>CIN</th>
+            <th>Rôle</th>
+            <th>Date d'inscription</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.userId }}</td>
+            <td>{{ user.prenom }} {{ user.nom }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.cin ?? '-' }}</td>
+            <td>
+                {% if user.role.value == 'Etudiant' %}
+                    <span class="badge badge-info">Étudiant</span>
+                {% elseif user.role.value == 'Psychologue' %}
+                    <span class="badge badge-warning">Psychologue</span>
+                {% elseif user.role.value == 'Responsable Etudiant' %}
+                    <span class="badge badge-success">Responsable</span>
+                {% else %}
+                    <span class="badge badge-secondary">{{ user.role.value }}</span>
+                {% endif %}
+            </td>
+            <td>{{ user.createdAt|date('d/m/Y H:i') }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

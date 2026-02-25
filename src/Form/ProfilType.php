@@ -1,4 +1,5 @@
 <?php
+// src/Form/ProfilType.php
 
 namespace App\Form;
 
@@ -10,7 +11,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Vich\UploaderBundle\Form\Type\VichImageType; // ← Ajout
 
 class ProfilType extends AbstractType
 {
@@ -33,10 +34,15 @@ class ProfilType extends AbstractType
                 'required' => false,
                 'attr' => ['class' => 'form-control']
             ])
-            ->add('photo', FileType::class, [
+            // ↓ Remplacement de l'ancien champ 'photo' par 'photoFile'
+            ->add('photoFile', VichImageType::class, [
                 'label' => 'Photo de profil',
-                'mapped' => false,
                 'required' => false,
+                'allow_delete' => true,          // Affiche une case à cocher pour supprimer l'image
+                'delete_label' => 'Supprimer la photo',
+                'download_uri' => true,          // Affiche un lien pour télécharger l'image
+                'image_uri' => true,              // Affiche un aperçu de l'image
+                'asset_helper' => true,           // Utilise le helper asset pour générer l'URL
                 'attr' => ['class' => 'form-control']
             ])
             ->add('bio', TextareaType::class, [
@@ -101,7 +107,7 @@ class ProfilType extends AbstractType
     {
         $resolver->setDefaults([
             'data_class' => Profil::class,
-            'role' => null, // Accepter l'option 'role'
+            'role' => null,
         ]);
     }
 }

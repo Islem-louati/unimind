@@ -4,27 +4,23 @@
 
 {% block unauthenticated_body %}
 
-
 <section>
     <div class="page-header min-vh-100">
         <div class="container">
             <div class="row">
                 <div class="col-xl-4 col-lg-5 col-md-7 d-flex flex-column mx-lg-0 mx-auto">
                     <div class="card card-plain">
+
+                        {# ── EN-TÊTE ──────────────────────────────────── #}
                         <div class="card-header pb-0 text-start">
                             <h4 class="font-weight-bolder">Connexion à UniMind</h4>
                             <p class="mb-0">Entrez votre email et mot de passe pour accéder à votre compte</p>
                         </div>
-                        
-                        {% if error %}
-                            <div class="alert alert-danger alert-dismissible fade show mx-4 mt-3" role="alert">
-                                {{ error.messageKey|trans(error.messageData, 'security') }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                            </div>
-                        {% endif %}
 
+                        {# ── MESSAGES FLASH ───────────────────────────── #}
                         {% for flash_error in app.flashes('error') %}
                             <div class="alert alert-danger alert-dismissible fade show mx-4 mt-3" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
                                 {{ flash_error }}
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
@@ -32,75 +28,251 @@
 
                         {% for flash_success in app.flashes('success') %}
                             <div class="alert alert-success alert-dismissible fade show mx-4 mt-3" role="alert">
+                                <i class="bi bi-check-circle-fill me-2"></i>
                                 {{ flash_success }}
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                         {% endfor %}
-                        
+
+                        {# ── ERREUR SYMFONY (mauvais identifiants) ─────── #}
+                        {% if error %}
+                            <div class="alert alert-danger alert-dismissible fade show mx-4 mt-3" role="alert">
+                                <i class="bi bi-shield-exclamation me-2"></i>
+                                Email ou mot de passe incorrect. Veuillez réessayer.
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endif %}
+
                         <div class="card-body">
-                            <form method="post" class="user" role="form">
+                            <form method="post" action="{{ path('app_login') }}" novalidate>
+
+                                {# ── CHAMP EMAIL ──────────────────────── #}
                                 <div class="mb-3">
-                                    <input type="email" name="email" id="inputEmail" 
-                                           class="form-control form-control-lg {{ error ? 'is-invalid' : '' }}"
-                                           value="{{ last_username }}" 
-                                           placeholder="Adresse email" 
-                                           aria-label="Email" required autofocus>
-                                    {% if error %}
-                                        <div class="invalid-feedback">
-                                            Email ou mot de passe incorrect
+                                    <label for="inputEmail" class="form-label text-sm">
+                                        Adresse email
+                                    </label>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        id="inputEmail"
+                                        class="form-control form-control-lg {% if login_errors.email is defined or error %}is-invalid{% endif %}"
+                                        value="{{ last_username }}"
+                                        placeholder="votre@email.com"
+                                        autocomplete="email"
+                                        required
+                                        autofocus
+                                    >
+                                    {# Erreur PHP validation email #}
+                                    {% if login_errors.email is defined %}
+                                        <div class="invalid-feedback d-flex align-items-center gap-1">
+                                            <i class="bi bi-exclamation-circle-fill"></i>
+                                            {{ login_errors.email }}
+                                        </div>
+                                    {% elseif error %}
+                                        <div class="invalid-feedback d-flex align-items-center gap-1">
+                                            <i class="bi bi-exclamation-circle-fill"></i>
+                                            Email ou mot de passe incorrect.
                                         </div>
                                     {% endif %}
                                 </div>
+
+                                {# ── CHAMP MOT DE PASSE ───────────────── #}
                                 <div class="mb-3">
-                                    <input type="password" name="password" id="inputPassword" 
-                                           class="form-control form-control-lg {{ error ? 'is-invalid' : '' }}"
-                                           placeholder="Mot de passe" 
-                                           aria-label="Password" required>
-                                    {% if error %}
-                                        <div class="invalid-feedback">
-                                            Email ou mot de passe incorrect
-                                        </div>
-                                    {% endif %}
+                                    <label for="inputPassword" class="form-label text-sm">
+                                        Mot de passe
+                                    </label>
+                                    <div class="input-group">
+                                        <input
+                                            type="password"
+                                            name="password"
+                                            id="inputPassword"
+                                            class="form-control form-control-lg {% if login_errors.password is defined or error %}is-invalid{% endif %}"
+                                            placeholder="Votre mot de passe"
+                                            autocomplete="current-password"
+                                            required
+                                        >
+                                        {# Bouton afficher/masquer mot de passe #}
+                                        <button
+                                            class="btn btn-outline-secondary"
+                                            type="button"
+                                            id="togglePassword"
+                                            title="Afficher/masquer le mot de passe"
+                                        >
+                                            <i class="bi bi-eye" id="toggleIcon"></i>
+                                        </button>
+
+                                        {# Erreur PHP validation mot de passe #}
+                                        {% if login_errors.password is defined %}
+                                            <div class="invalid-feedback d-flex align-items-center gap-1">
+                                                <i class="bi bi-exclamation-circle-fill"></i>
+                                                {{ login_errors.password }}
+                                            </div>
+                                        {% elseif error %}
+                                            <div class="invalid-feedback d-flex align-items-center gap-1">
+                                                <i class="bi bi-exclamation-circle-fill"></i>
+                                                Email ou mot de passe incorrect.
+                                            </div>
+                                        {% endif %}
+                                    </div>
                                 </div>
-                                <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="rememberMe" name="_remember_me">
-                                    <label class="form-check-label" for="rememberMe">Se souvenir de moi</label>
+
+                                {# ── SE SOUVENIR DE MOI ───────────────── #}
+                                <div class="form-check form-switch mb-3">
+                                    <input
+                                        class="form-check-input"
+                                        type="checkbox"
+                                        id="rememberMe"
+                                        name="_remember_me"
+                                    >
+                                    <label class="form-check-label text-sm" for="rememberMe">
+                                        Se souvenir de moi
+                                    </label>
                                 </div>
+
+                                {# ── CSRF TOKEN ───────────────────────── #}
                                 <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-                                
+
+                                {# ── BOUTON CONNEXION ─────────────────── #}
                                 <div class="text-center">
-                                    <button type="submit" class="btn btn-lg btn-primary btn-lg w-100 mt-4 mb-0">
+                                    <button type="submit" class="btn btn-lg btn-primary w-100 mt-2 mb-0">
+                                        <i class="bi bi-box-arrow-in-right me-2"></i>
                                         Se connecter
                                     </button>
                                 </div>
+
                             </form>
                         </div>
+
+                        {# ── PIED DE CARTE ────────────────────────────── #}
                         <div class="card-footer text-center pt-0 px-lg-2 px-1">
-                            <p class="mb-4 text-sm mx-auto">
+                            <p class="mb-2 text-sm mx-auto">
                                 Mot de passe oublié ?
                                 <a href="{{ path('app_forgot_password') }}" class="text-primary text-gradient font-weight-bold">
                                     Réinitialiser
                                 </a>
                             </p>
-                            <p class="mb-4 text-sm mx-auto">
-                                Vous n'avez pas de compte ?
+                            <p class="mb-3 text-sm mx-auto">
+                                Pas encore de compte ?
                                 <a href="{{ path('app_register') }}" class="text-primary text-gradient font-weight-bold">
                                     Créer un compte
                                 </a>
                             </p>
+                            <hr class="horizontal dark my-2">
+                            <a href="{{ path('app_face_login') }}" class="btn btn-outline-primary btn-sm w-100">
+                                <i class="bi bi-camera-video me-2"></i>
+                                Connexion par reconnaissance faciale
+                            </a>
                         </div>
+
                     </div>
                 </div>
+
+                {# ── COLONNE DROITE (image) ───────────────────────────── #}
                 <div class="col-6 d-lg-flex d-none h-100 my-auto pe-0 position-absolute top-0 end-0 text-center justify-content-center flex-column">
-                    <div class="position-relative bg-gradient-primary h-100 m-3 px-7 border-radius-lg d-flex flex-column justify-content-center overflow-hidden" style="background-image: url('https://images.unsplash.com/photo-1559757175-0eb30cd8c063?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1600&q=80');
-                        background-size: cover;">
+                    <div class="position-relative bg-gradient-primary h-100 m-3 px-7 border-radius-lg d-flex flex-column justify-content-center overflow-hidden"
+                         style="background-image: url('https://images.unsplash.com/photo-1559757175-0eb30cd8c063?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80'); background-size: cover;">
                         <span class="mask bg-gradient-primary opacity-6"></span>
-                        <h4 class="mt-5 text-white font-weight-bolder position-relative">"La santé mentale n'est pas une destination, mais un voyage"</h4>
-                        <p class="text-white position-relative">Prendre soin de son bien-être mental est essentiel pour une vie équilibrée et épanouissante.</p>
+                        <h4 class="mt-5 text-white font-weight-bolder position-relative">
+                            "La santé mentale n'est pas une destination, mais un voyage"
+                        </h4>
+                        <p class="text-white position-relative">
+                            Prendre soin de son bien-être mental est essentiel pour une vie équilibrée et épanouissante.
+                        </p>
                     </div>
                 </div>
+
             </div>
         </div>
     </div>
 </section>
+
+{# ── JAVASCRIPT ───────────────────────────────────────────────────────────── #}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // ── Afficher/masquer mot de passe ─────────────────────────────────────
+    const toggleBtn  = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('inputPassword');
+    const toggleIcon = document.getElementById('toggleIcon');
+
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', function () {
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+            toggleIcon.className = isPassword ? 'bi bi-eye-slash' : 'bi bi-eye';
+        });
+    }
+
+    // ── Masquer les alertes automatiquement après 6 secondes ─────────────
+    setTimeout(function () {
+        document.querySelectorAll('.alert').forEach(function (alert) {
+            if (typeof bootstrap !== 'undefined') {
+                new bootstrap.Alert(alert).close();
+            }
+        });
+    }, 6000);
+
+    // ── Validation côté client (en plus de PHP) ───────────────────────────
+    const form       = document.querySelector('form');
+    const emailInput = document.getElementById('inputEmail');
+
+    form.addEventListener('submit', function (e) {
+        let valid = true;
+
+        // Vider les erreurs précédentes
+        [emailInput, passwordInput].forEach(function (input) {
+            input.classList.remove('is-invalid');
+        });
+
+        // Valider email
+        const emailVal = emailInput.value.trim();
+        if (!emailVal) {
+            emailInput.classList.add('is-invalid');
+            setClientError(emailInput, 'L\'adresse email est obligatoire.');
+            valid = false;
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+            emailInput.classList.add('is-invalid');
+            setClientError(emailInput, 'Veuillez entrer une adresse email valide.');
+            valid = false;
+        }
+
+        // Valider mot de passe
+        const passVal = passwordInput.value;
+        if (!passVal) {
+            passwordInput.classList.add('is-invalid');
+            setClientError(passwordInput, 'Le mot de passe est obligatoire.');
+            valid = false;
+        } else if (passVal.length < 8) {
+            passwordInput.classList.add('is-invalid');
+            setClientError(passwordInput, 'Le mot de passe doit contenir au moins 8 caractères.');
+            valid = false;
+        }
+
+        if (!valid) {
+            e.preventDefault();
+        }
+    });
+
+    // Ajoute ou met à jour le message d'erreur sous un champ
+    function setClientError(input, message) {
+        let feedback = input.parentElement.querySelector('.invalid-feedback');
+        if (!feedback) {
+            feedback = document.createElement('div');
+            feedback.className = 'invalid-feedback d-flex align-items-center gap-1';
+            input.parentElement.appendChild(feedback);
+        }
+        feedback.innerHTML = '<i class="bi bi-exclamation-circle-fill"></i> ' + message;
+    }
+
+    // Effacer l'erreur quand l'utilisateur tape
+    emailInput.addEventListener('input', function () {
+        this.classList.remove('is-invalid');
+    });
+    passwordInput.addEventListener('input', function () {
+        this.classList.remove('is-invalid');
+    });
+
+});
+</script>
+
 {% endblock %}

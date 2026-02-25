@@ -19,7 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use App\Service\ExportService;
-
+use App\Service\ExportPdfService;
 #[IsGranted('ROLE_ADMIN')]
 #[Route('/admin')]
 class AdminController extends AbstractController
@@ -470,17 +470,38 @@ class AdminController extends AbstractController
         return $exportService->exportToExcel($users);
     }
 
-    #[Route('/utilisateurs/export/pdf', name: 'admin_users_export_pdf')]
-    public function exportPdf(
-        EntityManagerInterface $entityManager,
-        ExportService $exportService,
-        Request $request
-    ): Response {
-        // Récupérer tous les utilisateurs
+     #[Route('/utilisateurs/export/pdf', name: 'users_export_pdf')]  // Résulte en admin_users_export_pdf
+    #[IsGranted('ROLE_ADMIN')]
+    public function exportUsersPdf(EntityManagerInterface $entityManager, ExportPdfService $pdfService): Response
+    {
         $users = $entityManager->getRepository(User::class)->findAll();
+        $pdfContent = $pdfService->generateEditableUsersPdf($users);
         
-        return $exportService->exportToPdf($users);
+        return new Response($pdfContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="utilisateurs_' . date('Y-m-d') . '.pdf"',
+        ]);
     }
+
+    #[Route('/utilisateurs/demandes/export/pdf', name: 'pending_users_export_pdf')]
+#[IsGranted('ROLE_ADMIN')]
+public function exportPendingUsersPdf(
+    EntityManagerInterface $entityManager,
+    ExportPdfService $pdfService
+): Response {
+    $users = $entityManager->getRepository(User::class)->findBy(
+        ['statut' => 'en_attente'],
+        ['createdAt' => 'DESC']
+    );
+
+    $pdfContent = $pdfService->generateEditableUsersPdf($users);
+
+    return new Response($pdfContent, 200, [
+        'Content-Type'        => 'application/pdf',
+        'Content-Disposition' => 'attachment; filename="inscriptions_attente_editables_' . date('Y-m-d') . '.pdf"',
+    ]);
+}
+
 
     #[Route('/utilisateurs/export/csv', name: 'admin_users_export_csv')]
     public function exportCsv(

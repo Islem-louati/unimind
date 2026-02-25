@@ -1,3 +1,6 @@
+controllers:
+    resource: ../src/Controller/
+    type: annotation
 
 app_login:
     path: /connexion
@@ -33,10 +36,12 @@ app_profile:
 app_profile_edit:
     path: /profil/modifier
     controller: App\Controller\ProfileController::edit
+
 app_change_password:
     path: /profil/changer-mot-de-passe
     controller: App\Controller\ProfileController::changePassword
     methods: [GET, POST]
+
 app_profile_photo:
     path: /profil/photo
     controller: App\Controller\ProfileController::updatePhoto
@@ -85,23 +90,16 @@ admin_delete_user:
 admin_view_profile:
     path: /admin/utilisateurs/{id}/profil
     controller: App\Controller\AdminController::viewProfile
+
 admin_user_new:
     path: /admin/utilisateurs/nouveau
     controller: App\Controller\AdminController::newUser
     methods: [GET, POST]
+
 admin_statistics:
     path: /admin/statistiques
     controller: App\Controller\AdminController::statistics
 
-etudiant_dashboard:
-    path: /dashboard/etudiant
-    controller: App\Controller\DashboardController::etudiantDashboard
-
-
-
-resp_dashboard:
-    path: /dashboard/responsable
-    controller: App\Controller\DashboardController::responsableDashboard
 admin_users_export_excel:
     path: /admin/utilisateurs/export/excel
     controller: App\Controller\AdminController::exportExcel
@@ -117,9 +115,18 @@ admin_users_export_csv:
     controller: App\Controller\AdminController::exportCsv
     methods: GET
 
+etudiant_dashboard:
+    path: /dashboard/etudiant
+    controller: App\Controller\DashboardController::etudiantDashboard
+
+resp_dashboard:
+    path: /dashboard/responsable
+    controller: App\Controller\DashboardController::responsableDashboard
+
 app_dashboard_psy:
     path: /dashboard/psychologue
     controller: App\Controller\DashboardController::psychologueDashboard
+
 app_traitement_index:
     path: /traitements
     controller: App\Controller\TraitementController::index
@@ -140,123 +147,8 @@ app_traitement_delete:
     path: /traitements/{id}/supprimer
     controller: App\Controller\TraitementController::delete
     methods: POST
-# Treatment follow-up routes
-app_suivi_traitement_index:
-    path: /suivi-traitements
-    controller: App\Controller\SuiviTraitementController::index
-
-app_suivi_traitement_new:
-    path: /suivi-traitements/nouveau
-    controller: App\Controller\SuiviTraitementController::new
-
-app_suivi_traitement_show:
-    path: /suivi-traitements/{id}
-    controller: App\Controller\SuiviTraitementController::show
-
-app_suivi_traitement_edit:
-    path: /suivi-traitements/{id}/modifier
-    controller: App\Controller\SuiviTraitementController::edit
-
-app_suivi_traitement_delete:
-    path: /suivi-traitements/{id}/supprimer
-    controller: App\Controller\SuiviTraitementController::delete
-    methods: POST
-
-app_suivi_traitement_a_valider:
-    path: /suivi-traitements/a-valider
-    controller: App\Controller\SuiviTraitementController::aValider
-
-app_suivi_traitement_valider:
-    path: /suivi-traitements/{id}/valider
-    controller: App\Controller\SuiviTraitementController::valider
-    methods: POST
-app_suivi_traitement_select_traitement:
-    path: /suivi-traitements/selectionner-traitement
-    controller: App\Controller\SuiviTraitementController::selectTraitement
-    methods: [GET, POST]
-
-
-
-admin_stats:
-    path: /admin/stats
-    controller: App\Controller\Admin\DashboardController::stats
-    methods: GET
-
-# Questionnaire Admin CRUD
-admin_questionnaire_index:
-    path: /admin/questionnaire
-    controller: App\Controller\Admin\QuestionnaireController::index
-    methods: GET
-
-admin_questionnaire_new:
-    path: /admin/questionnaire/new
-    controller: App\Controller\Admin\QuestionnaireController::new
-    methods: [GET, POST]
-
-admin_questionnaire_show:
-    path: /admin/questionnaire/{id}
-    controller: App\Controller\Admin\QuestionnaireController::show
-    methods: GET
-    requirements:
-        id: '\d+'
-
-admin_questionnaire_edit:
-    path: /admin/questionnaire/{id}/edit
-    controller: App\Controller\Admin\QuestionnaireController::edit
-    methods: [GET, POST]
-    requirements:
-        id: '\d+'
-
-admin_questionnaire_delete:
-    path: /admin/questionnaire/{id}
-    controller: App\Controller\Admin\QuestionnaireController::delete
-    methods: POST
-    requirements:
-        id: '\d+'
-
-admin_questionnaire_questions:
-    path: /admin/questionnaire/{id}/questions
-    controller: App\Controller\Admin\QuestionnaireController::questions
-    methods: GET
-    requirements:
-        id: '\d+'
-
-# Question Admin CRUD (si vous avez QuestionController.php)
-admin_question_index:
-    path: /admin/question
-    controller: App\Controller\Admin\QuestionController::index
-    methods: GET
-
-admin_question_new:
-    path: /admin/question/new
-    controller: App\Controller\Admin\QuestionController::new
-    methods: [GET, POST]
-
-admin_question_show:
-    path: /admin/question/{id}
-    controller: App\Controller\Admin\QuestionController::show
-    methods: GET
-    requirements:
-        id: '\d+'
-
-admin_question_edit:
-    path: /admin/question/{id}/edit
-    controller: App\Controller\Admin\QuestionController::edit
-    methods: [GET, POST]
-    requirements:
-        id: '\d+'
-
-admin_question_delete:
-    path: /admin/question/{id}
-    controller: App\Controller\Admin\QuestionController::delete
-    methods: POST
-    requirements:
-        id: '\d+'
 
 # ==================== ÉTUDIANT ====================
-
-# Dashboard Étudiant
-
 
 etudiant_profil:
     path: /etudiant/profil
@@ -323,14 +215,13 @@ etudiant_mes_reponses_simuler:
         questionnaireId: '\d+'
 
 # ==================== API/JSON ====================
-# (Si vous avez des routes API)
-
 etudiant_questionnaire_submit_json:
     path: /etudiant/questionnaire/submit/{id}/json
     controller: App\Controller\Etudiant\QuestionnaireController::submitQuestionnaire
     methods: POST
     requirements:
         id: '\d+'
+
 #stat
 # ==================== STATISTIQUES GLOBALES ====================
 admin_global_stats:

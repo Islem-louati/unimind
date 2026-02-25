@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}UniMind - Document{% endblock %}</title>
+    <style>
+        @page {
+            margin: 0;
+            padding: 0;
+            size: A4 landscape;
+        }
+        body {
+            font-family: 'DejaVu Sans', Arial, sans-serif;
+            font-size: 10pt;
+            line-height: 1.4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .page {
+            padding: 20px;
+        }
+        .header {
+            border-bottom: 2px solid #5e72e4;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        .header .logo {
+            float: left;
+            width: 80px;
+            height: 80px;
+            background: #f0f0f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #5e72e4;
+            font-size: 14pt;
+        }
+        .header .title {
+            float: left;
+            margin-left: 20px;
+            padding-top: 15px;
+        }
+        .header .title h1 {
+            margin: 0;
+            font-size: 20pt;
+            color: #5e72e4;
+        }
+        .header .title p {
+            margin: 5px 0 0;
+            font-size: 10pt;
+            color: #666;
+        }
+        .header .date {
+            float: right;
+            text-align: right;
+            padding-top: 20px;
+            color: #666;
+        }
+        .footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50px;
+            border-top: 1px solid #ddd;
+            padding: 10px 20px;
+            font-size: 8pt;
+            color: #999;
+            text-align: center;
+        }
+        .footer .signature {
+            float: left;
+        }
+        .footer .page-number {
+            float: right;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th {
+            background: #5e72e4;
+            color: white;
+            font-weight: bold;
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #5e72e4;
+        }
+        td {
+            padding: 6px;
+            border: 1px solid #ddd;
+        }
+        tr:nth-child(even) {
+            background: #f8f9fc;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 8pt;
+            color: white;
+        }
+        .badge-success { background: #2dce89; }
+        .badge-warning { background: #fb6340; }
+        .badge-danger { background: #f5365c; }
+        .badge-info { background: #11cdef; }
+        .badge-secondary { background: #8898aa; }
+    </style>
+    {% block stylesheets %}{% endblock %}
+</head>
+<body>
+    <div class="page">
+        <div class="header">
+            <div class="logo">
+                <!-- Si vous avez un vrai logo, utilisez <img src="{{ asset('assets/img/unimind.png') }}" width="80"> -->
+                <span>UniMind</span>
+            </div>
+            <div class="title">
+                <h1>{% block document_title %}UniMind{% endblock %}</h1>
+                <p>{% block document_subtitle %}Plateforme de soutien psychologique universitaire{% endblock %}</p>
+            </div>
+            <div class="date">
+                Généré le {{ 'now'|date('d/m/Y H:i') }}<br>
+                Par {{ app.user.prenom }} {{ app.user.nom }}
+            </div>
+        </div>
+
+        {% block content %}{% endblock %}
+
+        <div class="footer">
+            <div class="signature">
+                Signature numérique : Document généré automatiquement
+            </div>
+            <div class="page-number">
+                Page <span class="page-count"></span> / <span class="total-pages"></span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

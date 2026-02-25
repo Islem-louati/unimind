@@ -25,7 +25,8 @@ class SuiviTraitement
     private ?int $suivitraitement_id = null;
 
     #[ORM\ManyToOne(targetEntity: Traitement::class, inversedBy: 'suivis')]
-    #[ORM\JoinColumn(name: 'Traitement_id', referencedColumnName: 'traitement_id', nullable: false)]
+    #[ORM\JoinColumn(name: 'Traitement_id', referencedColumnName:
+'traitement_id', nullable: false)]
     #[Groups(['suivi:read', 'suivi:write', 'suivi:detail'])]
     #[Assert\NotBlank(message: 'Le traitement est obligatoire')]
     private ?Traitement $traitement = null;
@@ -33,16 +34,19 @@ class SuiviTraitement
     #[ORM\Column(name: 'dateSuivi', type: 'date')]
     #[Groups(['suivi:read', 'suivi:write'])]
     #[Assert\NotBlank(message: 'La date du suivi est obligatoire')]
-    #[Assert\Type(\DateTimeInterface::class, message: 'La date du suivi doit être valide')]
+    #[Assert\Type(\DateTimeInterface::class, message: 'La date du
+suivi doit être valide')]
     private ?\DateTimeInterface $dateSuivi = null;
 
     #[ORM\Column(name: 'dateSaisie', type: 'datetime')]
     #[Groups(['suivi:read'])]
     private ?\DateTimeInterface $dateSaisie = null;
 
-    #[ORM\Column(name: 'effectue', type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'effectue', type: 'boolean', options:
+['default' => false])]
     #[Groups(['suivi:read', 'suivi:write'])]
-    #[Assert\NotBlank(message: 'Le statut d\'exécution du suivi est obligatoire')]
+    #[Assert\NotBlank(message: 'Le statut d\'exécution du suivi est
+obligatoire')]
     private ?bool $effectue = null;
 
     #[ORM\Column(name: 'heurePrevue', type: 'time', nullable: true)]
@@ -53,25 +57,29 @@ class SuiviTraitement
     #[Groups(['suivi:read', 'suivi:write'])]
     private ?\DateTimeInterface $heureEffective = null;
 
-    #[ORM\Column(name: 'observations', type: 'text', length: 1000, nullable: true)]
+    #[ORM\Column(name: 'observations', type: 'text', length: 1000,
+nullable: true)]
     #[Groups(['suivi:read', 'suivi:write'])]
-    #[Assert\NotBlank(message: 'Les observations sont obligatoires')]
     #[Assert\Length(
         min: 10,
         max: 1000,
-        minMessage: 'Les observations doivent faire au moins {{ limit }} caractères',
-        maxMessage: 'Les observations ne peuvent pas dépasser {{ limit }} caractères'
+        minMessage: 'Les observations doivent faire au moins {{ limit
+}} caractères',
+        maxMessage: 'Les observations ne peuvent pas dépasser {{ limit
+}} caractères'
     )]
     private ?string $observations = null;
 
-    #[ORM\Column(name: 'observationsPsy', type: 'text', length: 1000, nullable: true)]
+    #[ORM\Column(name: 'observationsPsy', type: 'text', length: 1000,
+nullable: true)]
     #[Groups(['suivi:read', 'suivi:write'])]
-    #[Assert\NotBlank(message: 'Les observations du psychologue sont obligatoires')]
     #[Assert\Length(
         min: 10,
         max: 1000,
-        minMessage: 'Les observations du psychologue doivent faire au moins {{ limit }} caractères',
-        maxMessage: 'Les observations du psychologue ne peuvent pas dépasser {{ limit }} caractères'
+        minMessage: 'Les observations du psychologue doivent faire au
+moins {{ limit }} caractères',
+        maxMessage: 'Les observations du psychologue ne peuvent pas
+dépasser {{ limit }} caractères'
     )]
     private ?string $observationsPsy = null;
 
@@ -80,7 +88,8 @@ class SuiviTraitement
     #[Assert\Range(
         min: 1,
         max: 10,
-        notInRangeMessage: 'L\'évaluation doit être comprise entre {{ min }} et {{ max }}'
+        notInRangeMessage: 'L\'évaluation doit être comprise entre {{
+min }} et {{ max }}'
     )]
     private ?int $evaluation = null;
 
@@ -92,7 +101,8 @@ class SuiviTraitement
     #[Groups(['suivi:read', 'suivi:write'])]
     private ?string $saisiPar = null;
 
-    #[ORM\Column(name: 'valide', type: 'boolean', options: ['default' => false])]
+    #[ORM\Column(name: 'valide', type: 'boolean', options: ['default'
+=> false])]
     #[Groups(['suivi:read', 'suivi:write'])]
     private ?bool $valide = null;
 
@@ -205,7 +215,8 @@ class SuiviTraitement
     public function setObservations(?string $observations): self
     {
         if (strlen($observations) > 1000) {
-            throw new \InvalidArgumentException('Les observations ne peuvent pas dépasser 1000 caractères');
+            throw new \InvalidArgumentException('Les observations ne
+peuvent pas dépasser 1000 caractères');
         }
 
         $this->observations = $observations;
@@ -231,7 +242,8 @@ class SuiviTraitement
     public function setEvaluation(?int $evaluation): self
     {
         if ($evaluation !== null && ($evaluation < 1 || $evaluation > 10)) {
-            throw new \InvalidArgumentException('L\'évaluation doit être entre 1 et 10');
+            throw new \InvalidArgumentException('L\'évaluation doit
+être entre 1 et 10');
         }
 
         $this->evaluation = $evaluation;
@@ -245,7 +257,8 @@ class SuiviTraitement
 
     public function setRessenti(?string $ressenti): self
     {
-        if ($ressenti !== null && !in_array($ressenti, Ressenti::getValues(), true)) {
+        if ($ressenti !== null && !in_array($ressenti,
+Ressenti::getValues(), true)) {
             throw new \InvalidArgumentException('Ressenti invalide');
         }
 
@@ -351,7 +364,8 @@ class SuiviTraitement
     public function valider(): self
     {
         if (!$this->effectue) {
-            throw new \LogicException('Un suivi non effectué ne peut pas être validé');
+            throw new \LogicException('Un suivi non effectué ne peut
+pas être validé');
         }
 
         $this->valide = true;
@@ -366,7 +380,8 @@ class SuiviTraitement
             return null;
         }
 
-        return str_repeat('★', $this->evaluation) . str_repeat('☆', 10 - $this->evaluation);
+        return str_repeat('★', $this->evaluation) . str_repeat('☆', 10
+- $this->evaluation);
     }
 
     public function isEnRetard(): bool
@@ -384,7 +399,8 @@ class SuiviTraitement
     public function isAujourdhui(): bool
     {
         $aujourdhui = new \DateTime();
-        return $this->dateSuivi->format('Y-m-d') === $aujourdhui->format('Y-m-d');
+        return $this->dateSuivi->format('Y-m-d') ===
+$aujourdhui->format('Y-m-d');
     }
 
     public function getStatutDetaille(): string
@@ -416,7 +432,7 @@ class SuiviTraitement
     {
         $aujourdhui = new \DateTime();
         $interval = $aujourdhui->diff($this->dateSuivi);
-        
+
         if ($interval->days == 0) {
             return 'Aujourd\'hui';
         } elseif ($interval->days == 1) {

@@ -3,8 +3,11 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use Symfony\Component\HttpFoundation\File\File;
 
 #[ORM\Entity]
+#[Vich\Uploadable]
 #[ORM\Table(name: 'profil')]
 class Profil
 {
@@ -15,7 +18,9 @@ class Profil
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $photo = null;
-
+    // Nouveau champ pour le fichier uploadé (non mappé en base)
+    #[Vich\UploadableField(mapping: 'profil_photo', fileNameProperty: 'photo')]
+    private ?File $photoFile = null;
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $bio = null;
 
@@ -49,8 +54,8 @@ class Profil
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $fonction = null;
 
-    #[ORM\Column(type: 'datetime')]
-    private \DateTimeInterface $updated_at;
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $updated_at = null;
 
     #[ORM\Column(type: 'string', length: 100, nullable: true)]
     private ?string $pseudo = null;
@@ -202,12 +207,12 @@ class Profil
         return $this;
     }
 
-    public function getUpdatedAt(): \DateTimeInterface
+    public function getUpdatedAt(): ?\DateTimeInterface
     {
         return $this->updated_at;
     }
 
-    public function setUpdatedAt(\DateTimeInterface $updated_at): self
+    public function setUpdatedAt(?\DateTimeInterface $updated_at): self
     {
         $this->updated_at = $updated_at;
         return $this;
@@ -238,4 +243,40 @@ class Profil
         }
         return $this;
     }
+    public function setPhotoFile(?File $photoFile = null): void
+    {
+        $this->photoFile = $photoFile;
+        if (null !== $photoFile) {
+            // Mettre à jour updated_at pour que Doctrine persiste le changement
+            $this->updated_at = new \DateTime();
+        }
+    }
+
+    public function getPhotoFile(): ?File
+    {
+        return $this->photoFile;
+    }
+    public function __sleep(): array
+{
+    return [
+        'profil_id',
+        'photo',
+        'bio',
+        'tel',
+        'date_naissance',
+        'specialite',
+        'experience',
+        'qualification',
+        'niveau',
+        'filiere',
+        'departement',
+        'etablissement',
+        'fonction',
+        'updated_at',
+        'pseudo',
+        'user',
+    ];}
+
+    
+
 }

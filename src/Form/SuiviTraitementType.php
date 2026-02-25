@@ -18,7 +18,8 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class SuiviTraitementType extends AbstractType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options): void
+    public function buildForm(FormBuilderInterface $builder, array
+$options): void
     {
         $isEtudiant = $options['is_etudiant'] ?? false;
 
@@ -38,7 +39,8 @@ class SuiviTraitementType extends AbstractType
                 ->add('ressenti', ChoiceType::class, [
                     'label' => 'Comment vous sentez-vous ?',
                     'choices' => array_combine(
-                        array_map(fn($case) => $case->getLabel(), Ressenti::cases()),
+                        array_map(fn($case) => $case->getLabel(),
+Ressenti::cases()),
                         array_map(fn($case) => $case->value, Ressenti::cases())
                     ),
                     'attr' => [
@@ -61,7 +63,8 @@ class SuiviTraitementType extends AbstractType
                     'attr' => [
                         'class' => 'form-control',
                         'rows' => 4,
-                        'placeholder' => 'Décrivez comment vous vous sentez, vos progrès, vos difficultés...'
+                        'placeholder' => 'Décrivez comment vous vous
+sentez, vos progrès, vos difficultés...'
                     ]
                 ])
                 ->add('effectue', CheckboxType::class, [
@@ -71,7 +74,7 @@ class SuiviTraitementType extends AbstractType
                         'class' => 'form-check-input'
                     ]
                 ]);
-        } 
+        }
         // FORMULAIRE PSYCHOLOGUE
         else {
             $builder
@@ -89,7 +92,8 @@ class SuiviTraitementType extends AbstractType
                     'attr' => [
                         'class' => 'form-control',
                         'rows' => 4,
-                        'placeholder' => 'Notes professionnelles, observations, évolutions...'
+                        'placeholder' => 'Notes professionnelles,
+observations, évolutions...'
                     ]
                 ])
                 ->add('valide', CheckboxType::class, [

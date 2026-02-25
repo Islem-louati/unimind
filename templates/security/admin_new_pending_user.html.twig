@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Réinitialisation de mot de passe</title>
+    <title>Nouvelle inscription en attente</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,7 +13,7 @@
             padding: 20px;
         }
         .header {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
             color: white;
             padding: 30px;
             text-align: center;
@@ -28,10 +28,16 @@
         }
         .button {
             display: inline-block;
-            background: #f5576c;
+            background: #4facfe;
             color: white;
             padding: 12px 30px;
             text-decoration: none;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .user-info {
+            background: #e8f4fd;
+            padding: 15px;
             border-radius: 5px;
             margin: 20px 0;
         }
@@ -45,27 +51,27 @@
 </head>
 <body>
     <div class="header">
-        <h1>UniMind</h1>
-        <p>Réinitialisation de mot de passe</p>
+        <h1>UniMind Admin</h1>
     </div>
     
     <div class="content">
-        <h2>Bonjour {{ user.prenom }} {{ user.nom }} !</h2>
+        <h2>Nouvelle inscription en attente</h2>
         
-        <p>Nous avons reçu une demande de réinitialisation de votre mot de passe.</p>
+        <p>Un nouvel utilisateur s'est inscrit et attend votre validation.</p>
         
-        <div style="text-align: center;">
-            <a href="{{ resetUrl }}" class="button">Réinitialiser mon mot de passe</a>
+        <div class="user-info">
+            <p><strong>Nom :</strong> {{ user.prenom }} {{ user.nom }}</p>
+            <p><strong>Email :</strong> {{ user.email }}</p>
+            <p><strong>Rôle :</strong> 
+                {% if user.role.value == 'Etudiant' %}Étudiant
+                {% elseif user.role.value == 'Psychologue' %}Psychologue
+                {% elseif user.role.value == 'Responsable Etudiant' %}Responsable Étudiant
+                {% endif %}
+            </p>
+            <p><strong>Date :</strong> {{ user.createdAt|date('d/m/Y H:i') }}</p>
         </div>
         
-        <p><strong>⏰ Ce lien expirera le :</strong> {{ expiresAt|date('d/m/Y à H:i') }}</p>
         
-        <p>Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.</p>
-        
-        <p>Si le bouton ne fonctionne pas, copiez ce lien :</p>
-        <p style="background: #eee; padding: 10px; word-break: break-all;">{{ resetUrl }}</p>
-        
-        <p>Cordialement,<br><strong>L'équipe UniMind</strong></p>
     </div>
     
     <div class="footer">
