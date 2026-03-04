@@ -26,11 +26,5 @@ services:
         resource: '../src/Controller/'
         tags: ['controller.service_arguments']
 
-    # Configuration du service IA
-    App\Service\IaQuestionGeneratorService:
-        arguments:
-            $huggingfaceApiKey: '%env(HUGGINGFACE_API_KEY)%'
-            $em: '@doctrine.orm.entity_manager'
-
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
+    
+    
